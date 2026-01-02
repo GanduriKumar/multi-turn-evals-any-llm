@@ -102,7 +102,7 @@ Write an integration test (backend/tests/test_init_workspace.py) that runs the s
 
 Verify that running the script twice does not overwrite existing files without confirmation.
 
-# [ ] Prompt006 — Implement LLM provider registry and adapter pattern
+# [x] Prompt006 — Implement LLM provider registry and adapter pattern
 
 Prompt:
 
@@ -122,11 +122,11 @@ Write unit tests (backend/tests/test_provider_registry.py) to register the Dummy
 
 Test that registering two providers with the same name raises an error.
 
-# [ ] Prompt007 — Define standard request/response schema for LLM calls
+# [x] Prompt007 — Define standard request/response schema for LLM calls
 
 Prompt:
 
-Define a request/response schema for LLM calls using Pydantic models. The request must include a # [ ] Promptstring, conversation context, model metadata (e.g., provider, model version), and timestamps. The response must capture the generated text, token usage, latency, and any provider metadata. Save these models in backend/src/eval_server/schemas/llm.py. Fully implement all Pydantic models with type validations – partial or placeholder fields are not acceptable.
+Define a request/response schema for LLM calls using Pydantic models. The request must include a Promptstring, conversation context, model metadata (e.g., provider, model version), and timestamps. The response must capture the generated text, token usage, latency, and any provider metadata. Save these models in backend/src/eval_server/schemas/llm.py. Fully implement all Pydantic models with type validations – partial or placeholder fields are not acceptable.
 
 Expected outputs:
 
