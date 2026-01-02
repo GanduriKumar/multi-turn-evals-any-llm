@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eval-server"
+version = "0.1.0"
+description = "FastAPI-based service for orchestrating multi-turn LLM evaluations"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Kumar G N" }]
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.22",
+  "pydantic>=2.7",
+  "pydantic-settings>=2.2",
+  "pyyaml>=6.0",
+  "httpx>=0.25",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "pytest-cov>=4.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/multi-turn-evals-any-llm"
+
+[project.scripts]
+eval-server = "eval_server.__main__:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
