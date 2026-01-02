@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Small utility to center the app content */
+html, body, #root {
+  height: 100%;
+}
+body {
+  margin: 0;
+}

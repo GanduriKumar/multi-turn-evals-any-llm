@@ -42,7 +42,7 @@ Write a unit test (backend/tests/test_install.py) that installs the package via 
 
 Run pytest in the backend directory to ensure the package installs and loads successfully.
 
-# [ ] Prompt003 — Scaffold frontend React project with Tailwind
+# [x] Prompt003 — Scaffold frontend React project with Tailwind
 
 Prompt:
 
@@ -62,7 +62,7 @@ Run npm install (or yarn install) in frontend/ and ensure it completes without e
 
 Run npm run dev and visit the development server in a test (for example, using httpx or a headless browser) to confirm that the project boots and the default page renders.
 
-[ ] Prompt004 — Create shared configuration folder
+# [ ] Prompt004 — Create shared configuration folder
 
 Prompt:
 
