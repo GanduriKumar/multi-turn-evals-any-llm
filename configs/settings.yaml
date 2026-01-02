@@ -1,0 +1,57 @@
+# Global settings for the multi-turn LLM evaluation framework
+#
+# This file provides sensible defaults that can be overridden per run.
+# Each option is documented with comments.
+
+version: 1
+
+models:
+  # Default LLM provider name registered in the backend (e.g., "dummy", "openai")
+  provider: dummy
+  # Default model identifier/version for the provider
+  model_id: dummy-1.0
+  # Temperature controls randomness of generation (0.0-1.0)
+  temperature: 0.0
+  # Maximum number of tokens in a single generation
+  max_tokens: 512
+  # Request timeout in seconds for provider calls
+  timeout_sec: 30
+
+datasets:
+  # Default dataset root directory; paths may be absolute or relative to repo root
+  root_dir: configs/datasets
+  # File extensions that loaders will consider by default
+  allowed_extensions:
+    - .json
+    - .yaml
+    - .yml
+
+scoring:
+  # Weights for different metrics when aggregating scores
+  weights:
+    correctness: 0.6
+    consistency: 0.2
+    adherence: 0.15
+    hallucination: 0.05
+  # Global pass threshold (0.0-1.0) when determining pass/fail
+  pass_threshold: 0.8
+  # Aggregation strategy for conversation-level results: mean|min|weighted
+  aggregation: mean
+
+report:
+  # Output directory for reports and artifacts
+  output_dir: metrics\reports
+  # Format(s) to generate for reports
+  formats:
+    - html
+    - json
+  # Whether to include raw provider responses in reports
+  include_raw: true
+
+ui:
+  # Enable optional web UI features in the frontend
+  enabled: true
+  # Theme preference for the UI: light|dark|system
+  theme: system
+  # Pagination size for tables/lists
+  page_size: 25

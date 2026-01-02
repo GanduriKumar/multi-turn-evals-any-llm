@@ -62,7 +62,7 @@ Run npm install (or yarn install) in frontend/ and ensure it completes without e
 
 Run npm run dev and visit the development server in a test (for example, using httpx or a headless browser) to confirm that the project boots and the default page renders.
 
-# [ ] Prompt004 — Create shared configuration folder
+# [x] Prompt004 — Create shared configuration folder
 
 Prompt:
 
@@ -82,7 +82,7 @@ Write a test (backend/tests/test_config_loader.py) that uses load_settings() to 
 
 Verify that invalid YAML triggers a validation error.
 
-[ ] Prompt005 — Create CLI script to initialize a new evaluation workspace
+# [x] Prompt005 — Create CLI script to initialize a new evaluation workspace
 
 Prompt:
 
@@ -102,7 +102,7 @@ Write an integration test (backend/tests/test_init_workspace.py) that runs the s
 
 Verify that running the script twice does not overwrite existing files without confirmation.
 
-[ ] Prompt006 — Implement LLM provider registry and adapter pattern
+# [ ] Prompt006 — Implement LLM provider registry and adapter pattern
 
 Prompt:
 
@@ -122,11 +122,11 @@ Write unit tests (backend/tests/test_provider_registry.py) to register the Dummy
 
 Test that registering two providers with the same name raises an error.
 
-[ ] Prompt007 — Define standard request/response schema for LLM calls
+# [ ] Prompt007 — Define standard request/response schema for LLM calls
 
 Prompt:
 
-Define a request/response schema for LLM calls using Pydantic models. The request must include a [ ] Promptstring, conversation context, model metadata (e.g., provider, model version), and timestamps. The response must capture the generated text, token usage, latency, and any provider metadata. Save these models in backend/src/eval_server/schemas/llm.py. Fully implement all Pydantic models with type validations – partial or placeholder fields are not acceptable.
+Define a request/response schema for LLM calls using Pydantic models. The request must include a # [ ] Promptstring, conversation context, model metadata (e.g., provider, model version), and timestamps. The response must capture the generated text, token usage, latency, and any provider metadata. Save these models in backend/src/eval_server/schemas/llm.py. Fully implement all Pydantic models with type validations – partial or placeholder fields are not acceptable.
 
 Expected outputs:
 
@@ -138,7 +138,7 @@ Write unit tests (backend/tests/test_llm_schema.py) that instantiate the request
 
 Test that invalid inputs (missing fields, wrong types) raise validation errors.
 
-[ ] Prompt008 — Design dataset format for multi‑turn conversations and goldens
+# [ ] Prompt008 — Design dataset format for multi‑turn conversations and goldens
 
 Prompt:
 
@@ -156,7 +156,7 @@ Write tests (backend/tests/test_dataset_format.py) that validate the example dat
 
 Test that missing or extra fields in the examples cause validation failures.
 
-[ ] Prompt009 — Support JSON and YAML dataset formats
+# [ ] Prompt009 — Support JSON and YAML dataset formats
 
 Prompt:
 
@@ -174,11 +174,11 @@ Write tests (backend/tests/test_loader.py) that load sample JSON and YAML datase
 
 Test that loading invalid JSON/YAML raises a clear exception.
 
-[ ] Prompt010 — Implement dataset loader with schema validation and error messages
+# [ ] Prompt010 — Implement dataset loader with schema validation and error messages
 
 Prompt:
 
-Develop a dataset loader in backend/src/eval_server/data/validation_loader.py that validates each conversation and golden file against the schemas. On invalid input, produce actionable error messages specifying the location and reason of failure. Integrate the loader with the functions created in [ ] Prompt009. Write complete validation logic and descriptive error reporting – avoid generic exceptions.
+Develop a dataset loader in backend/src/eval_server/data/validation_loader.py that validates each conversation and golden file against the schemas. On invalid input, produce actionable error messages specifying the location and reason of failure. Integrate the loader with the functions created in # [ ] Prompt009. Write complete validation logic and descriptive error reporting – avoid generic exceptions.
 
 Expected outputs:
 
@@ -190,7 +190,7 @@ Tests to add/run now:
 
 Implement tests (backend/tests/test_validation_loader.py) that provide both valid and invalid datasets to the loader and assert appropriate behaviour and error messages.
 
-[ ] Prompt011 — Add versioning for datasets and golden references
+# [ ] Prompt011 — Add versioning for datasets and golden references
 
 Prompt:
 
@@ -208,7 +208,7 @@ Write tests (backend/tests/test_versioning.py) that parse various semantic versi
 
 Test that missing or malformed version fields in datasets cause validation errors.
 
-[ ] Prompt012 — Implement tagging for dataset domain and difficulty
+# [ ] Prompt012 — Implement tagging for dataset domain and difficulty
 
 Prompt:
 
@@ -224,7 +224,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_filtering.py) that filter a list of dataset metadata by various tag and difficulty combinations and assert that the correct datasets are returned.
 
-[ ] Prompt013 — Store multi‑turn conversation turns as ordered lists with speaker roles and tool calls
+# [ ] Prompt013 — Store multi‑turn conversation turns as ordered lists with speaker roles and tool calls
 
 Prompt:
 
@@ -240,7 +240,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_conversation_model.py) that construct conversations with and without tool calls and verify ordering and data integrity.
 
-[ ] Prompt014 — Store expected responses separately keyed by conversation and turn IDs
+# [ ] Prompt014 — Store expected responses separately keyed by conversation and turn IDs
 
 Prompt:
 
@@ -256,7 +256,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_golden_access.py) that store and retrieve golden entries by ID and verify correctness.
 
-[ ] Prompt015 — Allow per‑turn expected outputs and optional final outcome expectations
+# [ ] Prompt015 — Allow per‑turn expected outputs and optional final outcome expectations
 
 Prompt:
 
@@ -272,7 +272,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_final_outcome.py) that include final outcome expectations and verify that they are evaluated properly.
 
-[ ] Prompt016 — Support multiple acceptable variants per expected output
+# [ ] Prompt016 — Support multiple acceptable variants per expected output
 
 Prompt:
 
@@ -288,7 +288,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_variants.py) that define multiple variants for a turn and verify that the evaluation accepts any matching variant.
 
-[ ] Prompt017 — Support structured expected fields in golden references
+# [ ] Prompt017 — Support structured expected fields in golden references
 
 Prompt:
 
@@ -304,7 +304,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_structured_fields.py) for scenarios where structured fields are present and ensure the evaluation compares them correctly.
 
-[ ] Prompt018 — Implement business‑rule constraints in golden references
+# [ ] Prompt018 — Implement business‑rule constraints in golden references
 
 Prompt:
 
@@ -320,7 +320,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_constraints.py) that define conversations with constraints and verify that scoring fails or passes correctly based on the outputs.
 
-[ ] Prompt019 — Specify evaluation weights per metric and per turn
+# [ ] Prompt019 — Specify evaluation weights per metric and per turn
 
 Prompt:
 
@@ -336,7 +336,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_weights.py) that define different weight scenarios and verify that weighted scoring aggregates as expected.
 
-[ ] Prompt020 — Create run configuration file format
+# [ ] Prompt020 — Create run configuration file format
 
 Prompt:
 
@@ -356,7 +356,7 @@ Write tests (backend/tests/test_run_config_loader.py) that load sample configura
 
 Test that invalid configurations result in informative errors.
 
-[ ] Prompt021 — Implement evaluation orchestrator with concurrency support
+# [ ] Prompt021 — Implement evaluation orchestrator with concurrency support
 
 Prompt:
 
@@ -374,7 +374,7 @@ Write tests (backend/tests/test_orchestrator.py) that run a small evaluation wit
 
 Test that cancellation stops execution and reports a cancelled status.
 
-[ ] Prompt022 — Provide headless execution engine for backend
+# [ ] Prompt022 — Provide headless execution engine for backend
 
 Prompt:
 
@@ -390,7 +390,7 @@ Tests to add/run now:
 
 Write integration tests (backend/tests/test_headless_engine.py) that run the headless engine with a sample run config and verify that the run completes and artifacts are created.
 
-[ ] Prompt023 — Implement execution queue tracking job states and progress
+# [ ] Prompt023 — Implement execution queue tracking job states and progress
 
 Prompt:
 
@@ -408,7 +408,7 @@ Write tests (backend/tests/test_queue.py) that add jobs, update their states, an
 
 Test concurrent updates to ensure thread safety.
 
-[ ] Prompt024 — Provide job cancellation support
+# [ ] Prompt024 — Provide job cancellation support
 
 Prompt:
 
@@ -424,7 +424,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_cancellation.py) that start a long‑running evaluation, issue a cancellation, and verify that the job status is updated and no further processing occurs.
 
-[ ] Prompt025 — Generate deterministic run IDs for reproducibility
+# [ ] Prompt025 — Generate deterministic run IDs for reproducibility
 
 Prompt:
 
@@ -438,7 +438,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_run_id.py) that pass identical and different configuration objects and assert that run IDs are consistent or differ accordingly.
 
-[ ] Prompt026 — Build turn runner to feed user turns with accumulated context
+# [ ] Prompt026 — Build turn runner to feed user turns with accumulated context
 
 Prompt:
 
@@ -454,7 +454,7 @@ Write tests (backend/tests/test_turn_runner.py) that simulate a multi‑turn con
 
 Test that the runner can handle tool calls as part of context when required.
 
-[ ] Prompt027 — Add support for memory injection
+# [ ] Prompt027 — Add support for memory injection
 
 Prompt:
 
@@ -468,7 +468,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_memory_injection.py) that provide memory objects and verify that they are incorporated into the context passed to the LLM.
 
-[ ] Prompt028 — Support configurable truncation policies
+# [ ] Prompt028 — Support configurable truncation policies
 
 Prompt:
 
@@ -484,7 +484,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_truncation.py) that feed long conversation histories and verify that the context passed to the LLM follows the specified truncation policy.
 
-[ ] Prompt029 — Support tool‑call simulation hooks
+# [ ] Prompt029 — Support tool‑call simulation hooks
 
 Prompt:
 
@@ -500,7 +500,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_tool_hooks.py) that define a mock hook returning a sample tool output and verify that the turn runner injects the tool output correctly into the conversation context.
 
-[ ] Prompt030 — Capture raw LLM outputs per turn
+# [ ] Prompt030 — Capture raw LLM outputs per turn
 
 Prompt:
 
@@ -518,7 +518,7 @@ Write tests (backend/tests/test_raw_outputs.py) that simulate LLM calls and veri
 
 Test error scenarios and ensure metadata captures error details.
 
-[ ] Prompt031 — Normalize LLM outputs into canonical evaluation records
+# [ ] Prompt031 — Normalize LLM outputs into canonical evaluation records
 
 Prompt:
 
@@ -534,7 +534,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_normalizer.py) that take raw outputs and verify that the normalized records have consistent structure and content.
 
-[ ] Prompt032 — Provide automatic scoring per turn against golden reference
+# [ ] Prompt032 — Provide automatic scoring per turn against golden reference
 
 Prompt:
 
@@ -548,7 +548,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_turn_scoring.py) that compare sample outputs to goldens and verify that scores and pass/fail results are computed correctly.
 
-[ ] Prompt033 — Provide automatic scoring for full conversation outcomes
+# [ ] Prompt033 — Provide automatic scoring for full conversation outcomes
 
 Prompt:
 
@@ -562,7 +562,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_conversation_scoring.py) that feed sequences of per‑turn scores and verify correct aggregation for mean, min, and weighted functions.
 
-[ ] Prompt034 — Implement per‑turn correctness metric
+# [ ] Prompt034 — Implement per‑turn correctness metric
 
 Prompt:
 
@@ -576,7 +576,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_correctness_metric.py) that evaluate different match modes and assert correct scoring behaviour.
 
-[ ] Prompt035 — Implement multi‑turn consistency metric
+# [ ] Prompt035 — Implement multi‑turn consistency metric
 
 Prompt:
 
@@ -590,7 +590,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_consistency_metric.py) that simulate conversations with contradictions and verify that the metric detects them.
 
-[ ] Prompt036 — Implement instruction/constraint adherence metric
+# [ ] Prompt036 — Implement instruction/constraint adherence metric
 
 Prompt:
 
@@ -604,7 +604,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_adherence_metric.py) that define constraints and verify that the metric correctly penalizes violations and rewards adherence.
 
-[ ] Prompt037 — Implement hallucination risk metric
+# [ ] Prompt037 — Implement hallucination risk metric
 
 Prompt:
 
@@ -618,7 +618,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_hallucination_metric.py) that supply context and outputs and verify that hallucination risk scores correspond to whether the output is grounded.
 
-[ ] Prompt038 — Implement refusal/safety compliance metric
+# [ ] Prompt038 — Implement refusal/safety compliance metric
 
 Prompt:
 
@@ -632,7 +632,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_safety_metric.py) that define prohibited actions and verify that responses violating safety rules are flagged and scored accordingly.
 
-[ ] Prompt039 — Implement regression detection metric
+# [ ] Prompt039 — Implement regression detection metric
 
 Prompt:
 
@@ -646,7 +646,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_regression_metric.py) that compare sample baseline and new runs and verify that regressions are detected and properly reported.
 
-[ ] Prompt040 — Implement custom metric plugin mechanism
+# [ ] Prompt040 — Implement custom metric plugin mechanism
 
 Prompt:
 
@@ -662,7 +662,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_metric_plugins.py) that register a custom metric plugin and verify that it is discovered and executed correctly.
 
-[ ] Prompt041 — Implement threshold rules for per‑turn pass/fail
+# [ ] Prompt041 — Implement threshold rules for per‑turn pass/fail
 
 Prompt:
 
@@ -676,7 +676,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_thresholds.py) that define thresholds and verify that turns are marked pass or fail correctly based on computed scores and weights.
 
-[ ] Prompt042 — Implement threshold rules for conversation pass/fail
+# [ ] Prompt042 — Implement threshold rules for conversation pass/fail
 
 Prompt:
 
@@ -690,7 +690,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_conversation_thresholds.py) that provide aggregated metric scores and verify that conversation pass/fail outcomes are computed based on thresholds.
 
-[ ] Prompt043 — Implement configurable aggregation functions for conversation scoring
+# [ ] Prompt043 — Implement configurable aggregation functions for conversation scoring
 
 Prompt:
 
@@ -704,7 +704,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_aggregation.py) that verify mean, minimum, and weighted averages are computed correctly for sample score sets.
 
-[ ] Prompt044 — Persist evaluation artifacts and outputs
+# [ ] Prompt044 — Persist evaluation artifacts and outputs
 
 Prompt:
 
@@ -718,7 +718,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_artifact_persistence.py) that run an evaluation and verify that all expected artifact files are created with correct content.
 
-[ ] Prompt045 — Persist machine‑readable results in JSON
+# [ ] Prompt045 — Persist machine‑readable results in JSON
 
 Prompt:
 
@@ -732,7 +732,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_results_writer.py) that run an evaluation and verify that the JSON file exists and contains all required data.
 
-[ ] Prompt046 — Persist tabular results export in CSV
+# [ ] Prompt046 — Persist tabular results export in CSV
 
 Prompt:
 
@@ -746,7 +746,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_csv_export.py) that run an evaluation and verify that the CSV export exists, has the correct columns, and contains expected data.
 
-[ ] Prompt047 — Generate human‑readable evaluation reports
+# [ ] Prompt047 — Generate human‑readable evaluation reports
 
 Prompt:
 
@@ -760,7 +760,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_report_generator.py) that run a small evaluation and verify that the report file exists and contains expected sections and data.
 
-[ ] Prompt048 — Generate evaluator‑annotated reports with rating, notes, and overrides
+# [ ] Prompt048 — Generate evaluator‑annotated reports with rating, notes, and overrides
 
 Prompt:
 
@@ -774,7 +774,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_report_generator_annotations.py) that simulate evaluator feedback and verify that the annotations appear in the report and influence re‑scoring appropriately.
 
-[ ] Prompt049 — Provide UI workflow to capture and store evaluator feedback
+# [ ] Prompt049 — Provide UI workflow to capture and store evaluator feedback
 
 Prompt:
 
@@ -790,7 +790,7 @@ Tests to add/run now:
 
 Write UI tests that simulate entering feedback and verify that it is sent to the backend and stored correctly.
 
-[ ] Prompt050 — Support re‑scoring using human overrides
+# [ ] Prompt050 — Support re‑scoring using human overrides
 
 Prompt:
 
@@ -804,7 +804,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_rescoring.py) that simulate evaluator overrides and verify that pass/fail statuses and aggregated scores are updated while original scores remain stored.
 
-[ ] Prompt051 — Implement golden update workflow
+# [ ] Prompt051 — Implement golden update workflow
 
 Prompt:
 
@@ -820,7 +820,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_golden_update.py) that propose updates, approve them, and verify that new golden files are created with incremented versions.
 
-[ ] Prompt052 — Implement audit logging of evaluation activity
+# [ ] Prompt052 — Implement audit logging of evaluation activity
 
 Prompt:
 
@@ -836,7 +836,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_audit_logging.py) that run evaluations and verify that audit logs are created with correct entries.
 
-[ ] Prompt053 — Expose REST API layer for backend capabilities
+# [ ] Prompt053 — Expose REST API layer for backend capabilities
 
 Prompt:
 
@@ -852,7 +852,7 @@ Tests to add/run now:
 
 Write API tests (backend/tests/test_api.py) that call each endpoint using httpx and verify correct responses, including error cases.
 
-[ ] Prompt054 — Implement dataset listing API endpoint
+# [ ] Prompt054 — Implement dataset listing API endpoint
 
 Prompt:
 
@@ -866,7 +866,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_api_datasets.py) that call the endpoint and verify that the response includes expected dataset entries and metadata.
 
-[ ] Prompt055 — Implement API to fetch conversation and golden data by ID
+# [ ] Prompt055 — Implement API to fetch conversation and golden data by ID
 
 Prompt:
 
@@ -880,7 +880,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_api_conversation.py) that request valid and invalid conversation IDs and assert responses or error messages accordingly.
 
-[ ] Prompt056 — Implement API to start a new evaluation run
+# [ ] Prompt056 — Implement API to start a new evaluation run
 
 Prompt:
 
@@ -894,7 +894,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_api_start_run.py) that post valid and invalid run configurations and verify correct run creation or errors.
 
-[ ] Prompt057 — Implement API to poll job progress
+# [ ] Prompt057 — Implement API to poll job progress
 
 Prompt:
 
@@ -908,7 +908,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_api_progress.py) that run evaluations and poll progress, verifying that statuses update over time.
 
-[ ] Prompt058 — Implement API to retrieve per‑turn outputs and metric breakdowns
+# [ ] Prompt058 — Implement API to retrieve per‑turn outputs and metric breakdowns
 
 Prompt:
 
@@ -922,7 +922,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_api_metrics.py) that run an evaluation and retrieve metric breakdowns, verifying that all data matches stored results.
 
-[ ] Prompt059 — Implement API to download run artifacts (JSON, CSV, report)
+# [ ] Prompt059 — Implement API to download run artifacts (JSON, CSV, report)
 
 Prompt:
 
@@ -936,7 +936,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_api_artifacts.py) that request each artifact type and verify that the downloaded files match those stored on disk.
 
-[ ] Prompt060 — Implement API to submit human evaluation feedback
+# [ ] Prompt060 — Implement API to submit human evaluation feedback
 
 Prompt:
 
@@ -950,7 +950,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_api_feedback.py) that submit valid and invalid feedback and verify correct storage or error responses.
 
-[ ] Prompt061 — Implement API to compare two runs and return regression summaries
+# [ ] Prompt061 — Implement API to compare two runs and return regression summaries
 
 Prompt:
 
@@ -964,7 +964,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_api_compare.py) that compare two sample runs and verify that the delta calculations are correct.
 
-[ ] Prompt062 — Generate OpenAPI/Swagger documentation automatically
+# [ ] Prompt062 — Generate OpenAPI/Swagger documentation automatically
 
 Prompt:
 
@@ -978,7 +978,7 @@ Tests to add/run now:
 
 Write a test (backend/tests/test_openapi.py) that retrieves the OpenAPI JSON and asserts that all endpoints are documented with correct schemas.
 
-[ ] Prompt063 — Implement backend validation and error handling
+# [ ] Prompt063 — Implement backend validation and error handling
 
 Prompt:
 
@@ -994,7 +994,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_error_handling.py) that trigger various error conditions and verify that the API returns consistent error responses and statuses.
 
-[ ] Prompt064 — Secure secret configuration via environment variables
+# [ ] Prompt064 — Secure secret configuration via environment variables
 
 Prompt:
 
@@ -1015,7 +1015,7 @@ Tests (backend/tests/test_secrets.py) verifying that attempting to load the appl
 Test that secrets are not accidentally persisted in dataset or results files
 
 Frontend user interfaces
-[ ] Prompt065 — Create React UI for browsing datasets, selecting models, choosing metrics, and starting runs
+# [ ] Prompt065 — Create React UI for browsing datasets, selecting models, choosing metrics, and starting runs
 
 Prompt:
 
@@ -1033,7 +1033,7 @@ Frontend integration tests using a testing library (e.g., React Testing Library)
 
 Test that filling out the run setup form and submitting sends the correct payload and handles the response
 
-[ ] Prompt066 — Create React UI for monitoring run progress
+# [ ] Prompt066 — Create React UI for monitoring run progress
 
 Prompt:
 
@@ -1051,7 +1051,7 @@ UI tests ensuring that run statuses update over time and that cancelling a run s
 
 Test that runs disappear from the active list when completed or cancelled
 
-[ ] Prompt067 — Create React UI for viewing conversation transcripts with expected vs actual responses
+# [ ] Prompt067 — Create React UI for viewing conversation transcripts with expected vs actual responses
 
 Prompt:
 
@@ -1069,7 +1069,7 @@ Integration tests mocking the endpoint response and verifying that the page rend
 
 Test that diff highlights appear where expected and not when responses match exactly
 
-[ ] Prompt068 — Create React UI for viewing metric breakdowns and thresholds
+# [ ] Prompt068 — Create React UI for viewing metric breakdowns and thresholds
 
 Prompt:
 
@@ -1087,7 +1087,7 @@ UI tests verifying that metric data is rendered correctly and that threshold ind
 
 Test exporting the view and ensure the downloaded file matches the on‑screen data
 
-[ ] Prompt069 — Create React UI for entering and saving human evaluator ratings and notes
+# [ ] Prompt069 — Create React UI for entering and saving human evaluator ratings and notes
 
 Prompt:
 
@@ -1105,7 +1105,7 @@ UI tests verifying that feedback can be entered and submitted, and that submissi
 
 Test that unsaved feedback persists in component state when navigating between turns
 
-[ ] Prompt070 — Create React UI for comparing runs and visualizing regressions
+# [ ] Prompt070 — Create React UI for comparing runs and visualizing regressions
 
 Prompt:
 
@@ -1119,7 +1119,7 @@ Tests to add/run now:
 
 UI tests verifying that the comparison data is displayed correctly and that filtering works as intended
 
-[ ] Prompt071 — Provide frontend support for downloading artifacts and reports
+# [ ] Prompt071 — Provide frontend support for downloading artifacts and reports
 
 Prompt:
 
@@ -1135,7 +1135,7 @@ Tests to add/run now:
 
 UI tests verifying that clicking download buttons retrieves files and that error messages are shown on failure
 
-[ ] Prompt072 — Provide end‑to‑end tests for the full UI flow
+# [ ] Prompt072 — Provide end‑to‑end tests for the full UI flow
 
 Prompt:
 
@@ -1149,7 +1149,7 @@ Tests to add/run now:
 
 Execute the E2E test suite and ensure all tests pass against a fresh instance of the application
 
-[ ] Prompt073 — Provide backend unit tests for critical components
+# [ ] Prompt073 — Provide backend unit tests for critical components
 
 Prompt:
 
@@ -1163,7 +1163,7 @@ Tests to add/run now:
 
 Run the test suite using pytest and ensure all unit tests pass with high coverage
 
-[ ] Prompt074 — Provide a sample dataset with at least one 5‑turn commerce conversation
+# [ ] Prompt074 — Provide a sample dataset with at least one 5‑turn commerce conversation
 
 Prompt:
 
@@ -1177,11 +1177,11 @@ Tests to add/run now:
 
 Write a test (backend/tests/test_sample_dataset.py) that loads the sample dataset using the loader and validates it against the schema
 
-[ ] Prompt075 — Provide a sample run configuration evaluating multiple models on the same dataset
+# [ ] Prompt075 — Provide a sample run configuration evaluating multiple models on the same dataset
 
 Prompt:
 
-Create a sample run configuration file in configs/runs/sample_multi_model.yaml that evaluates the sample dataset from [ ] Prompt074 against multiple models. Specify different metric bundles, truncation policies, and concurrency. Ensure that the configuration is valid and documented. Provide a fully working sample configuration – do not leave missing fields.
+Create a sample run configuration file in configs/runs/sample_multi_model.yaml that evaluates the sample dataset from # [ ] Prompt074 against multiple models. Specify different metric bundles, truncation policies, and concurrency. Ensure that the configuration is valid and documented. Provide a fully working sample configuration – do not leave missing fields.
 
 Expected outputs:
 
@@ -1191,7 +1191,7 @@ Tests to add/run now:
 
 Write a test (backend/tests/test_sample_run_config.py) that loads the configuration and verifies that it is valid and includes multiple models
 
-[ ] Prompt076 — Provide a single command to start backend and frontend services
+# [ ] Prompt076 — Provide a single command to start backend and frontend services
 
 Prompt:
 
@@ -1205,7 +1205,7 @@ Tests to add/run now:
 
 Write a test (scripts/test_make_dev.sh) that runs the make target and verifies that both servers start and are accessible at their respective ports
 
-[ ] Prompt077 — Provide JSON Schema definitions for datasets, goldens, and run configurations
+# [ ] Prompt077 — Provide JSON Schema definitions for datasets, goldens, and run configurations
 
 Prompt:
 
@@ -1221,7 +1221,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_schemas.py) that load the schemas and validate sample data against them, ensuring correctness and completeness
 
-[ ] Prompt078 — Allow task_type metadata in datasets
+# [ ] Prompt078 — Allow task_type metadata in datasets
 
 Prompt:
 
@@ -1237,7 +1237,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_task_type.py) that add datasets with different task types and verify grouping and filtering functions
 
-[ ] Prompt079 — Provide reusable metric bundles per task_type
+# [ ] Prompt079 — Provide reusable metric bundles per task_type
 
 Prompt:
 
@@ -1253,7 +1253,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_metric_bundles.py) that define metric bundles and verify that run configurations referencing them load the correct metrics
 
-[ ] Prompt080 — Implement per‑provider rate limit configuration
+# [ ] Prompt080 — Implement per‑provider rate limit configuration
 
 Prompt:
 
@@ -1269,7 +1269,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_rate_limiter.py) that simulate high request volumes and verify that the rate limiter enforces limits correctly
 
-[ ] Prompt081 — Implement per‑provider retry policies
+# [ ] Prompt081 — Implement per‑provider retry policies
 
 Prompt:
 
@@ -1285,7 +1285,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_retry_policy.py) that simulate transient and permanent errors and verify that the retry mechanism behaves correctly
 
-[ ] Prompt082 — Abstract storage behind pluggable adapters
+# [ ] Prompt082 — Abstract storage behind pluggable adapters
 
 Prompt:
 
@@ -1301,7 +1301,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_storage_adapter.py) that write and retrieve artifacts via the storage interface and verify data integrity
 
-[ ] Prompt083 — Provide versioned sample JSON and YAML templates
+# [ ] Prompt083 — Provide versioned sample JSON and YAML templates
 
 Prompt:
 
@@ -1316,7 +1316,7 @@ Tests to add/run now:
 Write tests (backend/tests/test_templates.py) that load each template, strip comments, and validate against the appropriate schema
 
 Additional features and UI enhancements
-[ ] Prompt084 — Implement generic golden dataset generator
+# [ ] Prompt084 — Implement generic golden dataset generator
 
 Prompt:
 
@@ -1334,7 +1334,7 @@ Tests (backend/tests/test_dataset_generator.py) invoking the script with differe
 
 Test that running the generator multiple times produces unique versions
 
-[ ] Prompt085 — Create a dedicated golden set editor UI
+# [ ] Prompt085 — Create a dedicated golden set editor UI
 
 Prompt:
 
@@ -1352,7 +1352,7 @@ UI tests verifying that golden entries can be created, edited, and deleted and t
 
 Test that unauthorized access is blocked (if implemented)
 
-[ ] Prompt086 — Create a metrics management interface (UI)
+# [ ] Prompt086 — Create a metrics management interface (UI)
 
 Prompt:
 
@@ -1370,7 +1370,7 @@ UI tests verifying that metrics can be created, edited, and toggled active/inact
 
 Test handling of invalid metric uploads and server‑side validation errors
 
-[ ] Prompt087 — Create dataset upload/import interface in the frontend
+# [ ] Prompt087 — Create dataset upload/import interface in the frontend
 
 Prompt:
 
@@ -1388,7 +1388,7 @@ UI tests verifying that uploading valid files results in dataset creation and th
 
 Test that newly uploaded datasets appear in the dataset listing page
 
-[ ] Prompt088 — Implement NavBar and unified navigation
+# [ ] Prompt088 — Implement NavBar and unified navigation
 
 Prompt:
 
@@ -1406,7 +1406,7 @@ Component tests ensuring that NavBar renders all links and highlights the active
 
 Test that clicking each link navigates to the correct page without a full reload
 
-[ ] Prompt089 — Enhance evaluation run interface for selecting or importing datasets
+# [ ] Prompt089 — Enhance evaluation run interface for selecting or importing datasets
 
 Prompt:
 
@@ -1424,7 +1424,7 @@ UI tests verifying that uploading a dataset during run setup adds it to the sele
 
 Test that run configurations include newly uploaded datasets when submitted
 
-[ ] Prompt090 — Provide industry‑specific templates and documentation
+# [ ] Prompt090 — Provide industry‑specific templates and documentation
 
 Prompt:
 
