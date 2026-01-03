@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "conversation_id": "conv-001",
+  "metadata": {
+    "tags": ["onboarding", "policy"],
+    "difficulty": "easy",
+    "domain": "hr"
+  },
+  "turns": [
+    {"turn_id": "t1", "role": "system", "content": "You are a helpful assistant."},
+    {"turn_id": "t2", "role": "user", "content": "Summarize our leave policy", "tool_calls": [
+      {"tool_name": "doc_search", "arguments": {"query": "leave policy"}, "result": {"doc_id": 42}}
+    ]},
+    {"turn_id": "t3", "role": "assistant", "content": "Our leave policy allows 25 days..."}
+  ]
+}

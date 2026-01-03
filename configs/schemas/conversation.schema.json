@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/conversation.schema.json",
+  "title": "Multi-turn Conversation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "conversation_id", "metadata", "turns"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this conversation dataset file",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "conversation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"],
+          "default": "medium"
+        }
+      }
+    },
+    "turns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["turn_id", "role", "content"],
+        "properties": {
+          "turn_id": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "enum": ["user", "assistant", "system"] },
+          "content": { "type": "string" },
+          "tool_calls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["tool_name"],
+              "properties": {
+                "tool_name": { "type": "string", "minLength": 1 },
+                "arguments": { "type": "object" },
+                "result": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

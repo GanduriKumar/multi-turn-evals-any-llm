@@ -138,7 +138,7 @@ Write unit tests (backend/tests/test_llm_schema.py) that instantiate the request
 
 Test that invalid inputs (missing fields, wrong types) raise validation errors.
 
-# [ ] Prompt008 — Design dataset format for multi‑turn conversations and goldens
+# [x] Prompt008 — Design dataset format for multi‑turn conversations and goldens
 
 Prompt:
 
@@ -156,7 +156,7 @@ Write tests (backend/tests/test_dataset_format.py) that validate the example dat
 
 Test that missing or extra fields in the examples cause validation failures.
 
-# [ ] Prompt009 — Support JSON and YAML dataset formats
+# [x] Prompt009 — Support JSON and YAML dataset formats
 
 Prompt:
 
@@ -174,7 +174,7 @@ Write tests (backend/tests/test_loader.py) that load sample JSON and YAML datase
 
 Test that loading invalid JSON/YAML raises a clear exception.
 
-# [ ] Prompt010 — Implement dataset loader with schema validation and error messages
+# [x] Prompt010 — Implement dataset loader with schema validation and error messages
 
 Prompt:
 
@@ -190,7 +190,7 @@ Tests to add/run now:
 
 Implement tests (backend/tests/test_validation_loader.py) that provide both valid and invalid datasets to the loader and assert appropriate behaviour and error messages.
 
-# [ ] Prompt011 — Add versioning for datasets and golden references
+# [x] Prompt011 — Add versioning for datasets and golden references
 
 Prompt:
 

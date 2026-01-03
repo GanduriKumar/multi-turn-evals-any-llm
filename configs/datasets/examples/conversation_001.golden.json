@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "conversation_id": "conv-001",
+  "expectations": [
+    {
+      "turn_id": "t3",
+      "expected": {
+        "text_variants": [
+          "Our leave policy allows 25 days",
+          "Employees have 25 days of leave"
+        ],
+        "structured": {
+          "summary": true,
+          "days_allowed": 25
+        },
+        "weights": {
+          "correctness": 0.7,
+          "consistency": 0.2,
+          "adherence": 0.1
+        },
+        "constraints": [
+          {"rule": "must_mention_number", "params": {"number": 25}},
+          {"rule": "must_not_include", "params": {"terms": ["unlimited", "unpaid only"]}}
+        ],
+        "conditions": [
+          {"type": "score", "operator": ">=", "threshold": 0.8}
+        ]
+      }
+    }
+  ]
+}
