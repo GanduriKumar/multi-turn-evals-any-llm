@@ -662,7 +662,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_metric_plugins.py) that register a custom metric plugin and verify that it is discovered and executed correctly.
 
-# [ ] Prompt041 — Implement threshold rules for per‑turn pass/fail
+# [x] Prompt041 — Implement threshold rules for per‑turn pass/fail
 
 Prompt:
 
@@ -676,7 +676,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_thresholds.py) that define thresholds and verify that turns are marked pass or fail correctly based on computed scores and weights.
 
-# [ ] Prompt042 — Implement threshold rules for conversation pass/fail
+# [x] Prompt042 — Implement threshold rules for conversation pass/fail
 
 Prompt:
 
@@ -690,7 +690,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_conversation_thresholds.py) that provide aggregated metric scores and verify that conversation pass/fail outcomes are computed based on thresholds.
 
-# [ ] Prompt043 — Implement configurable aggregation functions for conversation scoring
+# [x] Prompt043 — Implement configurable aggregation functions for conversation scoring
 
 Prompt:
 
@@ -704,7 +704,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_aggregation.py) that verify mean, minimum, and weighted averages are computed correctly for sample score sets.
 
-# [ ] Prompt044 — Persist evaluation artifacts and outputs
+# [x] Prompt044 — Persist evaluation artifacts and outputs
 
 Prompt:
 
@@ -718,7 +718,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_artifact_persistence.py) that run an evaluation and verify that all expected artifact files are created with correct content.
 
-# [ ] Prompt045 — Persist machine‑readable results in JSON
+# [x] Prompt045 — Persist machine‑readable results in JSON
 
 Prompt:
 
@@ -732,7 +732,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_results_writer.py) that run an evaluation and verify that the JSON file exists and contains all required data.
 
-# [ ] Prompt046 — Persist tabular results export in CSV
+# [x] Prompt046 — Persist tabular results export in CSV
 
 Prompt:
 

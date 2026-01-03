@@ -12,8 +12,10 @@ from .data.loader import load_conversation, load_golden
 from .data.golden_access import index_golden
 from .evaluation.scoring import score_turn
 from .evaluation.weights import aggregate_conversation, weighted_average
+from .scoring.thresholds import evaluate_conversation_thresholds
 from .scoring.normalizer import normalize_turn_output
 from .scoring.turn_scoring import score_turn_canonical
+from .scoring.thresholds import ThresholdPolicy, evaluate_turn_thresholds
 from .queue import ExecutionQueue, JobState
 
 
@@ -59,6 +61,7 @@ def default_get_response(turn: Mapping[str, Any], model: Mapping[str, Any], conv
 def _evaluate_dataset_model(
     dataset: Mapping[str, Any],
     model: Mapping[str, Any],
+    run_thresholds: Optional[Mapping[str, Any]],
     cancel_event: threading.Event,
     on_progress: Optional[ProgressCallback],
     get_response: Callable[[Mapping[str, Any], Mapping[str, Any], Mapping[str, Any]], str],
@@ -120,14 +123,18 @@ def _evaluate_dataset_model(
         actual_text = get_response(t, model, conv)
         # Normalize output; context lines omitted here for simplicity
         canonical = normalize_turn_output(actual_text, [])
-        # Determine thresholds from optional run-level config (not available here), so default empty
-        # Per-turn thresholds can be passed via expected.conditions in future; for now use defaults
-        metric_thresholds: Dict[str, float] = {}
-        scores_by_metric, metrics_pass = score_turn_canonical(canonical, expected, thresholds=metric_thresholds)
+        # Determine thresholds from run-level config if provided (per-metric), default threshold falls back to run.turn_pass or 0.5
+        rt = run_thresholds or {}
+        metric_thresholds: Dict[str, float] = dict((rt.get("metric") or {}))
+        default_thr = float(rt.get("turn_pass") or 0.5)
+
+        scores_by_metric, _ = score_turn_canonical(canonical, expected, thresholds=metric_thresholds)
         # Combine metrics into a single turn score using optional weights from expected
         weights = expected.get("weights") or {}
+        # Evaluate pass/fail using threshold policy
+        policy = ThresholdPolicy(require="all", pass_ratio=1.0, default_threshold=default_thr)
+        passed, _thr_details = evaluate_turn_thresholds(scores_by_metric, metric_thresholds, weights=weights, policy=policy)
         turn_score = weighted_average(scores_by_metric, weights if weights else None)
-        passed = metrics_pass
         turn_results.append(TurnEvaluation(turn_id=tid, passed=passed, matched_variant=None))
         turn_scores[tid] = float(turn_score)
         # Per-turn weight if provided
@@ -145,6 +152,17 @@ def _evaluate_dataset_model(
     # Aggregate conversation score (weighted over turns)
     score = aggregate_conversation(turn_scores, turn_weights if turn_weights else None)
 
+    # Conversation-level thresholds (optional): if provided in run_thresholds.metric, reuse same thresholds
+    conv_pass = True
+    if run_thresholds:
+        rt = run_thresholds or {}
+        metric_thresholds: Dict[str, float] = dict((rt.get("metric") or {}))
+        default_thr = float(rt.get("conversation_pass") or rt.get("turn_pass") or 0.5)
+        pol = ThresholdPolicy(require="all", pass_ratio=1.0, default_threshold=default_thr)
+        # For now, supply a single aggregated metric 'score' alongside any other aggregated metrics as needed in future.
+        agg_scores: Dict[str, float] = {"score": float(score)}
+        conv_pass, _ = evaluate_conversation_thresholds(agg_scores, thresholds=metric_thresholds, policy=pol)
+
     if on_progress:
         on_progress({
             "event": "end",
@@ -153,6 +171,7 @@ def _evaluate_dataset_model(
             "conversation_id": conv_id,
             "status": status,
             "score": score,
+            "conversation_pass": conv_pass,
         })
 
     return ConversationEvaluation(
@@ -214,7 +233,7 @@ def evaluate_run(
             if cancel.is_set():
                 cancelled_flag = True
                 break
-            result = _evaluate_dataset_model(ds_dict, m_dict, cancel, on_progress, get_response)
+            result = _evaluate_dataset_model(ds_dict, m_dict, rc.thresholds.__dict__ if rc.thresholds else None, cancel, on_progress, get_response)
             results.append(result)
             if result.status == "cancelled":
                 cancelled_flag = True
@@ -228,7 +247,7 @@ def evaluate_run(
                 if cancel.is_set():
                     cancelled_flag = True
                     break
-                futures.append(pool.submit(_evaluate_dataset_model, ds_dict, m_dict, cancel, on_progress, get_response))
+                futures.append(pool.submit(_evaluate_dataset_model, ds_dict, m_dict, rc.thresholds.__dict__ if rc.thresholds else None, cancel, on_progress, get_response))
 
             for fut in as_completed(futures):
                 res = fut.result()
