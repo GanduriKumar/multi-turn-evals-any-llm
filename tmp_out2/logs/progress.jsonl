@@ -1,0 +1,6 @@
+{"event": "start", "dataset_id": "conv001", "model": "dummy-1", "conversation": "configs/datasets/examples/conversation_001.json"}
+{"event": "start", "dataset_id": "conv001", "model": "dummy-2", "conversation": "configs/datasets/examples/conversation_001.json"}
+{"event": "turn", "dataset_id": "conv001", "model": "dummy-1", "turn_id": "t3", "passed": false}
+{"event": "end", "dataset_id": "conv001", "model": "dummy-1", "conversation_id": "conv-001", "status": "completed", "score": 1.0, "conversation_pass": true}
+{"event": "turn", "dataset_id": "conv001", "model": "dummy-2", "turn_id": "t3", "passed": false}
+{"event": "end", "dataset_id": "conv001", "model": "dummy-2", "conversation_id": "conv-001", "status": "completed", "score": 1.0, "conversation_pass": true}

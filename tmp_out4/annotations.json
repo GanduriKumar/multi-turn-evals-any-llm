@@ -1,0 +1,1 @@
+{"annotations": [{"dataset_id": "conv001", "conversation_id": "conv-001", "model_name": "dummy-1", "turn_id": "t2", "notes": "Looks great", "override_pass": true, "override_score": 0.9}, {"dataset_id": "conv001", "conversation_id": "conv-001", "model_name": "dummy-2", "turn_id": "t2", "notes": "Looks great", "override_pass": true, "override_score": 0.9}]}

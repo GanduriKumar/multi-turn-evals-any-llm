@@ -19,6 +19,10 @@ from .scoring.thresholds import ThresholdPolicy, evaluate_turn_thresholds, evalu
 from .evaluation.weights import aggregate_conversation
 from .metrics.regression import score_regressions
 from .reporting.results_writer import assemble_results, write_results_json
+from .reporting.report_generator import generate_html_report
+from .reporting.markdown_export import generate_markdown_report
+from .reporting.comparison_generator import generate_comparison_report
+from .reporting.pdf_export import generate_pdf_report
 
 
 def _ensure_dir(path: Path) -> None:
@@ -249,6 +253,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--output", help="Override output directory", default=None)
     parser.add_argument("--max-workers", type=int, default=None, help="Override max workers (global)")
     parser.add_argument("--baseline", type=str, default=None, help="Path to a baseline summary.json to compare for regressions")
+    parser.add_argument("--generate-report", action="store_true", help="Generate HTML report after run")
+    parser.add_argument("--generate-markdown", action="store_true", help="Generate Markdown report after run")
+    parser.add_argument("--generate-comparison", type=str, default=None, help="Generate comparison report vs another results.json")
+    parser.add_argument("--generate-pdf", action="store_true", help="Generate PDF report (requires wkhtmltopdf)")
+    parser.add_argument("--theme", type=str, default="default", choices=["default", "dark", "compact"], help="Report theme")
 
     args = parser.parse_args(argv)
 
@@ -287,6 +296,38 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     out_dir = run_headless(rc, output_dir=args.output, baseline_summary=args.baseline)
     print(f"Headless run complete. Artifacts written to: {out_dir}")
+    
+    # Generate reports if requested
+    results_path = Path(out_dir) / "results.json"
+    
+    if args.generate_report:
+        try:
+            report_path = generate_html_report(results_path, theme=args.theme)
+            print(f"HTML report generated: {report_path}")
+        except Exception as e:
+            print(f"Warning: Failed to generate HTML report: {e}")
+    
+    if args.generate_markdown:
+        try:
+            md_path = generate_markdown_report(results_path)
+            print(f"Markdown report generated: {md_path}")
+        except Exception as e:
+            print(f"Warning: Failed to generate Markdown report: {e}")
+    
+    if args.generate_comparison:
+        try:
+            comp_path = generate_comparison_report(results_path, Path(args.generate_comparison))
+            print(f"Comparison report generated: {comp_path}")
+        except Exception as e:
+            print(f"Warning: Failed to generate comparison report: {e}")
+    
+    if args.generate_pdf:
+        try:
+            pdf_path = generate_pdf_report(results_path, theme=args.theme)
+            print(f"PDF report generated: {pdf_path}")
+        except Exception as e:
+            print(f"Warning: Failed to generate PDF report: {e}")
+    
     return 0
 
 

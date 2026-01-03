@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from .api.feedback import router as feedback_router
 import uvicorn
 
 
@@ -8,6 +9,9 @@ def create_app() -> FastAPI:
     @app.get("/health")
     def health():
         return {"status": "ok"}
+
+    # API routes
+    app.include_router(feedback_router, prefix="/api")
 
     return app
 

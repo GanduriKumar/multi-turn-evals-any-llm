@@ -1,0 +1,129 @@
+{
+  "run": {
+    "run_id": "run_42a538e521feb21b",
+    "datasets": [
+      "configs/datasets/examples/conversation_001.json"
+    ],
+    "models": [
+      "dummy-1",
+      "dummy-2"
+    ]
+  },
+  "summary": {
+    "results": [
+      {
+        "dataset_id": "conv001",
+        "conversation_id": "conv-001",
+        "model_name": "dummy-2",
+        "status": "completed",
+        "score": 1.0,
+        "turn_results": [
+          {
+            "turn_id": "t3",
+            "passed": false,
+            "matched_variant": null
+          }
+        ]
+      },
+      {
+        "dataset_id": "conv001",
+        "conversation_id": "conv-001",
+        "model_name": "dummy-1",
+        "status": "completed",
+        "score": 1.0,
+        "turn_results": [
+          {
+            "turn_id": "t3",
+            "passed": false,
+            "matched_variant": null
+          }
+        ]
+      }
+    ],
+    "cancelled": false
+  },
+  "results": [
+    {
+      "dataset_id": "conv001",
+      "conversation_id": "conv-001",
+      "model_name": "dummy-1",
+      "aggregate": {
+        "score": 0.0,
+        "passed": false
+      },
+      "turns": [
+        {
+          "turn_id": "t2",
+          "prompt": "Summarize our leave policy",
+          "response": "DUMMY: [SYSTEM: You are a helpful assistant. | TOOL: doc_search args={'query': 'leave policy'} result={'doc_id': 42}] -> Summarize our leave policy",
+          "context": [
+            "SYSTEM: You are a helpful assistant.",
+            "TOOL: doc_search args={'query': 'leave policy'} result={'doc_id': 42}"
+          ],
+          "canonical": {
+            "raw_text": "DUMMY: [SYSTEM: You are a helpful assistant. | TOOL: doc_search args={'query': 'leave policy'} result={'doc_id': 42}] -> Summarize our leave policy",
+            "text": "dummy: [system: you are a helpful assistant. | tool: doc_search args={'query': 'leave policy'} result={'doc_id': 42}] -> summarize our leave policy",
+            "structured": {},
+            "tools": [
+              {
+                "tool_name": "doc_search",
+                "arguments": {
+                  "query": "leave policy"
+                },
+                "result": {
+                  "doc_id": 42
+                }
+              }
+            ],
+            "metadata": {}
+          },
+          "metrics": {},
+          "weights": {},
+          "weighted_score": 0.0,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "dataset_id": "conv001",
+      "conversation_id": "conv-001",
+      "model_name": "dummy-2",
+      "aggregate": {
+        "score": 0.0,
+        "passed": false
+      },
+      "turns": [
+        {
+          "turn_id": "t2",
+          "prompt": "Summarize our leave policy",
+          "response": "DUMMY: [SYSTEM: You are a helpful assistant. | TOOL: doc_search args={'query': 'leave policy'} result={'doc_id': 42}] -> Summarize our leave policy",
+          "context": [
+            "SYSTEM: You are a helpful assistant.",
+            "TOOL: doc_search args={'query': 'leave policy'} result={'doc_id': 42}"
+          ],
+          "canonical": {
+            "raw_text": "DUMMY: [SYSTEM: You are a helpful assistant. | TOOL: doc_search args={'query': 'leave policy'} result={'doc_id': 42}] -> Summarize our leave policy",
+            "text": "dummy: [system: you are a helpful assistant. | tool: doc_search args={'query': 'leave policy'} result={'doc_id': 42}] -> summarize our leave policy",
+            "structured": {},
+            "tools": [
+              {
+                "tool_name": "doc_search",
+                "arguments": {
+                  "query": "leave policy"
+                },
+                "result": {
+                  "doc_id": 42
+                }
+              }
+            ],
+            "metadata": {}
+          },
+          "metrics": {},
+          "weights": {},
+          "weighted_score": 0.0,
+          "passed": false
+        }
+      ]
+    }
+  ]
+}

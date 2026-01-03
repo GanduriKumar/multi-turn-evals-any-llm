@@ -9,6 +9,11 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "build"
+		},
+		{
+			"label": "Run backend tests",
+			"type": "shell",
+			"command": "C:/Users/kumar.gn/PycharmProjects/multi-turn-evals-any-llm/.venv/Scripts/python.exe -m pytest -q backend/tests -q"
 		}
 	]
 }

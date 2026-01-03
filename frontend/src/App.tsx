@@ -1,34 +1,28 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import ResultsViewer from './components/ResultsViewer'
+import { useState } from 'react'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [runId, setRunId] = useState('')
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="container" style={{ padding: 24, maxWidth: '1200px', margin: '0 auto' }}>
+      <h1>Evaluator Workbench</h1>
+      
+      <div className="run-selector" style={{ marginBottom: '2rem', padding: '1rem', background: '#f5f5f5', borderRadius: '8px' }}>
+        <label style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <strong>Run ID:</strong>
+          <input 
+            value={runId} 
+            onChange={(e) => setRunId(e.target.value)} 
+            placeholder="Enter run ID (e.g. run-20240101...)" 
+            style={{ padding: '8px', flex: 1, maxWidth: '400px' }}
+          />
+        </label>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+      <ResultsViewer runId={runId} />
+    </div>
   )
 }
 

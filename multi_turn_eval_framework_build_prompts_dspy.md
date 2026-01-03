@@ -746,7 +746,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_csv_export.py) that run an evaluation and verify that the CSV export exists, has the correct columns, and contains expected data.
 
-# [ ] Prompt047 — Generate human‑readable evaluation reports
+# [x] Prompt047 — Generate human‑readable evaluation reports
 
 Prompt:
 
@@ -760,7 +760,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_report_generator.py) that run a small evaluation and verify that the report file exists and contains expected sections and data.
 
-# [ ] Prompt048 — Generate evaluator‑annotated reports with rating, notes, and overrides
+# [x] Prompt048 — Generate evaluator‑annotated reports with rating, notes, and overrides
 
 Prompt:
 
@@ -774,7 +774,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_report_generator_annotations.py) that simulate evaluator feedback and verify that the annotations appear in the report and influence re‑scoring appropriately.
 
-# [ ] Prompt049 — Provide UI workflow to capture and store evaluator feedback
+# [x] Prompt049 — Provide UI workflow to capture and store evaluator feedback
 
 Prompt:
 
@@ -790,7 +790,7 @@ Tests to add/run now:
 
 Write UI tests that simulate entering feedback and verify that it is sent to the backend and stored correctly.
 
-# [ ] Prompt050 — Support re‑scoring using human overrides
+# [x] Prompt050 — Support re‑scoring using human overrides
 
 Prompt:
 

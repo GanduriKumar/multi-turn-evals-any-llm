@@ -1,0 +1,33 @@
+{
+  "results": [
+    {
+      "dataset_id": "conv001",
+      "conversation_id": "conv-001",
+      "model_name": "dummy-2",
+      "status": "completed",
+      "score": 1.0,
+      "turn_results": [
+        {
+          "turn_id": "t3",
+          "passed": false,
+          "matched_variant": null
+        }
+      ]
+    },
+    {
+      "dataset_id": "conv001",
+      "conversation_id": "conv-001",
+      "model_name": "dummy-1",
+      "status": "completed",
+      "score": 1.0,
+      "turn_results": [
+        {
+          "turn_id": "t3",
+          "passed": false,
+          "matched_variant": null
+        }
+      ]
+    }
+  ],
+  "cancelled": false
+}

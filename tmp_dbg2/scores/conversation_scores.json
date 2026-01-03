@@ -1,0 +1,18 @@
+{
+  "results": [
+    {
+      "dataset_id": "conv001",
+      "conversation_id": "conv-001",
+      "model_name": "dummy-1",
+      "score": 0.0,
+      "passed": false
+    },
+    {
+      "dataset_id": "conv001",
+      "conversation_id": "conv-001",
+      "model_name": "dummy-2",
+      "score": 0.0,
+      "passed": false
+    }
+  ]
+}

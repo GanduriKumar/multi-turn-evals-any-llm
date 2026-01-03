@@ -1,0 +1,14 @@
+{
+  "datasets": [
+    {
+      "conversation": "configs/datasets/examples/conversation_001.json",
+      "golden": "configs/datasets/examples/conversation_001.golden.yaml",
+      "id": "conv001",
+      "tags": [
+        "commerce",
+        "refund"
+      ],
+      "difficulty": "easy"
+    }
+  ]
+}

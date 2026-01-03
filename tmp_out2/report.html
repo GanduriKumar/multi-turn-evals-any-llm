@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluation Report - run_42a538e521feb21b</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header .meta {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .section h3 {
+            font-size: 1.3em;
+            margin: 15px 0 10px 0;
+            color: #444;
+        }
+        
+        .section h4 {
+            font-size: 1.1em;
+            margin: 10px 0 5px 0;
+            color: #555;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .summary-card h3 {
+            font-size: 0.9em;
+            font-weight: 600;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .summary-card p {
+            margin: 0;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .mono {
+            font-family: "Monaco", "Courier New", monospace;
+            font-size: 0.9em;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin: 0 5px 0 0;
+        }
+        
+        .badge-pass {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .badge-fail {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .conversation-group {
+            background: #f9fafb;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        
+        .conversation-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .conversation-header h3 {
+            margin: 0 0 10px 0;
+            color: #667eea;
+        }
+        
+        .conversation-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 0.95em;
+        }
+        
+        .meta-item {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .turns-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .turn-box {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .turn-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .turn-header h4 {
+            margin: 0;
+        }
+        
+        .turn-badges {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .turn-score {
+            background: #f3f4f6;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .turn-content {
+            margin-bottom: 20px;
+        }
+        
+        .exchange {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .exchange {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 6px;
+            background: #f9fafb;
+        }
+        
+        .message.prompt {
+            border-left: 4px solid #667eea;
+        }
+        
+        .message.response {
+            border-left: 4px solid #10b981;
+        }
+        
+        .message strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .message p {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .turn-metrics {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        
+        .turn-metrics strong {
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+        
+        .metrics-table th {
+            background: #f3f4f6;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .metrics-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .metrics-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .summary-metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .summary-metrics-table th {
+            background: #f3f4f6;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+        }
+        
+        .summary-metrics-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .summary-metrics-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .summary-details {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+        
+        .summary-details ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .summary-details li {
+            margin: 5px 0;
+            font-family: "Monaco", "Courier New", monospace;
+            font-size: 0.9em;
+        }
+        
+        .metric-bar {
+            display: inline-block;
+            height: 20px;
+            border-radius: 3px;
+            color: white;
+            font-size: 0.8em;
+            line-height: 20px;
+            text-align: center;
+            min-width: 30px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 40px;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: "Monaco", "Courier New", monospace;
+            font-size: 0.9em;
+        }
+        
+        
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --background-color: #f5f7fa;
+            --text-color: #333333;
+            --pass-color: #10b981;
+            --fail-color: #ef4444;
+        }
+        
+        body {
+            background: var(--background-color);
+            color: var(--text-color);
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+        
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        .badge-pass {
+            background-color: var(--pass-color);
+        }
+        
+        .badge-fail {
+            background-color: var(--fail-color);
+        }
+        
+        .conversation-group {
+            border-left-color: var(--primary-color);
+        }
+        
+        .conversation-header h3 {
+            color: var(--primary-color);
+        }
+        
+        .metric-bar[style*="green"] {
+            background-color: var(--pass-color) !important;
+        }
+        
+        .metric-bar[style*="red"] {
+            background-color: var(--fail-color) !important;
+        }
+        
+        code {
+            background: var(--secondary-color);
+            color: var(--accent-color);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 Evaluation Report</h1>
+            <div class="meta">
+                <p><strong>Run ID:</strong> run_42a538e521feb21b</p>
+                <p><strong>Generated:</strong> 2026-01-03 23:04:37</p>
+                <p><strong>Theme:</strong> default</p>
+            </div>
+        </header>
+
+        
+    <section id="summary" class="section">
+        <h2>📊 Run Summary</h2>
+        
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>Run ID</h3>
+                <p class="mono">run_42a538e521feb21b</p>
+            </div>
+            <div class="summary-card">
+                <h3>Total Conversations</h3>
+                <p class="stat-value">2</p>
+            </div>
+            <div class="summary-card">
+                <h3>Total Turns</h3>
+                <p class="stat-value">2</p>
+            </div>
+            <div class="summary-card">
+                <h3>Conversations Passed</h3>
+                <p class="stat-value">0/2</p>
+            </div>
+            <div class="summary-card">
+                <h3>Turns Passed</h3>
+                <p class="stat-value">0/2</p>
+            </div>
+            <div class="summary-card">
+                <h3>Final Conversations Passed</h3>
+                <p class="stat-value">2/2</p>
+            </div>
+            <div class="summary-card">
+                <h3>Final Turns Passed</h3>
+                <p class="stat-value">2/2</p>
+            </div>
+            <div class="summary-card">
+                <h3>Avg Conversation Score</h3>
+                <p class="stat-value">0.0000</p>
+            </div>
+            <div class="summary-card">
+                <h3>Avg Turn Score</h3>
+                <p class="stat-value">0.0000</p>
+            </div>
+            <div class="summary-card">
+                <h3>Avg Final Turn Score</h3>
+                <p class="stat-value">0.1000</p>
+            </div>
+            <div class="summary-card">
+                <h3>Datasets</h3>
+                <p>1 dataset(s)</p>
+            </div>
+            <div class="summary-card">
+                <h3>Models</h3>
+                <p>2 model(s): dummy-1, dummy-2</p>
+            </div>
+        </div>
+        
+        <div class="summary-details">
+            <h3>Datasets</h3>
+            <ul>
+                <li><code>configs/datasets/examples/conversation_001.json</code></li>
+            </ul>
+        </div>
+    </section>
+
+        
+    <section id="results" class="section">
+        <h2>📈 Results by Conversation</h2>
+
+        <div class="conversation-group">
+            <div class="conversation-header">
+                <h3>Conversation: conv-001</h3>
+                <div class="conversation-meta">
+                    <span class="meta-item"><strong>Dataset:</strong> conv001</span>
+                    <span class="meta-item"><strong>Model:</strong> dummy-1</span>
+                    <span class="meta-item"><strong>Score:</strong> 0.0000</span>
+                    <span class="meta-item"><span class="badge badge-fail">FAIL</span></span>
+                </div>
+            </div>
+
+            <div class="turns-container">
+
+                <div class="turn-box">
+                    <div class="turn-header">
+                        <h4>Turn t2</h4>
+                        <div class="turn-badges">
+                            <span class="turn-score">Score: 0.0000</span>
+                            <span class="badge badge-fail">FAIL</span>
+                        </div>
+                    </div>
+
+                    <div class="turn-content">
+                        <div class="exchange">
+                            <div class="message prompt">
+                                <strong>Prompt:</strong>
+                                <p>Summarize our leave policy</p>
+                            </div>
+                            <div class="message response">
+                                <strong>Response:</strong>
+                                <p>DUMMY: [SYSTEM: You are a helpful assistant. | TOOL: doc_search args={&#39;query&#39;: &#39;leave policy&#39;} result={&#39;doc_id&#39;: 42}] -&gt; Summarize our leave policy</p>
+                            </div>
+                        </div>
+
+                        <div class="turn-metrics">
+                            <strong>Metrics:</strong>
+                            <table class="metrics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Score</th>
+                                        <th>Weight</th>
+                                        <th>Contribution</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="turn-metrics">
+                            <strong>Evaluator:</strong>
+                            <table class="metrics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rating</th>
+                                        <th>Notes</th>
+                                        <th>Override Pass</th>
+                                        <th>Override Score</th>
+                                        <th>Final Score</th>
+                                        <th>Final Pass</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{_format_metric_value((turn.get('evaluator') or {}).get('rating'))}</td>
+                                        <td>{_escape_html((turn.get('evaluator') or {}).get('notes'))}</td>
+                                        <td>{_format_metric_value((turn.get('evaluator') or {}).get('override_pass'))}</td>
+                                        <td>{_format_metric_value((turn.get('evaluator') or {}).get('override_score'))}</td>
+                                        <td>{_format_metric_value(turn.get('final_weighted_score', weighted_score))}</td>
+                                        <td>{_pass_fail_badge(bool(turn.get('final_pass', turn_passed)))}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="conversation-group">
+            <div class="conversation-header">
+                <h3>Conversation: conv-001</h3>
+                <div class="conversation-meta">
+                    <span class="meta-item"><strong>Dataset:</strong> conv001</span>
+                    <span class="meta-item"><strong>Model:</strong> dummy-2</span>
+                    <span class="meta-item"><strong>Score:</strong> 0.0000</span>
+                    <span class="meta-item"><span class="badge badge-fail">FAIL</span></span>
+                </div>
+            </div>
+
+            <div class="turns-container">
+
+                <div class="turn-box">
+                    <div class="turn-header">
+                        <h4>Turn t2</h4>
+                        <div class="turn-badges">
+                            <span class="turn-score">Score: 0.0000</span>
+                            <span class="badge badge-fail">FAIL</span>
+                        </div>
+                    </div>
+
+                    <div class="turn-content">
+                        <div class="exchange">
+                            <div class="message prompt">
+                                <strong>Prompt:</strong>
+                                <p>Summarize our leave policy</p>
+                            </div>
+                            <div class="message response">
+                                <strong>Response:</strong>
+                                <p>DUMMY: [SYSTEM: You are a helpful assistant. | TOOL: doc_search args={&#39;query&#39;: &#39;leave policy&#39;} result={&#39;doc_id&#39;: 42}] -&gt; Summarize our leave policy</p>
+                            </div>
+                        </div>
+
+                        <div class="turn-metrics">
+                            <strong>Metrics:</strong>
+                            <table class="metrics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Score</th>
+                                        <th>Weight</th>
+                                        <th>Contribution</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="turn-metrics">
+                            <strong>Evaluator:</strong>
+                            <table class="metrics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rating</th>
+                                        <th>Notes</th>
+                                        <th>Override Pass</th>
+                                        <th>Override Score</th>
+                                        <th>Final Score</th>
+                                        <th>Final Pass</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{_format_metric_value((turn.get('evaluator') or {}).get('rating'))}</td>
+                                        <td>{_escape_html((turn.get('evaluator') or {}).get('notes'))}</td>
+                                        <td>{_format_metric_value((turn.get('evaluator') or {}).get('override_pass'))}</td>
+                                        <td>{_format_metric_value((turn.get('evaluator') or {}).get('override_score'))}</td>
+                                        <td>{_format_metric_value(turn.get('final_weighted_score', weighted_score))}</td>
+                                        <td>{_pass_fail_badge(bool(turn.get('final_pass', turn_passed)))}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+        
+    <section id="metrics" class="section">
+        <h2>📉 Metrics Summary</h2>
+        <p><em>No individual metrics recorded for this evaluation.</em></p>
+    </section>
+
+        
+        <footer>
+            <p>Report generated by eval-server on 2026-01-03 23:04:37</p>
+        </footer>
+    </div>
+</body>
+</html>
