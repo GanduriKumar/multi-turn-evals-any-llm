@@ -32,6 +32,7 @@ Homepage = "https://github.com/your-org/multi-turn-evals-any-llm"
 [project.scripts]
 eval-server = "eval_server.__main__:main"
 init-workspace = "eval_server.init_workspace:main"
+eval-run = "eval_server.headless_engine:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

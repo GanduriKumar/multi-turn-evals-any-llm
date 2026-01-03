@@ -1,0 +1,57 @@
+version: "1.0.0"
+run_id: "sample-20260103"
+name: "Sample Run with Multiple Datasets and Models"
+description: "Demonstrates selecting datasets, models, metrics, truncation and concurrency"
+output_dir: runs/sample_output
+random_seed: 42
+
+# Datasets reference a conversation file and a golden expectations file
+# Paths are relative to repo root or absolute
+# You can optionally add tags/difficulty to filter/report
+datasets:
+  - id: conv001
+    conversation: configs/datasets/examples/conversation_001.json
+    golden: configs/datasets/examples/conversation_001.golden.yaml
+    tags: ["commerce", "refund"]
+    difficulty: "easy"
+
+# Multiple models; each specifies provider, model and optional params
+models:
+  - name: dummy-1
+    provider: dummy
+    model: dummy-v1
+    params:
+      temperature: 0.0
+    concurrency:
+      max_requests_per_second: 5
+      max_concurrent_requests: 2
+  - name: dummy-2
+    provider: dummy
+    model: dummy-v2
+
+# Metric bundles toggle which evaluation modules to run
+metric_bundles:
+  - basic_text
+  - structured
+  - constraints
+  - final_outcome
+
+# Truncation policy for long prompts/contexts
+truncation:
+  strategy: none
+  max_input_tokens: 4096
+
+# Global concurrency knobs
+concurrency:
+  max_workers: 4
+  per_model: 2
+
+# Thresholds to mark pass/fail at different aggregation levels
+thresholds:
+  turn_pass: 0.7
+  conversation_pass: 0.75
+  metric:
+    correctness: 0.8
+    adherence: 0.7
+    consistency: 0.6
+    hallucination: 0.9

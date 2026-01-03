@@ -336,7 +336,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_weights.py) that define different weight scenarios and verify that weighted scoring aggregates as expected.
 
-# [ ] Prompt020 — Create run configuration file format
+# [x] Prompt020 — Create run configuration file format
 
 Prompt:
 
@@ -356,7 +356,7 @@ Write tests (backend/tests/test_run_config_loader.py) that load sample configura
 
 Test that invalid configurations result in informative errors.
 
-# [ ] Prompt021 — Implement evaluation orchestrator with concurrency support
+# [x] Prompt021 — Implement evaluation orchestrator with concurrency support
 
 Prompt:
 
@@ -374,7 +374,7 @@ Write tests (backend/tests/test_orchestrator.py) that run a small evaluation wit
 
 Test that cancellation stops execution and reports a cancelled status.
 
-# [ ] Prompt022 — Provide headless execution engine for backend
+# [x] Prompt022 — Provide headless execution engine for backend
 
 Prompt:
 
@@ -390,7 +390,7 @@ Tests to add/run now:
 
 Write integration tests (backend/tests/test_headless_engine.py) that run the headless engine with a sample run config and verify that the run completes and artifacts are created.
 
-# [ ] Prompt023 — Implement execution queue tracking job states and progress
+# [x] Prompt023 — Implement execution queue tracking job states and progress
 
 Prompt:
 
@@ -408,7 +408,7 @@ Write tests (backend/tests/test_queue.py) that add jobs, update their states, an
 
 Test concurrent updates to ensure thread safety.
 
-# [ ] Prompt024 — Provide job cancellation support
+# [x] Prompt024 — Provide job cancellation support
 
 Prompt:
 
@@ -424,7 +424,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_cancellation.py) that start a long‑running evaluation, issue a cancellation, and verify that the job status is updated and no further processing occurs.
 
-# [ ] Prompt025 — Generate deterministic run IDs for reproducibility
+# [x] Prompt025 — Generate deterministic run IDs for reproducibility
 
 Prompt:
 
@@ -438,7 +438,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_run_id.py) that pass identical and different configuration objects and assert that run IDs are consistent or differ accordingly.
 
-# [ ] Prompt026 — Build turn runner to feed user turns with accumulated context
+# [x] Prompt026 — Build turn runner to feed user turns with accumulated context
 
 Prompt:
 
@@ -454,7 +454,7 @@ Write tests (backend/tests/test_turn_runner.py) that simulate a multi‑turn con
 
 Test that the runner can handle tool calls as part of context when required.
 
-# [ ] Prompt027 — Add support for memory injection
+# [x] Prompt027 — Add support for memory injection
 
 Prompt:
 
@@ -468,7 +468,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_memory_injection.py) that provide memory objects and verify that they are incorporated into the context passed to the LLM.
 
-# [ ] Prompt028 — Support configurable truncation policies
+# [x] Prompt028 — Support configurable truncation policies
 
 Prompt:
 
@@ -484,7 +484,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_truncation.py) that feed long conversation histories and verify that the context passed to the LLM follows the specified truncation policy.
 
-# [ ] Prompt029 — Support tool‑call simulation hooks
+# [x] Prompt029 — Support tool‑call simulation hooks
 
 Prompt:
 
