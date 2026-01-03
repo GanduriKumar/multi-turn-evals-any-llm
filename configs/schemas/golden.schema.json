@@ -31,7 +31,15 @@
                 "minItems": 1,
                 "items": { "type": "string", "minLength": 1 }
               },
-              "structured": { "type": "object" },
+              "structured": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "decision": { "type": "string", "enum": ["ALLOW", "DENY"] },
+                  "reason_code": { "type": "string", "minLength": 1 },
+                  "next_action": { "type": "string", "minLength": 1 }
+                }
+              },
               "weights": {
                 "type": "object",
                 "properties": {
@@ -42,12 +50,22 @@
                 },
                 "additionalProperties": false
               },
+              "turn_weight": { "type": "number", "minimum": 0 },
               "constraints": {
                 "type": "array",
                 "items": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": ["rule"],
+                  "properties": {
+                    "rule": { "type": "string", "minLength": 1 },
+                    "params": { "type": "object" },
+                    "expr": { "type": "string", "minLength": 1 },
+                    "message": { "type": "string" }
+                  },
+                  "anyOf": [
+                    { "required": ["rule"] },
+                    { "required": ["expr"] }
+                  ],
                   "properties": {
                     "rule": { "type": "string", "minLength": 1 },
                     "params": { "type": "object" }

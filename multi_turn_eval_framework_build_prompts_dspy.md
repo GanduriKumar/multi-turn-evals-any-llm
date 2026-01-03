@@ -288,7 +288,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_variants.py) that define multiple variants for a turn and verify that the evaluation accepts any matching variant.
 
-# [ ] Prompt017 — Support structured expected fields in golden references
+# [x] Prompt017 — Support structured expected fields in golden references
 
 Prompt:
 
@@ -304,7 +304,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_structured_fields.py) for scenarios where structured fields are present and ensure the evaluation compares them correctly.
 
-# [ ] Prompt018 — Implement business‑rule constraints in golden references
+# [x] Prompt018 — Implement business‑rule constraints in golden references
 
 Prompt:
 
@@ -320,7 +320,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_constraints.py) that define conversations with constraints and verify that scoring fails or passes correctly based on the outputs.
 
-# [ ] Prompt019 — Specify evaluation weights per metric and per turn
+# [x] Prompt019 — Specify evaluation weights per metric and per turn
 
 Prompt:
 
