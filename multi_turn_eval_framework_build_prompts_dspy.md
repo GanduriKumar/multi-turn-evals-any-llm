@@ -562,7 +562,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_conversation_scoring.py) that feed sequences of per‑turn scores and verify correct aggregation for mean, min, and weighted functions.
 
-# [ ] Prompt034 — Implement per‑turn correctness metric
+# [x] Prompt034 — Implement per‑turn correctness metric
 
 Prompt:
 
@@ -576,7 +576,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_correctness_metric.py) that evaluate different match modes and assert correct scoring behaviour.
 
-# [ ] Prompt035 — Implement multi‑turn consistency metric
+# [x] Prompt035 — Implement multi‑turn consistency metric
 
 Prompt:
 
@@ -590,7 +590,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_consistency_metric.py) that simulate conversations with contradictions and verify that the metric detects them.
 
-# [ ] Prompt036 — Implement instruction/constraint adherence metric
+# [x] Prompt036 — Implement instruction/constraint adherence metric
 
 Prompt:
 
@@ -604,7 +604,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_adherence_metric.py) that define constraints and verify that the metric correctly penalizes violations and rewards adherence.
 
-# [ ] Prompt037 — Implement hallucination risk metric
+# [x] Prompt037 — Implement hallucination risk metric
 
 Prompt:
 
@@ -618,7 +618,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_hallucination_metric.py) that supply context and outputs and verify that hallucination risk scores correspond to whether the output is grounded.
 
-# [ ] Prompt038 — Implement refusal/safety compliance metric
+# [x] Prompt038 — Implement refusal/safety compliance metric
 
 Prompt:
 
@@ -632,7 +632,7 @@ Tests to add/run now:
 
 Write tests (backend/tests/test_safety_metric.py) that define prohibited actions and verify that responses violating safety rules are flagged and scored accordingly.
 
-# [ ] Prompt039 — Implement regression detection metric
+# [x] Prompt039 — Implement regression detection metric
 
 Prompt:
 
