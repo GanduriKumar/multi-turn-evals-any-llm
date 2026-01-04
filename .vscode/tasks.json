@@ -14,6 +14,19 @@
 			"label": "Run backend tests",
 			"type": "shell",
 			"command": "C:/Users/kumar.gn/PycharmProjects/multi-turn-evals-any-llm/.venv/Scripts/python.exe -m pytest -q backend/tests -q"
+		},
+		{
+			"label": "Run frontend tests",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"--prefix",
+				"frontend",
+				"test",
+				"--silent",
+				"--scripts-prepend-node-path"
+			],
+			"group": "build"
 		}
 	]
 }

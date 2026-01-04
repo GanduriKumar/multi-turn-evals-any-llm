@@ -7,8 +7,8 @@ from eval_server.__main__ import create_app
 
 
 def make_valid_payload(repo_root: Path) -> dict:
-    conv = repo_root / 'configs' / 'datasets' / 'examples' / 'conversation_001.json'
-    gold = repo_root / 'configs' / 'datasets' / 'examples' / 'conversation_001.golden.yaml'
+    conv = repo_root / 'datasets' / 'examples' / 'conversation_001.json'
+    gold = repo_root / 'datasets' / 'examples' / 'conversation_001.golden.yaml'
     return {
         'version': '1.0.0',
         'datasets': [

@@ -28,10 +28,23 @@ from .progress_registry import registry as _progress
 router = APIRouter(prefix="/runs", tags=["runs"])
 
 
+class DatasetConfigModel(BaseModel):
+    id: str
+    conversation: str
+    golden: str
+    tags: Optional[list[str]] = None
+    difficulty: Optional[str] = None
+
+class ModelConfigModel(BaseModel):
+    name: str
+    provider: str
+    model: str
+    params: Optional[Dict[str, Any]] = None
+
 class RunStartRequest(BaseModel):
     version: str
-    datasets: list[Dict[str, Any]]
-    models: list[Dict[str, Any]]
+    datasets: list[DatasetConfigModel]
+    models: list[ModelConfigModel]
     run_id: Optional[str] = None
     name: Optional[str] = None
     description: Optional[str] = None
@@ -56,7 +69,7 @@ def start_run(req: RunStartRequest) -> RunStartResponse:
     # But load_run_config expects a path; instead, we mimic minimal validation by ensuring required keys exist
     try:
         # Basic required fields check
-        if not req.version or not isinstance(req.datasets, list) or not isinstance(req.models, list) or len(req.datasets) == 0 or len(req.models) == 0:
+        if not req.version or len(req.datasets) == 0 or len(req.models) == 0:
             raise ValueError("invalid run configuration")
     except Exception as e:
         raise BadRequestError(str(e))
@@ -67,20 +80,20 @@ def start_run(req: RunStartRequest) -> RunStartResponse:
     try:
         datasets = [
             DatasetConfig(
-                id=d.get("id"),
-                conversation=d["conversation"],
-                golden=d["golden"],
-                tags=d.get("tags"),
-                difficulty=d.get("difficulty"),
+                id=d.id,
+                conversation=d.conversation,
+                golden=d.golden,
+                tags=d.tags,
+                difficulty=d.difficulty,
             )
             for d in req.datasets
         ]
         models = [
             ModelConfig(
-                name=m["name"],
-                provider=m["provider"],
-                model=m["model"],
-                params=m.get("params"),
+                name=m.name,
+                provider=m.provider,
+                model=m.model,
+                params=m.params,
                 concurrency=None,
             )
             for m in req.models

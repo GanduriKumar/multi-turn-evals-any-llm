@@ -22,6 +22,42 @@ class GoogleProvider(LLMProvider):
         self._prefix = str(kwargs.get("prefix", self._prefix))
 
     def generate(self, prompt: str, context: List[str] | None = None) -> str:
+        if not self._api_key:
+            return self._dry_run_generate(prompt, context)
+
+        try:
+            import google.generativeai as genai
+        except ImportError:
+            return self._dry_run_generate(prompt, context)
+
+        genai.configure(api_key=self._api_key)
+        model = genai.GenerativeModel(self._model)
+
+        history = []
+        if context:
+            for line in context:
+                role = "user"
+                content = line
+                if line.upper().startswith("USER:"):
+                    role = "user"
+                    content = line[5:].strip()
+                elif line.upper().startswith("ASSISTANT:"):
+                    role = "model"
+                    content = line[10:].strip()
+                elif line.upper().startswith("SYSTEM:"):
+                    role = "user"
+                    content = f"System instruction: {line[7:].strip()}"
+                
+                history.append({"role": role, "parts": [content]})
+
+        try:
+            chat = model.start_chat(history=history)
+            response = chat.send_message(prompt)
+            return response.text
+        except Exception as e:
+            raise RuntimeError(f"Google API error: {e}")
+
+    def _dry_run_generate(self, prompt: str, context: List[str] | None = None) -> str:
         ctx_part = " | ".join(context or [])
         if ctx_part:
             return f"{self._prefix} google[{self._model}] [{ctx_part}] -> {prompt}"

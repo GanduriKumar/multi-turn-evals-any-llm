@@ -69,4 +69,40 @@ describe('RunSetupPage', () => {
     await waitFor(() => expect(screen.getByText(/Run started successfully/)).toBeInTheDocument());
     expect(screen.getByText('run-123')).toBeInTheDocument();
   });
+
+  it('shows Ollama and sets default models per provider', async () => {
+    render(
+      <MemoryRouter>
+        <RunSetupPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('Conv A')).toBeInTheDocument());
+
+    const provider = screen.getByLabelText('Provider') as HTMLSelectElement;
+    const model = screen.getByLabelText('Model') as HTMLInputElement;
+
+    // Provider menu includes Ollama
+    expect(provider).toHaveTextContent('Ollama');
+
+    // Ollama default
+    fireEvent.change(provider, { target: { value: 'ollama' } });
+    expect(model.value).toBe('llama3.2');
+
+    // Google default
+    fireEvent.change(provider, { target: { value: 'google' } });
+    expect(model.value).toBe('gemini-2.5');
+
+    // OpenAI default
+    fireEvent.change(provider, { target: { value: 'openai' } });
+    expect(model.value).toBe('gpt-5.2');
+
+    // Azure OpenAI default (MoE)
+    fireEvent.change(provider, { target: { value: 'azure_openai' } });
+    expect(model.value).toBe('phi-3.5-moe');
+
+    // AWS Bedrock default (MoE)
+    fireEvent.change(provider, { target: { value: 'aws_bedrock' } });
+    expect(model.value).toBe('mixtral-8x7b-instruct');
+  });
 });

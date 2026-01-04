@@ -19,7 +19,7 @@ models:
 
 datasets:
   # Default dataset root directory; paths may be absolute or relative to repo root
-  root_dir: configs/datasets
+  root_dir: datasets
   # File extensions that loaders will consider by default
   allowed_extensions:
     - .json
@@ -40,7 +40,7 @@ scoring:
 
 report:
   # Output directory for reports and artifacts
-  output_dir: metrics\reports
+  output_dir: metrics/reports
   # Format(s) to generate for reports
   formats:
     - html

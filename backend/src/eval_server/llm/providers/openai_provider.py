@@ -24,6 +24,46 @@ class OpenAIProvider(LLMProvider):
         self._prefix = str(kwargs.get("prefix", self._prefix))
 
     def generate(self, prompt: str, context: List[str] | None = None) -> str:
+        if not self._api_key:
+            return self._dry_run_generate(prompt, context)
+
+        try:
+            import openai
+        except ImportError:
+            return self._dry_run_generate(prompt, context)
+
+        client = openai.OpenAI(api_key=self._api_key, base_url=self._base_url)
+        messages = []
+        
+        if context:
+            for line in context:
+                role = "system"
+                content = line
+                if line.upper().startswith("USER:"):
+                    role = "user"
+                    content = line[5:].strip()
+                elif line.upper().startswith("ASSISTANT:"):
+                    role = "assistant"
+                    content = line[10:].strip()
+                elif line.upper().startswith("SYSTEM:"):
+                    role = "system"
+                    content = line[7:].strip()
+                
+                messages.append({"role": role, "content": content})
+
+        messages.append({"role": "user", "content": prompt})
+
+        try:
+            response = client.chat.completions.create(
+                model=self._model_id,
+                messages=messages,
+            )
+            return response.choices[0].message.content or ""
+        except Exception as e:
+            # Fallback or re-raise? Re-raising is better for "Real" provider.
+            raise RuntimeError(f"OpenAI API error: {e}")
+
+    def _dry_run_generate(self, prompt: str, context: List[str] | None = None) -> str:
         # Dry-run deterministic response to avoid external calls in tests
         ctx_part = " | ".join(context or [])
         if ctx_part:

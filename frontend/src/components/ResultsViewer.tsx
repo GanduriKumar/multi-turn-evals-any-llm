@@ -59,14 +59,13 @@ export default function ResultsViewer({ runId }: ResultsViewerProps) {
       setLoading(true);
       setError(null);
       try {
-        // In a real app, this would be an API call. 
-        // For this demo, we'll try to fetch the results.json directly if served statically,
-        // or simulate it. Since we don't have a direct API for results yet, 
-        // we'll assume the user might need to paste JSON or we'll mock it for now.
-        // Ideally: const res = await fetch(`/api/runs/${runId}/results`);
-        
-        // For now, let's show a placeholder if we can't fetch
-        setError("To view results, please ensure the backend serves results.json or use the mock data mode.");
+        const res = await fetch(`/api/v1/results/${runId}/results`);
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Failed to fetch results: ${res.status} ${text}`);
+        }
+        const data = await res.json();
+        setResults(data);
       } catch (err: any) {
         setError(err.message);
       } finally {

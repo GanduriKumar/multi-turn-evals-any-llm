@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .api.feedback import router as feedback_router
 from .api.datasets import router as datasets_router
 from .api.jobs import router as jobs_router
@@ -30,6 +31,14 @@ def create_app() -> FastAPI:
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_tags=tags_metadata,
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     # Load settings early to fail fast if secrets are missing

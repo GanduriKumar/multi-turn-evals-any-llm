@@ -27,8 +27,19 @@ export default function RunSetupPage() {
 
   const [selectedDatasets, setSelectedDatasets] = useState<Record<string, boolean>>({});
 
+  // Default model per provider (updates the model field when provider changes)
+  const DEFAULT_MODELS: Record<string, string> = {
+    dummy: 'dummy',
+    openai: 'gpt-5.2',
+    google: 'gemini-2.5',
+    ollama: 'llama3.2',
+    azure_openai: 'phi-3.5-moe',
+    aws_bedrock: 'mixtral-8x7b-instruct',
+    anthropic: 'claude',
+  };
+
   const [provider, setProvider] = useState('dummy');
-  const [model, setModel] = useState('dummy');
+  const [model, setModel] = useState(DEFAULT_MODELS['dummy']);
   const [modelName, setModelName] = useState('dummy');
   const [metricBundles, setMetricBundles] = useState<string[]>([]);
   const [truncStrategy, setTruncStrategy] = useState<'none' | 'tokens'>('none');
@@ -140,10 +151,22 @@ export default function RunSetupPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
                 <label htmlFor="provider" className="block text-sm font-medium">Provider</label>
-                <select id="provider" className="border rounded p-2 w-full" value={provider} onChange={(e) => setProvider(e.target.value)}>
+                <select
+                  id="provider"
+                  className="border rounded p-2 w-full"
+                  value={provider}
+                  onChange={(e) => {
+                    const p = e.target.value;
+                    setProvider(p);
+                    setModel(DEFAULT_MODELS[p] ?? '');
+                  }}
+                >
                   <option value="dummy">Dummy</option>
                   <option value="openai">OpenAI</option>
                   <option value="azure_openai">Azure OpenAI</option>
+                  <option value="google">Google</option>
+                  <option value="ollama">Ollama</option>
+                  <option value="aws_bedrock">AWS Bedrock</option>
                   <option value="anthropic">Anthropic</option>
                 </select>
               </div>
