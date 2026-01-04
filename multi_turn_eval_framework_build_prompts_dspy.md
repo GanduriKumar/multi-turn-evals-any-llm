@@ -1015,7 +1015,7 @@ Tests (backend/tests/test_secrets.py) verifying that attempting to load the appl
 Test that secrets are not accidentally persisted in dataset or results files
 
 ## Frontend user interfaces
-# [ ] Prompt065 — Create React UI for browsing datasets, selecting models, choosing metrics, and starting runs
+# [x] Prompt065 — Create React UI for browsing datasets, selecting models, choosing metrics, and starting runs
 
 Prompt:
 
@@ -1033,7 +1033,7 @@ Frontend integration tests using a testing library (e.g., React Testing Library)
 
 Test that filling out the run setup form and submitting sends the correct payload and handles the response
 
-# [ ] Prompt066 — Create React UI for monitoring run progress
+# [x] Prompt066 — Create React UI for monitoring run progress
 
 Prompt:
 
@@ -1051,7 +1051,7 @@ UI tests ensuring that run statuses update over time and that cancelling a run s
 
 Test that runs disappear from the active list when completed or cancelled
 
-# [ ] Prompt067 — Create React UI for viewing conversation transcripts with expected vs actual responses
+# [x] Prompt067 — Create React UI for viewing conversation transcripts with expected vs actual responses
 
 Prompt:
 
@@ -1069,7 +1069,7 @@ Integration tests mocking the endpoint response and verifying that the page rend
 
 Test that diff highlights appear where expected and not when responses match exactly
 
-# [ ] Prompt068 — Create React UI for viewing metric breakdowns and thresholds
+# [x] Prompt068 — Create React UI for viewing metric breakdowns and thresholds
 
 Prompt:
 
@@ -1087,7 +1087,7 @@ UI tests verifying that metric data is rendered correctly and that threshold ind
 
 Test exporting the view and ensure the downloaded file matches the on‑screen data
 
-# [ ] Prompt069 — Create React UI for entering and saving human evaluator ratings and notes
+# [x] Prompt069 — Create React UI for entering and saving human evaluator ratings and notes
 
 Prompt:
 
@@ -1105,7 +1105,7 @@ UI tests verifying that feedback can be entered and submitted, and that submissi
 
 Test that unsaved feedback persists in component state when navigating between turns
 
-# [ ] Prompt070 — Create React UI for comparing runs and visualizing regressions
+# [x] Prompt070 — Create React UI for comparing runs and visualizing regressions
 
 Prompt:
 
@@ -1119,7 +1119,7 @@ Tests to add/run now:
 
 UI tests verifying that the comparison data is displayed correctly and that filtering works as intended
 
-# [ ] Prompt071 — Provide frontend support for downloading artifacts and reports
+# [x] Prompt071 — Provide frontend support for downloading artifacts and reports
 
 Prompt:
 

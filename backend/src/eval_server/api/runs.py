@@ -249,7 +249,8 @@ def download_artifacts(
 
     try:
         run_dir = _find_run_dir_results(run_id)
-    except FileNotFoundError:
+    except NotFoundError:
+        # Normalize error shape for clients expecting HTTPException body
         raise HTTPException(status_code=404, detail="run not found")
 
     # Resolve base paths
@@ -458,7 +459,7 @@ def submit_run_feedback(
 def get_run_feedback(run_id: str):
     try:
         run_dir = _find_run_dir_results(run_id)
-    except FileNotFoundError:
+    except NotFoundError:
         raise HTTPException(status_code=404, detail="run not found")
     path = _feedback_path_for_run(run_dir)
     if not path.exists():

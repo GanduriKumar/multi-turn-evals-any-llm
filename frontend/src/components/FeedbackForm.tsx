@@ -12,10 +12,6 @@ export type FeedbackFormProps = {
 };
 
 export default function FeedbackForm({ runId, datasetId, conversationId, modelName, turnId, onSubmitted }: FeedbackFormProps) {
-  const [rating, setRating] = useState<number | ''>('');
-  const [notes, setNotes] = useState('');
-  const [overridePass, setOverridePass] = useState<boolean | ''>('');
-  const [overrideScore, setOverrideScore] = useState<number | ''>('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -25,16 +21,26 @@ export default function FeedbackForm({ runId, datasetId, conversationId, modelNa
     setSubmitting(true);
     setError(null);
     setSuccess(null);
+    // Read values from DOM (keep inputs uncontrolled to avoid React/state timing issues in tests)
+    const formEl = e.currentTarget as HTMLFormElement;
+    const ratingEl = formEl.querySelector('#rating') as HTMLInputElement | null;
+    const notesEl = formEl.querySelector('#notes') as HTMLTextAreaElement | null;
+    const passEl = formEl.querySelector('#overridePass') as HTMLSelectElement | null;
+    const scoreEl = formEl.querySelector('#overrideScore') as HTMLInputElement | null;
+    const resolvedRating = ratingEl && ratingEl.value !== '' ? Number(ratingEl.value) : null;
+    const resolvedNotes = notesEl ? (notesEl.value || null) : null;
+    const resolvedOverridePass = passEl ? (passEl.value === '' ? null : passEl.value === 'true') : null;
+    const resolvedOverrideScore = scoreEl && scoreEl.value !== '' ? Number(scoreEl.value) : null;
 
     const payload: TurnFeedback = {
       dataset_id: datasetId,
       conversation_id: conversationId,
       model_name: modelName,
       turn_id: turnId,
-      rating: rating === '' ? null : Number(rating),
-      notes: notes || null,
-      override_pass: overridePass === '' ? null : Boolean(overridePass),
-      override_score: overrideScore === '' ? null : Number(overrideScore),
+      rating: resolvedRating as any,
+      notes: resolvedNotes as any,
+      override_pass: resolvedOverridePass as any,
+      override_score: resolvedOverrideScore as any,
     };
 
     try {
@@ -62,24 +68,19 @@ export default function FeedbackForm({ runId, datasetId, conversationId, modelNa
           min={0}
           max={5}
           step={0.5}
-          value={rating}
-          onChange={(e) => setRating(e.target.value === '' ? '' : Number(e.target.value))}
+          defaultValue={'' as any}
         />
       </div>
       <div className="field">
         <label htmlFor="notes">Notes</label>
-        <textarea id="notes" name="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <textarea id="notes" name="notes" defaultValue="" />
       </div>
       <div className="field">
         <label htmlFor="overridePass">Override Pass</label>
         <select
           id="overridePass"
           name="overridePass"
-          value={overridePass === '' ? '' : overridePass ? 'true' : 'false'}
-          onChange={(e) => {
-            const v = e.target.value;
-            setOverridePass(v === '' ? '' : v === 'true');
-          }}
+          defaultValue=""
         >
           <option value="">No override</option>
           <option value="true">Pass</option>
@@ -95,8 +96,7 @@ export default function FeedbackForm({ runId, datasetId, conversationId, modelNa
           min={0}
           max={1}
           step={0.01}
-          value={overrideScore}
-          onChange={(e) => setOverrideScore(e.target.value === '' ? '' : Number(e.target.value))}
+          defaultValue={'' as any}
         />
       </div>
       <button type="submit" disabled={submitting}>

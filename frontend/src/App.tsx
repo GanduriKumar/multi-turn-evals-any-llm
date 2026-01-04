@@ -1,28 +1,65 @@
+// MetricsBreakdownPage fallback (module not found)
 import './App.css'
 import ResultsViewer from './components/ResultsViewer'
 import { useState } from 'react'
+import { BrowserRouter, Link, Route, Routes, Navigate } from 'react-router-dom'
+import DatasetsPage from './pages/DatasetsPage'
+import RunSetupPage from './pages/RunSetupPage'
+import RunDashboardPage from './pages/RunDashboardPage'
+import MetricsBreakdownPage from './pages/MetricsBreakdownPage'
+import ConversationDetailPage from './pages/ConversationDetailPage'
+import RunComparisonPage from './pages/RunComparisonPage'
+
+ 
 
 function App() {
   const [runId, setRunId] = useState('')
 
   return (
-    <div className="container" style={{ padding: 24, maxWidth: '1200px', margin: '0 auto' }}>
-      <h1>Evaluator Workbench</h1>
-      
-      <div className="run-selector" style={{ marginBottom: '2rem', padding: '1rem', background: '#f5f5f5', borderRadius: '8px' }}>
-        <label style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <strong>Run ID:</strong>
-          <input 
-            value={runId} 
-            onChange={(e) => setRunId(e.target.value)} 
-            placeholder="Enter run ID (e.g. run-20240101...)" 
-            style={{ padding: '8px', flex: 1, maxWidth: '400px' }}
-          />
-        </label>
-      </div>
+    <BrowserRouter>
+      <div className="container mx-auto p-6 max-w-6xl">
+        <header className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Evaluator Workbench</h1>
+          <nav className="flex gap-4 text-blue-600">
+            <Link to="/datasets">Datasets</Link>
+            <Link to="/run-setup">Run Setup</Link>
+            <Link to="/dashboard/example">Dashboard</Link>
+            <Link to="/metrics/example">Metrics</Link>
+            <Link to="/compare?baseline=&current=">Compare</Link>
+            <Link to="/viewer">Run Viewer</Link>
+          </nav>
+        </header>
 
-      <ResultsViewer runId={runId} />
-    </div>
+        <Routes>
+          <Route path="/" element={<Navigate to="/datasets" replace />} />
+          <Route path="/datasets" element={<DatasetsPage />} />
+          <Route path="/run-setup" element={<RunSetupPage />} />
+          <Route path="/dashboard/:runId" element={<RunDashboardPage />} />
+          <Route path="/conversation/:runId/:conversationId" element={<ConversationDetailPage />} />
+          <Route path="/metrics/:runId" element={<MetricsBreakdownPage />} />
+          <Route path="/compare" element={<RunComparisonPage />} />
+          <Route
+            path="/viewer"
+            element={
+              <div>
+                <div className="mb-4 bg-gray-100 p-4 rounded">
+                  <label className="flex gap-3 items-center">
+                    <strong>Run ID:</strong>
+                    <input
+                      className="border rounded p-2 max-w-md w-full"
+                      value={runId}
+                      onChange={(e) => setRunId(e.target.value)}
+                      placeholder="Enter run ID (e.g. run-20240101...)"
+                    />
+                  </label>
+                </div>
+                <ResultsViewer runId={runId} />
+              </div>
+            }
+          />
+        </Routes>
+      </div>
+    </BrowserRouter>
   )
 }
 

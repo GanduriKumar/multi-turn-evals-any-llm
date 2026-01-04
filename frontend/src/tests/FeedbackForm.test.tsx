@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import FeedbackForm from '../components/FeedbackForm';
 // Jest globals are provided by the test environment; declare them for TypeScript without importing '@jest/globals'
 declare var expect: any;
+import { vi } from 'vitest';
 declare var jest: any;
 declare var it: any;
 declare var beforeEach: any;
@@ -106,7 +107,7 @@ async function waitFor(
 const originalFetch = (globalThis as any).fetch;
 
 beforeEach(() => {
-  (globalThis as any).fetch = jest.fn(async (input: RequestInfo, init?: RequestInit) => {
+  (globalThis as any).fetch = vi.fn(async (input: RequestInfo, init?: RequestInit) => {
     // Simulate OK response
     return {
       ok: true,
@@ -122,7 +123,7 @@ afterEach(() => {
 });
 
 it('submits feedback payload to backend and shows success', async () => {
-  const onSubmitted = jest.fn();
+  const onSubmitted = vi.fn();
   const { container } = render(
     <FeedbackForm
       runId="run-123"
