@@ -1,9 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Any, Dict, Optional
 import os
 from pathlib import Path
+from fastapi.middleware.cors import CORSMiddleware
+import json
 
 try:
     from .dataset_repo import DatasetRepository
@@ -28,6 +30,12 @@ class VersionInfo(BaseModel):
     semantic_threshold: float
 
 
+class SettingsBody(BaseModel):
+    ollama_host: Optional[str] = None
+    google_api_key: Optional[str] = None
+    semantic_threshold: Optional[float] = None
+
+
 def get_settings():
     google_api_key = os.getenv("GOOGLE_API_KEY")
     ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
@@ -39,6 +47,15 @@ def get_settings():
     }
 
 app = FastAPI(title="LLM Eval Backend", version=APP_VERSION)
+
+# CORS for local dev (frontend on Vite)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # App state singletons
 RUNS_ROOT = Path(__file__).resolve().parents[1] / "runs"
@@ -76,10 +93,115 @@ async def version():
     )
 
 
+@app.get("/settings")
+async def get_settings_api():
+    s = get_settings()
+    return {
+        "ollama_host": s["OLLAMA_HOST"],
+        "gemini_enabled": bool(s["GOOGLE_API_KEY"]),
+        "semantic_threshold": s["SEMANTIC_THRESHOLD"],
+    }
+
+
+@app.post("/settings")
+async def update_settings_api(body: SettingsBody):
+    """Dev-only: update .env in repo root. Do NOT store secrets elsewhere.
+    """
+    # .env at repo root
+    root = Path(__file__).resolve().parents[1]
+    env_path = root / '.env'
+    # Load existing
+    env: dict[str, str] = {}
+    if env_path.exists():
+        for line in env_path.read_text(encoding='utf-8').splitlines():
+            line = line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            k, v = line.split('=', 1)
+            env[k.strip()] = v.strip()
+    # Update
+    if body.ollama_host is not None:
+        env['OLLAMA_HOST'] = body.ollama_host
+    if body.google_api_key is not None:
+        env['GOOGLE_API_KEY'] = body.google_api_key
+    if body.semantic_threshold is not None:
+        env['SEMANTIC_THRESHOLD'] = str(body.semantic_threshold)
+    # Write
+    lines = [f"{k}={v}" for k, v in env.items()]
+    env_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    # Also update process env for current process
+    if 'OLLAMA_HOST' in env: os.environ['OLLAMA_HOST'] = env['OLLAMA_HOST']
+    if 'GOOGLE_API_KEY' in env: os.environ['GOOGLE_API_KEY'] = env['GOOGLE_API_KEY']
+    if 'SEMANTIC_THRESHOLD' in env: os.environ['SEMANTIC_THRESHOLD'] = env['SEMANTIC_THRESHOLD']
+    return {"ok": True}
+
+
 @app.get("/datasets")
 async def list_datasets():
     repo: DatasetRepository = app.state.orch.repo
     return repo.list_datasets()
+
+
+@app.post("/datasets/upload")
+async def upload_dataset(dataset: UploadFile = File(...), golden: Optional[UploadFile] = File(None), overwrite: bool = False):
+    """Upload a dataset (.dataset.json) and optional golden (.golden.json).
+    Validates against schemas and writes to the datasets folder.
+    """
+    repo: DatasetRepository = app.state.orch.repo
+    datasets_dir: Path = repo.root_dir
+    datasets_dir.mkdir(parents=True, exist_ok=True)
+
+    # Read and validate dataset JSON
+    try:
+        dataset_text = (await dataset.read()).decode("utf-8")
+        dataset_obj = json.loads(dataset_text)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid dataset JSON: {e}")
+
+    ds_errors = repo.sv.validate("dataset", dataset_obj)
+    if ds_errors:
+        raise HTTPException(status_code=400, detail={"type": "dataset", "errors": ds_errors})
+
+    dataset_id = dataset_obj.get("dataset_id")
+    if not dataset_id:
+        raise HTTPException(status_code=400, detail="dataset_id missing in dataset JSON")
+
+    # Paths
+    ds_path = datasets_dir / f"{dataset_id}.dataset.json"
+    gt_path = datasets_dir / f"{dataset_id}.golden.json"
+
+    # Golden optional
+    golden_saved = False
+    if golden is not None:
+        try:
+            golden_text = (await golden.read()).decode("utf-8")
+            golden_obj = json.loads(golden_text)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid golden JSON: {e}")
+        gt_errors = repo.sv.validate("golden", golden_obj)
+        if gt_errors:
+            raise HTTPException(status_code=400, detail={"type": "golden", "errors": gt_errors})
+        # Ensure same dataset_id
+        if golden_obj.get("dataset_id") != dataset_id:
+            raise HTTPException(status_code=400, detail="Golden dataset_id must match dataset dataset_id")
+
+        if gt_path.exists() and not overwrite:
+            raise HTTPException(status_code=409, detail=f"Golden already exists: {gt_path.name}. Set overwrite=true to replace.")
+        gt_path.write_text(json.dumps(golden_obj, indent=2), encoding="utf-8")
+        golden_saved = True
+
+    # Write dataset (after golden validation)
+    if ds_path.exists() and not overwrite:
+        raise HTTPException(status_code=409, detail=f"Dataset already exists: {ds_path.name}. Set overwrite=true to replace.")
+    ds_path.write_text(json.dumps(dataset_obj, indent=2), encoding="utf-8")
+
+    return {
+        "ok": True,
+        "dataset_id": dataset_id,
+        "dataset_saved": True,
+        "golden_saved": golden_saved,
+        "files": {"dataset": ds_path.name, "golden": gt_path.name if golden_saved else None},
+    }
 
 
 @app.get("/conversations/{conversation_id}")
@@ -213,4 +335,42 @@ async def compare_runs(runA: str, runB: str):
     SB = summarize(B)
     delta = SB["pass_rate"] - SA["pass_rate"]
     return {"runA": SA, "runB": SB, "delta_pass_rate": delta}
+
+
+class RunListItem(BaseModel):
+    run_id: str
+    dataset_id: Optional[str] = None
+    model_spec: Optional[str] = None
+    has_results: bool
+    created_ts: Optional[float] = None
+
+
+@app.get("/runs")
+async def list_runs():
+    """List runs by inspecting the runs/ folder."""
+    reader: RunArtifactReader = app.state.reader
+    layout = reader.layout
+    items: list[dict[str, Any]] = []
+    if not layout.runs_root.exists():
+        return items
+    for p in sorted(layout.runs_root.iterdir()):
+        if not p.is_dir():
+            continue
+        run_id = p.name
+        cfg_path = p / 'run_config.json'
+        res_path = p / 'results.json'
+        cfg = {}
+        try:
+            if cfg_path.exists():
+                cfg = json.loads(cfg_path.read_text(encoding='utf-8'))
+        except Exception:
+            cfg = {}
+        items.append({
+            'run_id': run_id,
+            'dataset_id': cfg.get('dataset_id'),
+            'model_spec': cfg.get('model_spec'),
+            'has_results': res_path.exists(),
+            'created_ts': cfg_path.stat().st_mtime if cfg_path.exists() else None,
+        })
+    return items
 

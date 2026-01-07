@@ -9,4 +9,8 @@ describe('App scaffold', () => {
     expect(screen.getByText('Quick Start')).toBeInTheDocument()
     expect(screen.getByText('Status')).toBeInTheDocument()
   })
+  it('navigates to routes', async () => {
+    render(<App />)
+    expect(screen.getByText('Datasets')).toBeInTheDocument()
+  })
 })
