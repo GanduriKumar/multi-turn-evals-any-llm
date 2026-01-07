@@ -29,6 +29,14 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/validate': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/metrics-config': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
     }
   }
 })

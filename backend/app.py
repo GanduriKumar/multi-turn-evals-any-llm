@@ -204,6 +204,81 @@ async def upload_dataset(dataset: UploadFile = File(...), golden: Optional[Uploa
     }
 
 
+@app.get("/datasets/{dataset_id}")
+async def get_dataset_by_id(dataset_id: str):
+    repo: DatasetRepository = app.state.orch.repo
+    try:
+        data = repo.get_dataset(dataset_id)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return data
+
+
+@app.get("/goldens/{dataset_id}")
+async def get_golden_by_dataset(dataset_id: str):
+    # golden file is <dataset_id>.golden.json
+    repo: DatasetRepository = app.state.orch.repo
+    p = repo.root_dir / f"{dataset_id}.golden.json"
+    if not p.exists():
+        raise HTTPException(status_code=404, detail="golden not found")
+    try:
+        return json.loads(p.read_text(encoding='utf-8'))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+class SaveDatasetBody(BaseModel):
+    dataset: Dict[str, Any]
+    golden: Optional[Dict[str, Any]] = None
+    overwrite: bool = False
+    bump_version: bool = False
+
+
+@app.post("/datasets/save")
+async def save_dataset(body: SaveDatasetBody):
+    repo: DatasetRepository = app.state.orch.repo
+    root: Path = repo.root_dir
+    ds = body.dataset
+    gt = body.golden
+    # validate
+    ds_errors = repo.sv.validate("dataset", ds)
+    if ds_errors:
+        raise HTTPException(status_code=400, detail={"type": "dataset", "errors": ds_errors})
+    if gt is not None:
+        gt_errors = repo.sv.validate("golden", gt)
+        if gt_errors:
+            raise HTTPException(status_code=400, detail={"type": "golden", "errors": gt_errors})
+    dataset_id = ds.get("dataset_id")
+    if not dataset_id:
+        raise HTTPException(status_code=400, detail="dataset_id required")
+    if gt is not None and gt.get("dataset_id") != dataset_id:
+        raise HTTPException(status_code=400, detail="golden.dataset_id must match dataset.dataset_id")
+    # bump version (patch)
+    if body.bump_version:
+        ver = str(ds.get("version", "0.0.0"))
+        parts = [int(p) if str(p).isdigit() else 0 for p in ver.split(".")[:3]]
+        while len(parts) < 3:
+            parts.append(0)
+        parts[2] += 1
+        ds["version"] = f"{parts[0]}.{parts[1]}.{parts[2]}"
+        if gt is not None:
+            gt["version"] = ds["version"]
+    # paths
+    ds_path = root / f"{dataset_id}.dataset.json"
+    gt_path = root / f"{dataset_id}.golden.json"
+    if ds_path.exists() and not body.overwrite:
+        raise HTTPException(status_code=409, detail="dataset exists; set overwrite=true")
+    if gt is not None and gt_path.exists() and not body.overwrite:
+        raise HTTPException(status_code=409, detail="golden exists; set overwrite=true")
+    # write
+    ds_path.write_text(json.dumps(ds, indent=2), encoding='utf-8')
+    golden_saved = False
+    if gt is not None:
+        gt_path.write_text(json.dumps(gt, indent=2), encoding='utf-8')
+        golden_saved = True
+    return {"ok": True, "dataset_id": dataset_id, "version": ds.get("version"), "dataset_saved": True, "golden_saved": golden_saved}
+
+
 @app.get("/conversations/{conversation_id}")
 async def get_conversation(conversation_id: str):
     repo: DatasetRepository = app.state.orch.repo
@@ -373,4 +448,53 @@ async def list_runs():
             'created_ts': cfg_path.stat().st_mtime if cfg_path.exists() else None,
         })
     return items
+
+
+@app.post("/validate")
+async def validate_json(body: Dict[str, Any]):
+    """Validate payload against a named schema without saving.
+    Body shape: {"type": "dataset"|"golden"|"run_config", "payload": {...}}
+    """
+    sv = app.state.orch.repo.sv
+    t = body.get("type")
+    payload = body.get("payload")
+    if t not in ("dataset", "golden", "run_config"):
+        raise HTTPException(status_code=400, detail="invalid type")
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="payload must be object")
+    errors = sv.validate(t, payload)
+    return {"ok": len(errors) == 0, "errors": errors}
+
+
+@app.get("/metrics-config")
+async def get_metrics_config():
+    root = Path(__file__).resolve().parents[1]
+    cfg_path = root / 'configs' / 'metrics.json'
+    if cfg_path.exists():
+        try:
+            return json.loads(cfg_path.read_text(encoding='utf-8'))
+        except Exception:
+            pass
+    # default
+    return {
+        "metrics": [
+            {"name": "exact_match", "enabled": True, "weight": 1.0},
+            {"name": "semantic_similarity", "enabled": True, "weight": 1.0, "threshold": float(os.getenv("SEMANTIC_THRESHOLD", "0.80"))},
+            {"name": "consistency", "enabled": True, "weight": 1.0},
+            {"name": "adherence", "enabled": True, "weight": 1.0},
+            {"name": "hallucination", "enabled": True, "weight": 1.0},
+        ]
+    }
+
+
+@app.post("/metrics-config")
+async def set_metrics_config(body: Dict[str, Any]):
+    root = Path(__file__).resolve().parents[1]
+    cfg_path = root / 'configs' / 'metrics.json'
+    cfg_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        cfg_path.write_text(json.dumps(body, indent=2), encoding='utf-8')
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"ok": True}
 

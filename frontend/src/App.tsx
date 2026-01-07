@@ -4,6 +4,9 @@ import DatasetsPage from './pages/Datasets'
 import RunsPage from './pages/Runs'
 import ReportsPage from './pages/Reports'
 import SettingsPage from './pages/Settings'
+import GoldenGeneratorPage from './pages/GoldenGenerator'
+import MetricsPage from './pages/Metrics'
+import GoldenEditorPage from './pages/GoldenEditor'
 
 function Card({ title, children }: { title: string, children: React.ReactNode }) {
   return (
@@ -92,9 +95,9 @@ export default function App() {
           <Route path="/runs" element={<RunsPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/golden-editor" element={<Placeholder title="Golden Editor" />} />
-          <Route path="/metrics" element={<Placeholder title="Metrics" />} />
-          <Route path="/golden-generator" element={<Placeholder title="Golden Generator" />} />
+          <Route path="/golden-editor" element={<GoldenEditorPage />} />
+          <Route path="/metrics" element={<MetricsPage />} />
+          <Route path="/golden-generator" element={<GoldenGeneratorPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>

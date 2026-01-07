@@ -25,6 +25,13 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [results, setResults] = useState<RunResults | null>(null)
+  const [fbRating, setFbRating] = useState<number>(5)
+  const [fbNotes, setFbNotes] = useState<string>('')
+  const [fbOverrideConv, setFbOverrideConv] = useState<null | boolean>(null)
+  const [fbTurnId, setFbTurnId] = useState<string>('')
+  const [fbTurnPass, setFbTurnPass] = useState<boolean | null>(null)
+  const [fbMsg, setFbMsg] = useState<string | null>(null)
+  const [fbErr, setFbErr] = useState<string | null>(null)
 
   const loadRuns = async () => {
     setError(null)
@@ -59,6 +66,25 @@ export default function ReportsPage() {
 
   const download = (type: 'json' | 'csv' | 'html') => {
     window.open(`/runs/${runId}/artifacts?type=${type}`, '_blank')
+  }
+
+  const submitFeedback = async () => {
+    if (!runId) return
+    setFbMsg(null); setFbErr(null)
+    try {
+      const body: any = { rating: fbRating, notes: fbNotes }
+      if (fbOverrideConv !== null) body.override_conversation_pass = fbOverrideConv
+      if (fbTurnId && fbTurnPass !== null) body.override_turn = { conversation_id: fbTurnId.split('#')[0], turn_index: Number(fbTurnId.split('#')[1] || 0), pass: fbTurnPass }
+      const r = await fetch(`/runs/${runId}/feedback`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      const js = await r.json()
+      if (!r.ok) throw new Error(js?.detail || 'Failed to submit feedback')
+      setFbMsg('Feedback submitted')
+      setFbNotes('')
+      setFbOverrideConv(null)
+      setFbTurnId(''); setFbTurnPass(null)
+    } catch (e:any) {
+      setFbErr(e.message || 'Failed to submit feedback')
+    }
   }
 
   return (
@@ -113,6 +139,49 @@ export default function ReportsPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div className="mt-4 border-t pt-3">
+              <div className="font-medium mb-2">Human Feedback</div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="flex items-center gap-2">
+                  <span className="w-28">Rating</span>
+                  <input type="number" min={1} max={5} className="border rounded px-2 py-1 w-24" value={fbRating} onChange={e => setFbRating(Number(e.target.value))} />
+                </label>
+                <label className="flex items-center gap-2">
+                  <span className="w-28">Conv override</span>
+                  <select className="border rounded px-2 py-1 w-40" value={fbOverrideConv === null ? '' : (fbOverrideConv ? 'true' : 'false')} onChange={e => setFbOverrideConv(e.target.value === '' ? null : e.target.value === 'true')}>
+                    <option value="">no override</option>
+                    <option value="true">force pass</option>
+                    <option value="false">force fail</option>
+                  </select>
+                </label>
+                <label className="flex items-center gap-2">
+                  <span className="w-28">Turn override</span>
+                  <select className="border rounded px-2 py-1 grow" value={fbTurnId} onChange={e => setFbTurnId(e.target.value)}>
+                    <option value="">none</option>
+                    {(results.conversations || []).flatMap((c:any) => (c.turns||[]).map((t:any) => ({ key: `${c.conversation_id}#${t.turn_index}`, label: `${c.conversation_id} turn ${t.turn_index}` }))).map(item => (
+                      <option key={item.key} value={item.key}>{item.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex items-center gap-2">
+                  <span className="w-28">Turn pass?</span>
+                  <select className="border rounded px-2 py-1 w-40" value={fbTurnPass === null ? '' : (fbTurnPass ? 'true' : 'false')} onChange={e => setFbTurnPass(e.target.value === '' ? null : e.target.value === 'true')}>
+                    <option value="">no override</option>
+                    <option value="true">pass</option>
+                    <option value="false">fail</option>
+                  </select>
+                </label>
+              </div>
+              <label className="block mt-3">
+                <span className="sr-only">Notes</span>
+                <textarea className="mt-1 w-full h-24 text-xs border rounded p-2" placeholder="Evaluator notes" value={fbNotes} onChange={e => setFbNotes(e.target.value)} />
+              </label>
+              <div className="mt-2 flex items-center gap-2">
+                <button onClick={submitFeedback} className="px-3 py-1.5 rounded bg-primary text-white hover:opacity-90">Submit Feedback</button>
+                {fbMsg && <span className="text-gray-700">{fbMsg}</span>}
+                {fbErr && <span className="text-danger">{fbErr}</span>}
+              </div>
             </div>
           </div>
         ) : (
