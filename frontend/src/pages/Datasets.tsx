@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import Badge from '../components/Badge'
+import { Input, Select, Checkbox } from '../components/Form'
 
 type DatasetItem = {
   dataset_id: string
@@ -72,14 +74,14 @@ export default function DatasetsPage() {
         <div className="space-y-3 text-sm">
           <div className="flex items-center gap-2">
             <label className="w-40">Dataset (.dataset.json)</label>
-            <input type="file" accept="application/json" onChange={e => setFileDataset(e.target.files?.[0] || null)} />
+            <Input type="file" accept="application/json" onChange={e => setFileDataset(e.target.files?.[0] || null)} />
           </div>
           <div className="flex items-center gap-2">
             <label className="w-40">Golden (.golden.json)</label>
-            <input type="file" accept="application/json" onChange={e => setFileGolden(e.target.files?.[0] || null)} />
+            <Input type="file" accept="application/json" onChange={e => setFileGolden(e.target.files?.[0] || null)} />
           </div>
           <label className="flex items-center gap-2">
-            <input type="checkbox" checked={overwrite} onChange={e => setOverwrite(e.target.checked)} />
+            <Checkbox checked={overwrite} onChange={e => setOverwrite((e.target as HTMLInputElement).checked)} />
             <span>Overwrite existing files</span>
           </label>
           <div className="flex items-center gap-2">
@@ -117,8 +119,8 @@ export default function DatasetsPage() {
                   <td className="py-2 pr-4">{row.domain || '-'}</td>
                   <td className="py-2 pr-4">{row.difficulty || '-'}</td>
                   <td className="py-2 pr-4">{row.conversations ?? '-'}</td>
-                  <td className="py-2 pr-4">{row.has_golden ? 'Yes' : 'No'}</td>
-                  <td className="py-2 pr-4">{row.valid ? 'Yes' : 'No'}</td>
+                  <td className="py-2 pr-4">{row.has_golden ? <Badge variant="success">Yes</Badge> : <Badge variant="warning">No</Badge>}</td>
+                  <td className="py-2 pr-4">{row.valid ? <Badge variant="success">Valid</Badge> : <Badge variant="danger">Invalid</Badge>}</td>
                 </tr>
               ))}
               {list.length === 0 && !loading && (

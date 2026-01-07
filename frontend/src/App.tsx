@@ -55,14 +55,6 @@ function HomeCards() {
       <Card title="Status">
         <div className="text-sm text-gray-700">Backend: configure at backend/app.py</div>
       </Card>
-      <Card title="Brand Palette">
-        <div className="flex gap-2">
-          <div className="w-8 h-8 rounded bg-primary" title="primary" />
-          <div className="w-8 h-8 rounded bg-success" title="success" />
-          <div className="w-8 h-8 rounded bg-warning" title="warning" />
-          <div className="w-8 h-8 rounded bg-danger" title="danger" />
-        </div>
-      </Card>
     </div>
   )
 }

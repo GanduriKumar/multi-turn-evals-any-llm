@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import { Select } from '../components/Form'
 
  
 
@@ -123,24 +124,24 @@ export default function GoldenGeneratorPage() {
       <Card title="Golden Generator">
         <div className="grid sm:grid-cols-3 gap-4 text-sm">
           <label className="flex items-center gap-2"><span className="w-28">Domain</span>
-            <select className="border rounded px-2 py-1 grow" value={domain} onChange={e => setDomain(e.target.value as Domain)}>
+            <Select className="grow" value={domain} onChange={e => setDomain(e.target.value as Domain)}>
               <option value="commerce">Commerce</option>
               <option value="banking">Banking</option>
-            </select>
+            </Select>
           </label>
           <label className="flex items-center gap-2"><span className="w-28">Difficulty</span>
-            <select className="border rounded px-2 py-1 grow" value={difficulty} onChange={e => setDifficulty(e.target.value as any)}>
+            <Select className="grow" value={difficulty} onChange={e => setDifficulty(e.target.value as any)}>
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
-            </select>
+            </Select>
           </label>
           <label className="flex items-center gap-2"><span className="w-28">Outcome</span>
-            <select className="border rounded px-2 py-1 grow" value={outcome} onChange={e => setOutcome(e.target.value as any)}>
+            <Select className="grow" value={outcome} onChange={e => setOutcome(e.target.value as any)}>
               <option value="ALLOW">ALLOW</option>
               <option value="DENY">DENY</option>
               <option value="PARTIAL">PARTIAL</option>
-            </select>
+            </Select>
           </label>
         </div>
         <div className="mt-4">

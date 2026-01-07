@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import { Select, Checkbox, Textarea } from '../components/Form'
 
  
 
@@ -54,11 +55,11 @@ export default function GoldenEditorPage() {
     <div className="grid gap-4">
       <Card title="Select Dataset">
         <div className="flex items-center gap-2 text-sm">
-          <select className="border rounded px-2 py-1 min-w-[240px]" value={selected} onChange={e => setSelected(e.target.value)}>
+          <Select className="min-w-[240px]" value={selected} onChange={e => setSelected(e.target.value)}>
             {datasets.map(d => (<option key={d.dataset_id} value={d.dataset_id}>{d.dataset_id}</option>))}
-          </select>
-          <label className="inline-flex items-center gap-2"><input type="checkbox" checked={overwrite} onChange={e => setOverwrite(e.target.checked)} /> Overwrite</label>
-          <label className="inline-flex items-center gap-2"><input type="checkbox" checked={bump} onChange={e => setBump(e.target.checked)} /> Bump patch version</label>
+          </Select>
+          <label className="inline-flex items-center gap-2"><Checkbox checked={overwrite} onChange={e => setOverwrite((e.target as HTMLInputElement).checked)} /> Overwrite</label>
+          <label className="inline-flex items-center gap-2"><Checkbox checked={bump} onChange={e => setBump((e.target as HTMLInputElement).checked)} /> Bump patch version</label>
           <Button onClick={save} disabled={saving || !dataset}>{saving ? 'Saving…' : 'Save'}</Button>
           {msg && <span className="text-gray-700">{msg}</span>}
           {err && <span className="text-danger">{err}</span>}
@@ -67,13 +68,13 @@ export default function GoldenEditorPage() {
 
       <Card title="Dataset JSON">
         {dataset ? (
-          <textarea className="w-full h-72 text-xs font-mono border rounded p-2" value={JSON.stringify(dataset, null, 2)} onChange={e => setDataset(JSON.parse(e.target.value || '{}'))} />
+          <Textarea className="w-full h-72 text-xs font-mono" value={JSON.stringify(dataset, null, 2)} onChange={e => setDataset(JSON.parse(e.target.value || '{}'))} />
         ) : <div className="text-sm text-gray-600">No dataset loaded</div>}
       </Card>
 
       <Card title="Golden JSON">
         {golden ? (
-          <textarea className="w-full h-72 text-xs font-mono border rounded p-2" value={JSON.stringify(golden, null, 2)} onChange={e => setGolden(JSON.parse(e.target.value || '{}'))} />
+          <Textarea className="w-full h-72 text-xs font-mono" value={JSON.stringify(golden, null, 2)} onChange={e => setGolden(JSON.parse(e.target.value || '{}'))} />
         ) : <div className="text-sm text-gray-600">No golden loaded</div>}
       </Card>
     </div>

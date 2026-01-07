@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import { Input, Checkbox } from '../components/Form'
 
  
 
@@ -50,17 +51,17 @@ export default function MetricsPage() {
             {cfg.metrics.map((m, i) => (
               <div key={m.name} className="grid sm:grid-cols-3 gap-3 items-center">
                 <label className="inline-flex items-center gap-2">
-                  <input type="checkbox" checked={m.enabled} onChange={e => setCfg(x => { const y = {...x!}; y.metrics = y.metrics.map((mm, idx) => idx===i ? {...mm, enabled: e.target.checked} : mm); return y })} />
+                  <Checkbox checked={m.enabled} onChange={e => setCfg(x => { const y = {...x!}; y.metrics = y.metrics.map((mm, idx) => idx===i ? {...mm, enabled: (e.target as HTMLInputElement).checked} : mm); return y })} />
                   <span className="font-medium">{m.name}</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <span className="w-24">Weight</span>
-                  <input type="number" step="0.1" className="border rounded px-2 py-1 w-28" value={m.weight ?? 1} onChange={e => setCfg(x => { const y = {...x!}; y.metrics = y.metrics.map((mm, idx) => idx===i ? {...mm, weight: Number(e.target.value)} : mm); return y })} />
+                  <Input type="number" step="0.1" className="w-28" value={m.weight ?? 1} onChange={e => setCfg(x => { const y = {...x!}; y.metrics = y.metrics.map((mm, idx) => idx===i ? {...mm, weight: Number(e.target.value)} : mm); return y })} />
                 </label>
                 {'threshold' in m ? (
                   <label className="flex items-center gap-2">
                     <span className="w-24">Threshold</span>
-                    <input type="number" step="0.01" min={0} max={1} className="border rounded px-2 py-1 w-28" value={m.threshold ?? 0} onChange={e => setCfg(x => { const y = {...x!}; y.metrics = y.metrics.map((mm, idx) => idx===i ? {...mm, threshold: Number(e.target.value)} : mm); return y })} />
+                    <Input type="number" step="0.01" min={0} max={1} className="w-28" value={m.threshold ?? 0} onChange={e => setCfg(x => { const y = {...x!}; y.metrics = y.metrics.map((mm, idx) => idx===i ? {...mm, threshold: Number(e.target.value)} : mm); return y })} />
                   </label>
                 ) : <div />}
               </div>

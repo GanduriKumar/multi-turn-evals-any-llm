@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import Badge from '../components/Badge'
+import { Select, Input, Textarea } from '../components/Form'
 
 type RunListItem = {
   run_id: string
@@ -86,12 +88,12 @@ export default function ReportsPage() {
     <div className="grid gap-4">
       <Card title="Select Run">
         <div className="flex flex-wrap gap-2 items-center text-sm">
-          <select className="border rounded px-2 py-1 min-w-[240px]" value={runId} onChange={e => setRunId(e.target.value)}>
+          <Select className="min-w-[240px]" value={runId} onChange={e => setRunId(e.target.value)}>
             <option value="" disabled>Select a run</option>
             {runs.map(r => (
               <option key={r.run_id} value={r.run_id}>{r.run_id} — {r.dataset_id || '?'} — {r.model_spec || '?'}</option>
             ))}
-          </select>
+          </Select>
           <Button variant="secondary" onClick={loadRuns}>Refresh</Button>
           <div className="grow" />
           <Button variant="ghost" disabled={!runId} onClick={() => download('json')}>Download JSON</Button>
@@ -127,7 +129,7 @@ export default function ReportsPage() {
                   {(results.conversations || []).map((c:any) => (
                     <tr key={c.conversation_id} className="border-t">
                       <td className="py-2 pr-4 font-mono">{c.conversation_id}</td>
-                      <td className="py-2 pr-4">{String(c.summary?.conversation_pass)}</td>
+                      <td className="py-2 pr-4">{c.summary?.conversation_pass ? <Badge variant="success">pass</Badge> : <Badge variant="danger">fail</Badge>}</td>
                       <td className="py-2 pr-4">{(c.summary?.weighted_pass_rate ?? 0).toFixed(2)}</td>
                       <td className="py-2 pr-4">{(c.turns || []).length}</td>
                     </tr>
@@ -140,37 +142,37 @@ export default function ReportsPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="flex items-center gap-2">
                   <span className="w-28">Rating</span>
-                  <input type="number" min={1} max={5} className="border rounded px-2 py-1 w-24" value={fbRating} onChange={e => setFbRating(Number(e.target.value))} />
+                  <Input type="number" min={1} max={5} className="w-24" value={fbRating} onChange={e => setFbRating(Number(e.target.value))} />
                 </label>
                 <label className="flex items-center gap-2">
                   <span className="w-28">Conv override</span>
-                  <select className="border rounded px-2 py-1 w-40" value={fbOverrideConv === null ? '' : (fbOverrideConv ? 'true' : 'false')} onChange={e => setFbOverrideConv(e.target.value === '' ? null : e.target.value === 'true')}>
+                  <Select className="w-40" value={fbOverrideConv === null ? '' : (fbOverrideConv ? 'true' : 'false')} onChange={e => setFbOverrideConv(e.target.value === '' ? null : e.target.value === 'true')}>
                     <option value="">no override</option>
                     <option value="true">force pass</option>
                     <option value="false">force fail</option>
-                  </select>
+                  </Select>
                 </label>
                 <label className="flex items-center gap-2">
                   <span className="w-28">Turn override</span>
-                  <select className="border rounded px-2 py-1 grow" value={fbTurnId} onChange={e => setFbTurnId(e.target.value)}>
+                  <Select className="grow" value={fbTurnId} onChange={e => setFbTurnId(e.target.value)}>
                     <option value="">none</option>
                     {(results.conversations || []).flatMap((c:any) => (c.turns||[]).map((t:any) => ({ key: `${c.conversation_id}#${t.turn_index}`, label: `${c.conversation_id} turn ${t.turn_index}` }))).map(item => (
                       <option key={item.key} value={item.key}>{item.label}</option>
                     ))}
-                  </select>
+                  </Select>
                 </label>
                 <label className="flex items-center gap-2">
                   <span className="w-28">Turn pass?</span>
-                  <select className="border rounded px-2 py-1 w-40" value={fbTurnPass === null ? '' : (fbTurnPass ? 'true' : 'false')} onChange={e => setFbTurnPass(e.target.value === '' ? null : e.target.value === 'true')}>
+                  <Select className="w-40" value={fbTurnPass === null ? '' : (fbTurnPass ? 'true' : 'false')} onChange={e => setFbTurnPass(e.target.value === '' ? null : e.target.value === 'true')}>
                     <option value="">no override</option>
                     <option value="true">pass</option>
                     <option value="false">fail</option>
-                  </select>
+                  </Select>
                 </label>
               </div>
               <label className="block mt-3">
                 <span className="sr-only">Notes</span>
-                <textarea className="mt-1 w-full h-24 text-xs border rounded p-2" placeholder="Evaluator notes" value={fbNotes} onChange={e => setFbNotes(e.target.value)} />
+                <Textarea className="mt-1 w-full h-24 text-xs" placeholder="Evaluator notes" value={fbNotes} onChange={e => setFbNotes(e.target.value)} />
               </label>
               <div className="mt-2 flex items-center gap-2">
                 <Button onClick={submitFeedback}>Submit Feedback</Button>

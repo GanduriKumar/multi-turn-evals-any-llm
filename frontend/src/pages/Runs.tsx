@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import Badge from '../components/Badge'
+import { Input, Select, Checkbox } from '../components/Form'
 
 type DatasetItem = {
   dataset_id: string
@@ -131,30 +133,30 @@ export default function RunsPage() {
             <div className="grid sm:grid-cols-2 gap-4">
               <label className="flex items-center gap-2">
                 <span className="w-28">Dataset</span>
-                <select className="border rounded px-2 py-1 grow" value={datasetId} onChange={e => setDatasetId(e.target.value)}>
+                <Select className="grow" value={datasetId} onChange={e => setDatasetId(e.target.value)}>
                   {datasets.map(d => (
                     <option key={d.dataset_id} value={d.dataset_id}>{d.dataset_id} {d.version ? `(${d.version})` : ''}</option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className="flex items-center gap-2">
                 <span className="w-28">Model</span>
-                <select className="border rounded px-2 py-1 grow" value={modelSpec} onChange={e => setModelSpec(e.target.value)}>
+                <Select className="grow" value={modelSpec} onChange={e => setModelSpec(e.target.value)}>
                   {availableModels.map(m => (<option key={m.id} value={m.id}>{m.label}</option>))}
-                </select>
+                </Select>
               </label>
               <label className="flex items-center gap-2">
                 <span className="w-28">Semantic thr.</span>
-                <input type="number" step="0.01" min={0} max={1} className="border rounded px-2 py-1 w-28" value={semanticThreshold} onChange={e => setSemanticThreshold(Number(e.target.value))} />
+                <Input type="number" step="0.01" min={0} max={1} className="w-28" value={semanticThreshold} onChange={e => setSemanticThreshold(Number(e.target.value))} />
               </label>
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <label className="inline-flex items-center gap-2"><input type="checkbox" checked={metricExact} onChange={e => setMetricExact(e.target.checked)} /> exact</label>
-              <label className="inline-flex items-center gap-2"><input type="checkbox" checked={metricSemantic} onChange={e => setMetricSemantic(e.target.checked)} /> semantic</label>
-              <label className="inline-flex items-center gap-2"><input type="checkbox" checked={metricConsistency} onChange={e => setMetricConsistency(e.target.checked)} /> consistency</label>
-              <label className="inline-flex items-center gap-2"><input type="checkbox" checked={metricAdherence} onChange={e => setMetricAdherence(e.target.checked)} /> adherence</label>
-              <label className="inline-flex items-center gap-2"><input type="checkbox" checked={metricHallucination} onChange={e => setMetricHallucination(e.target.checked)} /> hallucination</label>
+              <label className="inline-flex items-center gap-2"><Checkbox checked={metricExact} onChange={e => setMetricExact((e.target as HTMLInputElement).checked)} /> exact</label>
+              <label className="inline-flex items-center gap-2"><Checkbox checked={metricSemantic} onChange={e => setMetricSemantic((e.target as HTMLInputElement).checked)} /> semantic</label>
+              <label className="inline-flex items-center gap-2"><Checkbox checked={metricConsistency} onChange={e => setMetricConsistency((e.target as HTMLInputElement).checked)} /> consistency</label>
+              <label className="inline-flex items-center gap-2"><Checkbox checked={metricAdherence} onChange={e => setMetricAdherence((e.target as HTMLInputElement).checked)} /> adherence</label>
+              <label className="inline-flex items-center gap-2"><Checkbox checked={metricHallucination} onChange={e => setMetricHallucination((e.target as HTMLInputElement).checked)} /> hallucination</label>
             </div>
 
             <Button onClick={startRun} disabled={starting || !datasetId}>
@@ -171,7 +173,14 @@ export default function RunsPage() {
             <div>Run: <span className="font-mono">{startRes.run_id}</span></div>
             <div className="flex items-center gap-2">
               <span>State:</span>
-              <span className="font-medium">{status?.state || startRes.state}</span>
+              <span className="font-medium">
+                {(() => {
+                  const s = status?.state || startRes.state
+                  if (s === 'succeeded') return <Badge variant="success">succeeded</Badge>
+                  if (s === 'failed' || s === 'cancelled') return <Badge variant="danger">{s}</Badge>
+                  return <Badge variant="warning">{s}</Badge>
+                })()}
+              </span>
             </div>
             {status && (
               <>

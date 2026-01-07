@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import { Input } from '../components/Form'
 
 type Settings = {
   ollama_host: string | null
@@ -55,15 +56,15 @@ export default function SettingsPage() {
           <div className="space-y-3 text-sm">
             <label className="flex items-center gap-2">
               <span className="w-40">OLLAMA_HOST</span>
-              <input className="border rounded px-2 py-1 grow" value={ollama} onChange={e => setOllama(e.target.value)} placeholder="http://localhost:11434" />
+              <Input className="grow" value={ollama} onChange={e => setOllama(e.target.value)} placeholder="http://localhost:11434" />
             </label>
             <label className="flex items-center gap-2">
               <span className="w-40">GOOGLE_API_KEY</span>
-              <input className="border rounded px-2 py-1 grow" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="leave blank to keep" />
+              <Input className="grow" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="leave blank to keep" />
             </label>
             <label className="flex items-center gap-2">
               <span className="w-40">Semantic threshold</span>
-              <input type="number" step="0.01" min={0} max={1} className="border rounded px-2 py-1 w-28" value={semThr} onChange={e => setSemThr(Number(e.target.value))} />
+              <Input type="number" step="0.01" min={0} max={1} className="w-28" value={semThr} onChange={e => setSemThr(Number(e.target.value))} />
             </label>
             <div className="flex items-center gap-2">
               <Button onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
