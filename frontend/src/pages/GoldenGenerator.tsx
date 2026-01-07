@@ -145,7 +145,7 @@ export default function GoldenGeneratorPage() {
           </label>
         </div>
         <div className="mt-4">
-          <Button onClick={generate}>Generate</Button>
+          <Button variant="primary" onClick={generate}>Generate</Button>
         </div>
       </Card>
 

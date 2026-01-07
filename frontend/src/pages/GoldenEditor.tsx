@@ -60,7 +60,7 @@ export default function GoldenEditorPage() {
           </Select>
           <label className="inline-flex items-center gap-2"><Checkbox checked={overwrite} onChange={e => setOverwrite((e.target as HTMLInputElement).checked)} /> Overwrite</label>
           <label className="inline-flex items-center gap-2"><Checkbox checked={bump} onChange={e => setBump((e.target as HTMLInputElement).checked)} /> Bump patch version</label>
-          <Button onClick={save} disabled={saving || !dataset}>{saving ? 'Saving…' : 'Save'}</Button>
+          <Button variant="success" onClick={save} disabled={saving || !dataset}>{saving ? 'Saving…' : 'Save'}</Button>
           {msg && <span className="text-gray-700">{msg}</span>}
           {err && <span className="text-danger">{err}</span>}
         </div>

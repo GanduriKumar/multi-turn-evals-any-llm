@@ -67,7 +67,7 @@ export default function SettingsPage() {
               <Input type="number" step="0.01" min={0} max={1} className="w-28" value={semThr} onChange={e => setSemThr(Number(e.target.value))} />
             </label>
             <div className="flex items-center gap-2">
-              <Button onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+              <Button variant="success" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
               {msg && <span className="text-gray-700">{msg}</span>}
               {err && <span className="text-danger">{err}</span>}
             </div>

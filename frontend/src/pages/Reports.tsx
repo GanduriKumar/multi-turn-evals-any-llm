@@ -96,9 +96,9 @@ export default function ReportsPage() {
           </Select>
           <Button variant="secondary" onClick={loadRuns}>Refresh</Button>
           <div className="grow" />
-          <Button variant="ghost" disabled={!runId} onClick={() => download('json')}>Download JSON</Button>
-          <Button variant="ghost" disabled={!runId} onClick={() => download('csv')}>Download CSV</Button>
-          <Button variant="primary" disabled={!runId} onClick={() => download('html')}>Open Report</Button>
+          <Button variant="secondary" disabled={!runId} onClick={() => download('json')}>Download JSON</Button>
+          <Button variant="secondary" disabled={!runId} onClick={() => download('csv')}>Download CSV</Button>
+          <Button variant="warning" disabled={!runId} onClick={() => download('html')}>Open Report</Button>
         </div>
       </Card>
 
@@ -112,7 +112,7 @@ export default function ReportsPage() {
             <div className="flex flex-wrap gap-4">
               <div><span className="text-gray-500">Run:</span> <span className="font-mono">{results.run_id}</span></div>
               <div><span className="text-gray-500">Dataset:</span> {results.dataset_id}</div>
-              <div><span className="text-gray-500">Model:</span> {results.model_spec}</div>
+              <div><span className="text-gray-500">Model:</span> <span className="text-success font-medium">{results.model_spec}</span></div>
               <div><span className="text-gray-500">Conversations:</span> {results.conversations?.length ?? 0}</div>
             </div>
             <div className="overflow-x-auto">
@@ -175,7 +175,7 @@ export default function ReportsPage() {
                 <Textarea className="mt-1 w-full h-24 text-xs" placeholder="Evaluator notes" value={fbNotes} onChange={e => setFbNotes(e.target.value)} />
               </label>
               <div className="mt-2 flex items-center gap-2">
-                <Button onClick={submitFeedback}>Submit Feedback</Button>
+                <Button variant="success" onClick={submitFeedback}>Submit Feedback</Button>
                 {fbMsg && <span className="text-gray-700">{fbMsg}</span>}
                 {fbErr && <span className="text-danger">{fbErr}</span>}
               </div>

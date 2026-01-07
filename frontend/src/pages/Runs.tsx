@@ -159,7 +159,7 @@ export default function RunsPage() {
               <label className="inline-flex items-center gap-2"><Checkbox checked={metricHallucination} onChange={e => setMetricHallucination((e.target as HTMLInputElement).checked)} /> hallucination</label>
             </div>
 
-            <Button onClick={startRun} disabled={starting || !datasetId}>
+            <Button variant="primary" onClick={startRun} disabled={starting || !datasetId}>
               {starting ? 'Starting…' : 'Start Run'}
             </Button>
           </div>
