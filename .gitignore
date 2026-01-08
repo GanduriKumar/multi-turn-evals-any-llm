@@ -6,6 +6,7 @@ __pycache__/
 
 # Distribution / packaging
 runs/
+datasets/
 build/
 develop-eggs/
 dist/

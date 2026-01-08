@@ -67,6 +67,8 @@ export default function RunsPage() {
   const [status, setStatus] = useState<JobStatus | null>(null)
   const pollRef = useRef<number | null>(null)
   const [recentRuns, setRecentRuns] = useState<RunListItem[]>([])
+  const [regenLoading, setRegenLoading] = useState(false)
+  const [regenMsg, setRegenMsg] = useState<string | null>(null)
 
   // Helper: order runs by newest first (chronological desc)
   const orderRuns = (arr: RunListItem[]) =>
@@ -242,6 +244,70 @@ export default function RunsPage() {
     }
   }
 
+  // --- Regenerate (optimized) helpers ---
+  const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+
+  const parseCoverageCombined = (id: string) => {
+    // Expect: coverage-<domain-slug>-combined-<version>
+    // Return null if not matching
+    if (!id || !id.startsWith('coverage-')) return null
+    const parts = id.split('-')
+    if (parts.length < 4) return null
+    const last = parts[parts.length - 1]
+    const penultimate = parts[parts.length - 2]
+    if (penultimate !== 'combined') return null
+    const version = last
+    const domainSlug = parts.slice(1, parts.length - 2).join('-')
+    if (!domainSlug) return null
+    return { domainSlug, version }
+  }
+
+  const regenerateOptimized = async () => {
+    if (!datasetId) return
+    setRegenMsg(null)
+    const parsed = parseCoverageCombined(datasetId)
+    if (!parsed) {
+      setRegenMsg('Regenerate is available for coverage combined datasets only.')
+      return
+    }
+    setRegenLoading(true)
+    try {
+      // fetch taxonomy to map slug -> canonical domain name
+      const t = await fetch('/coverage/taxonomy')
+      if (!t.ok) throw new Error(`Taxonomy HTTP ${t.status}`)
+      const tj = await t.json()
+      const domains: string[] = Array.isArray(tj.domains) ? tj.domains : []
+      const match = domains.find(d => slugify(d) === parsed.domainSlug)
+      if (!match) throw new Error('Domain not found in taxonomy for selected dataset.')
+      // trigger generation with save+overwrite using current version
+      const body = {
+        domains: [match],
+        behaviors: null,
+        combined: true,
+        dry_run: false,
+        save: true,
+        overwrite: true,
+        version: parsed.version,
+      }
+      const r = await fetch('/coverage/generate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      if (!r.ok) {
+        const b = await r.json().catch(() => ({}))
+        throw new Error(b?.detail || `Generate HTTP ${r.status}`)
+      }
+      // refresh datasets list
+      const dR = await fetch('/datasets')
+      if (dR.ok) {
+        const d = await dR.json()
+        setDatasets(d)
+      }
+      setRegenMsg('Regenerated with optimized coverage (pairwise). Dataset files were overwritten.')
+    } catch (e: any) {
+      setRegenMsg(e?.message || 'Failed to regenerate')
+    } finally {
+      setRegenLoading(false)
+    }
+  }
+
   const control = async (action: 'pause'|'resume'|'cancel', jobIdOverride?: string) => {
     try {
       const jobId = jobIdOverride || startRes?.job_id || status?.job_id
@@ -293,6 +359,15 @@ export default function RunsPage() {
                 <Input type="number" step="0.01" min={0} max={1} className="w-28" value={semanticThreshold} onChange={e => setSemanticThreshold(Number(e.target.value))} />
               </label>
             </div>
+
+            {/* Regenerate (optimized) action */}
+            <div className="flex items-center gap-3">
+              <Button onClick={regenerateOptimized} disabled={!datasetId || regenLoading}>
+                {regenLoading ? 'Regenerating…' : 'Regenerate (optimized)'}
+              </Button>
+              <span className="text-xs text-gray-600">Uses current optimization strategy (configs/coverage.json)</span>
+            </div>
+            {regenMsg && <div className="text-xs {regenLoading ? 'text-gray-600' : 'text-gray-700'}">{regenMsg}</div>}
 
             <div className="flex flex-wrap gap-4">
               <label className="inline-flex items-center gap-2"><Checkbox checked={metricExact} onChange={e => setMetricExact((e.target as HTMLInputElement).checked)} /> exact</label>

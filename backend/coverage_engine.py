@@ -185,19 +185,12 @@ class CoverageEngine:
         # Pairwise selection (t=2). We implement a simple greedy covering array builder.
         # Keep anchors first (if they match this domain/behavior), then fill with pairwise until budget.
 
-        # Build value domains per axis
-        axes_vals: Dict[str, List[str]] = {a: list(self.taxonomy.get("axes", {}).get(a, [])) for a in AXES_ORDER}
-        # Compute all required pairs we must cover: (axisA, valA, axisB, valB) for A<B order
+        # Compute required pairs from the actually possible (post-exclusion) scenarios only.
+        # This avoids trying to cover pairs that cannot exist due to constraints, which would
+        # otherwise force selecting nearly all scenarios.
         required_pairs: set[Tuple[str, str, str, str]] = set()
-        for i in range(len(AXES_ORDER)):
-            for j in range(i + 1, len(AXES_ORDER)):
-                a, b = AXES_ORDER[i], AXES_ORDER[j]
-                for va in axes_vals.get(a, []):
-                    for vb in axes_vals.get(b, []):
-                        required_pairs.add((a, va, b, vb))
-
-        # Helper to compute which pairs a scenario covers
-        def scenario_pairs(sc: Scenario) -> List[Tuple[str, str, str, str]]:
+        # Helper to compute which pairs a scenario covers (defined below)
+        def scenario_pairs_local(sc: Scenario) -> List[Tuple[str, str, str, str]]:
             pairs: List[Tuple[str, str, str, str]] = []
             axes_dict = dict(sc.axes)
             for i in range(len(AXES_ORDER)):
@@ -205,6 +198,14 @@ class CoverageEngine:
                     a, b = AXES_ORDER[i], AXES_ORDER[j]
                     pairs.append((a, axes_dict[a], b, axes_dict[b]))
             return pairs
+        for sc in scenarios:
+            for p in scenario_pairs_local(sc):
+                required_pairs.add(p)
+
+        # Helper to compute which pairs a scenario covers
+        # Backward-compatible alias
+        def scenario_pairs(sc: Scenario) -> List[Tuple[str, str, str, str]]:
+            return scenario_pairs_local(sc)
 
         # Seed with anchors
         selected: List[Scenario] = []
