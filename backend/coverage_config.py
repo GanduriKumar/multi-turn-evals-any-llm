@@ -93,3 +93,47 @@ class CoverageConfig:
         dups = sorted({x for x in items if (x in s or s.add(x))})  # clever set-add trick
         if dups:
             raise ValueError(f"Duplicate values in {label}: {', '.join(dups)}")
+
+    # ---- Coverage generation settings ----
+    def load_coverage(self, path: Path | None = None) -> Dict[str, Any]:
+        """
+        Load coverage generation settings. This controls optimization strategy.
+        Example (configs/coverage.json):
+        {
+          "mode": "pairwise",        # one of: exhaustive, pairwise
+          "t": 2,                     # pairwise only (ignored for exhaustive)
+          "per_behavior_budget": 120, # optional soft cap per Domain×Behavior
+          "anchors": [                # always-include patterns
+            {"applies": {"domains": ["Trust, Safety & Fraud"]},
+             "when": {"policy_boundary": ["out-of-policy"]}}
+          ]
+        }
+        If file is missing or invalid, defaults to exhaustive mode.
+        """
+        p = path or (self.root / "coverage.json")
+        if not p.exists():
+            return {"mode": "exhaustive"}
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            mode = data.get("mode") or "exhaustive"
+            # basic validation
+            if mode not in ("exhaustive", "pairwise"):
+                mode = "exhaustive"
+            t = int(data.get("t", 2))
+            if t < 2:
+                t = 2
+            per_behavior_budget = data.get("per_behavior_budget")
+            if per_behavior_budget is not None:
+                try:
+                    per_behavior_budget = int(per_behavior_budget)
+                except Exception:
+                    per_behavior_budget = None
+            anchors = data.get("anchors") or []
+            return {
+                "mode": mode,
+                "t": t,
+                "per_behavior_budget": per_behavior_budget,
+                "anchors": anchors,
+            }
+        except Exception:
+            return {"mode": "exhaustive"}

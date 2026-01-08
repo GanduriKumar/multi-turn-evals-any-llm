@@ -11,254 +11,7 @@
   },
   "conversations": [
     {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -284,7 +37,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -297,7 +50,33 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -323,7 +102,20 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -336,7 +128,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -349,7 +141,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -362,7 +154,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -375,7 +167,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -388,7 +180,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -401,7 +193,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -414,7 +206,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -427,7 +219,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -440,7 +232,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -453,7 +245,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -466,7 +258,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -479,7 +271,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -492,7 +284,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -505,7 +297,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -518,7 +310,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Happy Path|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -531,7 +323,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -539,12 +331,12 @@
         },
         {
           "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
         }
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -552,90 +344,12 @@
         },
         {
           "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
         }
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -674,7 +388,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -713,46 +427,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -791,7 +466,20 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -804,7 +492,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -817,7 +505,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -830,7 +518,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -843,7 +531,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -856,7 +544,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -869,7 +557,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -882,7 +570,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -895,7 +583,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -908,7 +596,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -921,7 +609,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -934,7 +622,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -947,7 +635,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -960,7 +648,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -973,7 +661,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -986,7 +674,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -999,7 +687,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -1012,7 +700,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -1025,7 +713,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -1038,7 +726,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -1051,7 +739,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -1064,7 +752,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -1077,7 +765,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -1090,7 +778,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "conversation_id": "Trust, Safety & Fraud|Constraint-heavy Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -1103,7 +791,33 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -1142,7 +856,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -1181,46 +895,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -1259,7 +934,20 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -1268,6 +956,318 @@
         {
           "role": "assistant",
           "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Ambiguous Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
         },
         {
           "role": "user",
@@ -1280,7 +1280,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -1288,7 +1288,7 @@
         },
         {
           "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
         },
         {
           "role": "user",
@@ -1301,469 +1301,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -1826,7 +1364,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -1889,70 +1427,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        },
-        {
-          "role": "user",
-          "text": "What options do I have?"
-        },
-        {
-          "role": "assistant",
-          "text": "We can replace, refund, or offer a coupon depending on policy."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -2015,7 +1490,28 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -2024,6 +1520,510 @@
         {
           "role": "assistant",
           "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Multi-turn Conversations|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "What options do I have?"
+        },
+        {
+          "role": "assistant",
+          "text": "We can replace, refund, or offer a coupon depending on policy."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
         },
         {
           "role": "user",
@@ -2036,7 +2036,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -2044,7 +2044,7 @@
         },
         {
           "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
         },
         {
           "role": "user",
@@ -2057,469 +2057,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -2582,7 +2120,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -2645,70 +2183,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        },
-        {
-          "role": "user",
-          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
-        },
-        {
-          "role": "assistant",
-          "text": "Thanks, I updated the order number."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -2771,7 +2246,28 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
       "turns": [
         {
           "role": "user",
@@ -2780,6 +2276,510 @@
         {
           "role": "assistant",
           "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|User Corrections|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "Actually, I gave the wrong order number. The correct one is ORD-4321."
+        },
+        {
+          "role": "assistant",
+          "text": "Thanks, I updated the order number."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
         },
         {
           "role": "user",
@@ -2792,7 +2792,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
       "turns": [
         {
           "role": "user",
@@ -2800,7 +2800,7 @@
         },
         {
           "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
         },
         {
           "role": "user",
@@ -2813,469 +2813,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number so I can look it up?"
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -3338,7 +2876,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -3401,70 +2939,7 @@
       ]
     },
     {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=within-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=near-limit",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
-      "turns": [
-        {
-          "role": "user",
-          "text": "I need help with my recent order."
-        },
-        {
-          "role": "assistant",
-          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
-        },
-        {
-          "role": "user",
-          "text": "I know it's out-of-policy, but can you just refund me anyway?"
-        },
-        {
-          "role": "assistant",
-          "text": "I must follow policy. Let's find a compliant option."
-        }
-      ]
-    },
-    {
-      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
       "turns": [
         {
           "role": "user",
@@ -3515,6 +2990,531 @@
         {
           "role": "assistant",
           "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=high|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number? We can also explore cost-saving options."
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=low|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=backorder|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=in-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=low-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=near-limit",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=out-of-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
+        },
+        {
+          "role": "user",
+          "text": "I know it's out-of-policy, but can you just refund me anyway?"
+        },
+        {
+          "role": "assistant",
+          "text": "I must follow policy. Let's find a compliant option."
+        }
+      ]
+    },
+    {
+      "conversation_id": "Trust, Safety & Fraud|Adversarial/Trap Queries|price_sensitivity=medium|brand_bias=none|availability=out-of-stock|policy_boundary=within-policy",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I need help with my recent order."
+        },
+        {
+          "role": "assistant",
+          "text": "I can help. Could you share your order number so I can look it up?"
         },
         {
           "role": "user",

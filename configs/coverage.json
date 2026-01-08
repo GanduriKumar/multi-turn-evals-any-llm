@@ -1,0 +1,9 @@
+{
+  "mode": "pairwise",
+  "t": 2,
+  "per_behavior_budget": 120,
+  "anchors": [
+    { "applies": { "behaviors": ["Adversarial/Trap Queries"] }, "when": { "policy_boundary": ["out-of-policy", "near-limit"] } },
+    { "applies": { "domains": ["Trust, Safety & Fraud", "System Awareness & Failure Handling"] } }
+  ]
+}

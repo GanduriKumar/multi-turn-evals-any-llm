@@ -168,6 +168,96 @@ class CoverageEngine:
         self.config = config or CoverageConfig()
         self.taxonomy = self.config.load_taxonomy()
         self.exclusions = self.config.load_exclusions()
+        self.coverage = self.config.load_coverage()
 
     def scenarios_for(self, domain: str, behavior: str, seed: int = 42) -> List[Scenario]:
-        return apply_exclusions(self.taxonomy, self.exclusions, domain, behavior, seed)
+        # Generate base scenarios then optimize according to coverage settings
+        mode = (self.coverage or {}).get("mode", "exhaustive")
+        per_behavior_budget = (self.coverage or {}).get("per_behavior_budget")
+        anchors = (self.coverage or {}).get("anchors") or []
+
+        scenarios = apply_exclusions(self.taxonomy, self.exclusions, domain, behavior, seed)
+
+        # Short-circuit for exhaustive
+        if mode == "exhaustive":
+            return scenarios
+
+        # Pairwise selection (t=2). We implement a simple greedy covering array builder.
+        # Keep anchors first (if they match this domain/behavior), then fill with pairwise until budget.
+
+        # Build value domains per axis
+        axes_vals: Dict[str, List[str]] = {a: list(self.taxonomy.get("axes", {}).get(a, [])) for a in AXES_ORDER}
+        # Compute all required pairs we must cover: (axisA, valA, axisB, valB) for A<B order
+        required_pairs: set[Tuple[str, str, str, str]] = set()
+        for i in range(len(AXES_ORDER)):
+            for j in range(i + 1, len(AXES_ORDER)):
+                a, b = AXES_ORDER[i], AXES_ORDER[j]
+                for va in axes_vals.get(a, []):
+                    for vb in axes_vals.get(b, []):
+                        required_pairs.add((a, va, b, vb))
+
+        # Helper to compute which pairs a scenario covers
+        def scenario_pairs(sc: Scenario) -> List[Tuple[str, str, str, str]]:
+            pairs: List[Tuple[str, str, str, str]] = []
+            axes_dict = dict(sc.axes)
+            for i in range(len(AXES_ORDER)):
+                for j in range(i + 1, len(AXES_ORDER)):
+                    a, b = AXES_ORDER[i], AXES_ORDER[j]
+                    pairs.append((a, axes_dict[a], b, axes_dict[b]))
+            return pairs
+
+        # Seed with anchors
+        selected: List[Scenario] = []
+        def applies_to(sc: Scenario, rule: Dict[str, Any]) -> bool:
+            applies = rule.get("applies") or {}
+            # domain/behavior filtering
+            doms = applies.get("domains")
+            behs = applies.get("behaviors")
+            if doms and sc.domain not in doms:
+                return False
+            if behs and sc.behavior not in behs:
+                return False
+            when = rule.get("when") or {}
+            return _matches_filter(sc, when)
+
+        if anchors:
+            for sc in scenarios:
+                if any(applies_to(sc, a) for a in anchors):
+                    selected.append(sc)
+
+        # Track which pairs are already covered
+        covered: set[Tuple[str, str, str, str]] = set()
+        for sc in selected:
+            covered.update(scenario_pairs(sc))
+
+        # Greedy selection: repeatedly add scenario that covers the most uncovered pairs
+        remaining = [sc for sc in scenarios if sc not in selected]
+
+        def score(sc: Scenario) -> int:
+            c = 0
+            for p in scenario_pairs(sc):
+                if p not in covered:
+                    c += 1
+            return c
+
+        # Budget handling
+        max_count = per_behavior_budget if isinstance(per_behavior_budget, int) and per_behavior_budget > 0 else None
+
+        # If no budget, set a loose upper bound to avoid runaway (cap at len(scenarios))
+        upper_bound = max_count if max_count is not None else len(scenarios)
+
+        while remaining and len(selected) < upper_bound and len(covered) < len(required_pairs):
+            best = max(remaining, key=score, default=None)
+            if not best or score(best) == 0:
+                break
+            selected.append(best)
+            covered.update(scenario_pairs(best))
+            remaining.remove(best)
+
+        # If we still have budget and uncovered pairs (rare), fill arbitrarily while respecting budget
+        if max_count is not None and len(selected) < max_count and remaining:
+            fill = max_count - len(selected)
+            selected.extend(remaining[:fill])
+
+        # Always return in a stable order by scenario id
+        return sorted(selected or scenarios, key=lambda s: s.id)
