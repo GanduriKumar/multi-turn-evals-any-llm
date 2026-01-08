@@ -28,6 +28,7 @@ type VersionInfo = {
   gemini_enabled: boolean
   ollama_host: string | null
   semantic_threshold: number
+  openai_enabled?: boolean
 }
 
 type StartRunResponse = {
@@ -53,7 +54,7 @@ export default function RunsPage() {
   const [error, setError] = useState<string | null>(null)
 
   const [datasetId, setDatasetId] = useState('')
-  const [modelSpec, setModelSpec] = useState('ollama:llama3.2:latest')
+  const [modelSpec, setModelSpec] = useState('openai:gpt-5.1')
   const [semanticThreshold, setSemanticThreshold] = useState(0.8)
   const [metricExact, setMetricExact] = useState(true)
   const [metricSemantic, setMetricSemantic] = useState(true)
@@ -121,11 +122,19 @@ export default function RunsPage() {
         if (!sR.ok) throw new Error(`Settings HTTP ${sR.status}`)
         if (!rR.ok) throw new Error(`Runs HTTP ${rR.status}`)
         const d = await dR.json()
-        const v = await vR.json() as VersionInfo
+        const v = await vR.json() as VersionInfo & { models?: { ollama?: string; gemini?: string; openai?: string } }
         const s = await sR.json() as any
         const runs = await rR.json() as RunListItem[]
         setDatasets(d)
         setVer(v)
+        // choose default model based on available providers and configured defaults
+        try {
+          const oll = v.models?.ollama || 'llama3.2:latest'
+          const gem = v.models?.gemini || 'gemini-2.5'
+          const oai = v.models?.openai || 'gpt-5.1'
+          const defaultModel = (v.openai_enabled ? `openai:${oai}` : (v.gemini_enabled ? `gemini:${gem}` : `ollama:${oll}`))
+          setModelSpec(defaultModel)
+        } catch {}
         setRecentRuns(runs)
         setSemanticThreshold(Number(v.semantic_threshold) || 0.8)
         // Seed metric toggles from persisted settings.metrics if available
@@ -169,8 +178,14 @@ export default function RunsPage() {
   }, [])
 
   const availableModels = useMemo(() => {
-    const arr = [{ id: 'ollama:llama3.2:latest', label: 'Ollama — llama3.2:latest' }]
-    if (ver?.gemini_enabled) arr.push({ id: 'gemini:gemini-2.5', label: 'Gemini — gemini-2.5' })
+    const arr: { id: string; label: string }[] = []
+    const m = (ver as any)?.models || {}
+    const ollamaModel = m.ollama || 'llama3.2:latest'
+    const geminiModel = m.gemini || 'gemini-2.5'
+    const openaiModel = m.openai || 'gpt-5.1'
+    arr.push({ id: `ollama:${ollamaModel}`, label: `Ollama — ${ollamaModel}` })
+    if (ver?.gemini_enabled) arr.push({ id: `gemini:${geminiModel}`, label: `Gemini — ${geminiModel}` })
+    if (ver?.openai_enabled) arr.push({ id: `openai:${openaiModel}`, label: `OpenAI — ${openaiModel}` })
     return arr
   }, [ver])
 
@@ -429,22 +444,18 @@ export default function RunsPage() {
                             }}>Abort</Button>
                           </div>
                         )}
-                        {r.stale && (
+                        {r.stale && (["stale","running","paused","cancelling"].includes(String(r.state))) && (
                           <div className="flex gap-2">
-                            <Button variant="danger" onClick={async () => {
-                              // Allow user to cancel stale jobs which exist only on disk
+                            <Button onClick={async () => {
+                              // Mark a stale, previously-active job as cancelled (does not affect current active job)
                               try {
                                 const resp = await fetch(`/runs/${r.job_id}/control`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'cancel' }) })
                                 if (resp.ok) {
-                                  const s = await resp.json()
-                                  setStatus(s)
-                                  // refresh runs list
-                                  const rR2 = await fetch('/runs')
-                                  const runs2 = await rR2.json()
-                                  setRecentRuns(runs2)
+                                  // Refresh list to reflect persisted change
+                                  await refreshRuns()
                                 }
                               } catch {}
-                            }}>Mark Cancelled</Button>
+                            }}>Mark as cancelled</Button>
                           </div>
                         )}
                       </td>

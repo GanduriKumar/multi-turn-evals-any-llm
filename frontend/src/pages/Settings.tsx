@@ -6,13 +6,21 @@ import { Input } from '../components/Form'
 type Settings = {
   ollama_host: string | null
   gemini_enabled: boolean
+  openai_enabled?: boolean
   semantic_threshold: number
+  models?: { ollama?: string; gemini?: string; openai?: string }
+  embed_model?: string
 }
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null)
   const [ollama, setOllama] = useState('')
-  const [apiKey, setApiKey] = useState('')
+  const [apiKeyGemini, setApiKeyGemini] = useState('')
+  const [apiKeyOpenAI, setApiKeyOpenAI] = useState('')
+  const [modelOllama, setModelOllama] = useState('llama3.2:latest')
+  const [modelGemini, setModelGemini] = useState('gemini-2.5')
+  const [modelOpenAI, setModelOpenAI] = useState('gpt-5.1')
+  const [embedModel, setEmbedModel] = useState('nomic-embed-text')
   const [semThr, setSemThr] = useState(0.8)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
@@ -27,6 +35,11 @@ export default function SettingsPage() {
       setSettings(js)
       setOllama(js.ollama_host || '')
       setSemThr(Number(js.semantic_threshold) || 0.8)
+      const m = js.models || {}
+      if (m.ollama) setModelOllama(m.ollama)
+      if (m.gemini) setModelGemini(m.gemini)
+      if (m.openai) setModelOpenAI(m.openai)
+      if (js.embed_model) setEmbedModel(js.embed_model)
     } catch (e:any) {
       setErr(e.message || 'Failed to load settings')
     }
@@ -37,7 +50,7 @@ export default function SettingsPage() {
   const save = async () => {
     setSaving(true); setMsg(null); setErr(null)
     try {
-      const r = await fetch('/settings', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ollama_host: ollama, google_api_key: apiKey || undefined, semantic_threshold: semThr }) })
+      const r = await fetch('/settings', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ollama_host: ollama, google_api_key: apiKeyGemini || undefined, openai_api_key: apiKeyOpenAI || undefined, semantic_threshold: semThr, ollama_model: modelOllama, gemini_model: modelGemini, openai_model: modelOpenAI, embed_model: embedModel }) })
       const js = await r.json()
       if (!r.ok) throw new Error(js?.detail || 'Save failed')
       setMsg('Saved. Restart backend to apply to providers.')
@@ -59,8 +72,28 @@ export default function SettingsPage() {
               <Input className="grow" value={ollama} onChange={e => setOllama(e.target.value)} placeholder="http://localhost:11434" />
             </label>
             <label className="flex items-center gap-2">
+              <span className="w-40">EMBED_MODEL</span>
+              <Input className="grow" value={embedModel} onChange={e => setEmbedModel(e.target.value)} placeholder="nomic-embed-text" />
+            </label>
+            <label className="flex items-center gap-2">
+              <span className="w-40">OLLAMA_MODEL</span>
+              <Input className="grow" value={modelOllama} onChange={e => setModelOllama(e.target.value)} placeholder="llama3.2:latest" />
+            </label>
+            <label className="flex items-center gap-2">
               <span className="w-40">GOOGLE_API_KEY</span>
-              <Input className="grow" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="leave blank to keep" />
+              <Input className="grow" value={apiKeyGemini} onChange={e => setApiKeyGemini(e.target.value)} placeholder="leave blank to keep" />
+            </label>
+            <label className="flex items-center gap-2">
+              <span className="w-40">GEMINI_MODEL</span>
+              <Input className="grow" value={modelGemini} onChange={e => setModelGemini(e.target.value)} placeholder="gemini-2.5" />
+            </label>
+            <label className="flex items-center gap-2">
+              <span className="w-40">OPENAI_API_KEY</span>
+              <Input className="grow" value={apiKeyOpenAI} onChange={e => setApiKeyOpenAI(e.target.value)} placeholder="leave blank to keep" />
+            </label>
+            <label className="flex items-center gap-2">
+              <span className="w-40">OPENAI_MODEL</span>
+              <Input className="grow" value={modelOpenAI} onChange={e => setModelOpenAI(e.target.value)} placeholder="gpt-5.1" />
             </label>
             <label className="flex items-center gap-2">
               <span className="w-40">Semantic threshold</span>

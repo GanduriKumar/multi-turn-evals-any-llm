@@ -73,7 +73,7 @@ class Orchestrator:
 
     @staticmethod
     def parse_model_spec(model_spec: str) -> tuple[str, str]:
-        # format provider:model
+        # format provider:model, e.g., 'ollama:llama3.2:latest', 'gemini:gemini-2.5', 'openai:gpt-5.1'
         parts = model_spec.split(":", 1)
         if len(parts) != 2:
             raise ValueError("model spec must be 'provider:model'")

@@ -34,6 +34,27 @@ else:
 
 APP_VERSION = "0.1.0-mvp"
 
+# Load .env from repo root (dev convenience)
+def _load_env_from_file() -> None:
+    try:
+        root = Path(__file__).resolve().parents[1]
+        env_path = root / '.env'
+        if not env_path.exists():
+            return
+        for line in env_path.read_text(encoding='utf-8').splitlines():
+            line = line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            k, v = line.split('=', 1)
+            k = k.strip(); v = v.strip()
+            if k and v and k not in os.environ:
+                os.environ[k] = v
+    except Exception:
+        # non-fatal
+        pass
+
+_load_env_from_file()
+
 class Health(BaseModel):
     status: str
 
@@ -42,19 +63,32 @@ class VersionInfo(BaseModel):
     gemini_enabled: bool
     ollama_host: str | None
     semantic_threshold: float
+    openai_enabled: bool | None = None
+    models: dict[str, str] | None = None
 
 
 class SettingsBody(BaseModel):
     ollama_host: Optional[str] = None
     google_api_key: Optional[str] = None
+    openai_api_key: Optional[str] = None
     semantic_threshold: Optional[float] = None
+    ollama_model: Optional[str] = None
+    gemini_model: Optional[str] = None
+    openai_model: Optional[str] = None
+    embed_model: Optional[str] = None
     metrics: Optional[Dict[str, Any]] = None  # persisted UI toggles
 
 
 def get_settings():
     google_api_key = os.getenv("GOOGLE_API_KEY")
+    openai_api_key = os.getenv("OPENAI_API_KEY")
     ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
     semantic_threshold = float(os.getenv("SEMANTIC_THRESHOLD", "0.80"))
+    # models per provider (defaults)
+    ollama_model = os.getenv("OLLAMA_MODEL", "llama3.2:latest")
+    gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5")
+    openai_model = os.getenv("OPENAI_MODEL", "gpt-5.1")
+    embed_model = os.getenv("EMBED_MODEL", "nomic-embed-text")
     # Load persisted metrics config if present
     root = Path(__file__).resolve().parents[1]
     cfg_path = root / 'configs' / 'metrics.json'
@@ -66,9 +100,12 @@ def get_settings():
         metrics_cfg = None
     return {
         "GOOGLE_API_KEY": google_api_key,
+        "OPENAI_API_KEY": openai_api_key,
         "OLLAMA_HOST": ollama_host,
         "SEMANTIC_THRESHOLD": semantic_threshold,
         "METRICS_CFG": metrics_cfg,
+        "DEFAULT_MODELS": {"ollama": ollama_model, "gemini": gemini_model, "openai": openai_model},
+        "EMBED_MODEL": embed_model,
     }
 
 app = FastAPI(title="LLM Eval Backend", version=APP_VERSION)
@@ -120,6 +157,8 @@ async def version():
         gemini_enabled=bool(s["GOOGLE_API_KEY"]),
         ollama_host=s["OLLAMA_HOST"],
         semantic_threshold=s["SEMANTIC_THRESHOLD"],
+        openai_enabled=bool(s.get("OPENAI_API_KEY")),
+        models=s.get("DEFAULT_MODELS"),
     )
 
 
@@ -129,8 +168,11 @@ async def get_settings_api():
     return {
         "ollama_host": s["OLLAMA_HOST"],
         "gemini_enabled": bool(s["GOOGLE_API_KEY"]),
+        "openai_enabled": bool(s["OPENAI_API_KEY"]),
         "semantic_threshold": s["SEMANTIC_THRESHOLD"],
         "metrics": s.get("METRICS_CFG"),
+        "models": s.get("DEFAULT_MODELS"),
+        "embed_model": s.get("EMBED_MODEL"),
     }
 
 
@@ -155,16 +197,51 @@ async def update_settings_api(body: SettingsBody):
         env['OLLAMA_HOST'] = body.ollama_host
     if body.google_api_key is not None:
         env['GOOGLE_API_KEY'] = body.google_api_key
+    if body.openai_api_key is not None:
+        env['OPENAI_API_KEY'] = body.openai_api_key
     if body.semantic_threshold is not None:
         env['SEMANTIC_THRESHOLD'] = str(body.semantic_threshold)
+    if body.ollama_model is not None:
+        env['OLLAMA_MODEL'] = body.ollama_model
+    if body.gemini_model is not None:
+        env['GEMINI_MODEL'] = body.gemini_model
+    if body.openai_model is not None:
+        env['OPENAI_MODEL'] = body.openai_model
+    if body.embed_model is not None:
+        env['EMBED_MODEL'] = body.embed_model
     # Write
     lines = [f"{k}={v}" for k, v in env.items()]
     env_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     # Also update process env for current process
     if 'OLLAMA_HOST' in env: os.environ['OLLAMA_HOST'] = env['OLLAMA_HOST']
     if 'GOOGLE_API_KEY' in env: os.environ['GOOGLE_API_KEY'] = env['GOOGLE_API_KEY']
+    if 'OPENAI_API_KEY' in env: os.environ['OPENAI_API_KEY'] = env['OPENAI_API_KEY']
     if 'SEMANTIC_THRESHOLD' in env: os.environ['SEMANTIC_THRESHOLD'] = env['SEMANTIC_THRESHOLD']
+    if 'OLLAMA_MODEL' in env: os.environ['OLLAMA_MODEL'] = env['OLLAMA_MODEL']
+    if 'GEMINI_MODEL' in env: os.environ['GEMINI_MODEL'] = env['GEMINI_MODEL']
+    if 'OPENAI_MODEL' in env: os.environ['OPENAI_MODEL'] = env['OPENAI_MODEL']
+    if 'EMBED_MODEL' in env: os.environ['EMBED_MODEL'] = env['EMBED_MODEL']
     return {"ok": True}
+
+
+@app.get("/embeddings/test")
+async def embeddings_test():
+    """Quick check to validate embeddings endpoint and model are working."""
+    try:
+        # defer import to avoid import-time failures
+        try:
+            from .embeddings.ollama_embed import OllamaEmbeddings
+        except ImportError:
+            from backend.embeddings.ollama_embed import OllamaEmbeddings
+        emb = OllamaEmbeddings()
+        vecs = await emb.embed(["hello", "world"])
+        if not isinstance(vecs, list) or not vecs or not isinstance(vecs[0], list):
+            raise RuntimeError("unexpected embeddings shape")
+        dim = len(vecs[0])
+        return {"ok": True, "count": len(vecs), "dim": dim, "model": os.getenv("EMBED_MODEL", "nomic-embed-text"), "host": os.getenv("OLLAMA_HOST", "http://localhost:11434")}
+    except Exception as e:
+        from fastapi import Response
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/datasets")
