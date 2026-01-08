@@ -25,8 +25,9 @@ Everything is stored on your local filesystem. No database needed. The app is a 
 - Python 3.12 (recommended) with virtual environment
 - Node.js 18+ and npm
 - Optional for LLMs (choose any):
-  - Ollama running locally (default host http://localhost:11434) with model `llama3.2:latest`
-  - Google Gemini API Key (for model `gemini-2.5`)
+  - Ollama running locally (default host http://localhost:11434) with model `OLLLAMA_MODEL` (default `llama3.2:latest`)
+  - Google Gemini API Key (for model `GEMINI_MODEL`, default `gemini-2.5`)
+  - OpenAI API Key (for model `OPENAI_MODEL`, default `gpt-5.1`)
 
 Example: Install Ollama and pull a model
 - Download Ollama from https://ollama.com and start it.
@@ -139,7 +140,10 @@ Example golden entry (matching assistant turns by index):
 - Click Start Run. You’ll see live progress and completion status.
 
 Notes and examples:
-- Semantic scoring uses local embeddings (Ollama `nomic-embed-text`). If embeddings are not available, the semantic metric will include an error field but other metrics continue.
+- Semantic scoring uses local embeddings (via Ollama). Configure in Settings:
+  - OLLAMA_HOST (e.g., http://localhost:11434)
+  - EMBED_MODEL (e.g., `nomic-embed-text`)
+  - Test endpoint: `GET /embeddings/test`
 
 Example run configuration sent by the UI:
 ```json
@@ -168,16 +172,23 @@ Examples:
 
 ### 4. Settings page
 - Configure providers and thresholds:
-  - OLLAMA_HOST (e.g., http://localhost:11434)
-  - GOOGLE_API_KEY (for Gemini)
-  - Semantic threshold default
-– These settings are saved to a local `.env` file at the repo root. Do not commit secrets. Restart the backend after changing API keys/hosts to reinitialize providers.
+  - OLLAMA_HOST
+  - GOOGLE_API_KEY, OPENAI_API_KEY
+  - Semantic threshold
+  - Default models: OLLAMA_MODEL, GEMINI_MODEL, OPENAI_MODEL
+  - EMBED_MODEL for semantic similarity
+– These settings are saved to a local `.env` at the repo root and loaded at startup. Restart backend after changes.
 
 Example `.env` file:
 ```
 OLLAMA_HOST=http://localhost:11434
 GOOGLE_API_KEY=your_api_key_here
+OPENAI_API_KEY=your_openai_key
 SEMANTIC_THRESHOLD=0.80
+OLLAMA_MODEL=llama3.2:latest
+GEMINI_MODEL=gemini-2.5
+OPENAI_MODEL=gpt-5.1
+EMBED_MODEL=nomic-embed-text
 ```
 
 ### 5. Metrics page
@@ -242,7 +253,7 @@ Example save payload (what the UI sends):
 
 Common endpoints:
 - GET /health — basic status
-- GET /version — version and provider flags
+- GET /version — version, provider flags, and default models
 - GET /datasets — list datasets
 - POST /datasets/upload — upload dataset and optional golden
 - GET /datasets/{dataset_id} — get dataset JSON
@@ -256,8 +267,9 @@ Common endpoints:
 - GET /runs/{run_id}/artifacts?type=json|csv|html — download/export
 - POST /runs/{run_id}/feedback — append human feedback
 - GET /compare?runA=&runB= — compare run summaries
-- GET /settings — read provider settings
+- GET /settings — read settings (providers, models, embedding)
 - POST /settings — update .env (dev only)
+- GET /embeddings/test — verify embedding endpoint/model
 - GET/POST /metrics-config — read/write metrics configuration
 - GET /coverage/taxonomy — list domains and behaviors
 - GET /coverage/manifest — preview counts per domain×behavior pair (query params: domains, behaviors)
@@ -288,8 +300,8 @@ Common endpoints:
   - Set GOOGLE_API_KEY via Settings, then restart backend.
 
 - Semantic metric failures
-  - Ensure embeddings model is available locally. If unavailable, the metric will be skipped/failed with an error field.
-  - You can still rely on exact/consistency/adherence/hallucination scores.
+  - Ensure Ollama is running, `EMBED_MODEL` is pulled, and `OLLAMA_HOST` is correct.
+  - Use `GET /embeddings/test` to validate before running.
 
 Logs and artifacts:
 - Backend logs in the terminal where uvicorn runs.
