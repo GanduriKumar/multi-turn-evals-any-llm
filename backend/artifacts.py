@@ -115,6 +115,8 @@ class RunArtifactWriter:
                 "domain_description", "conversation_description",
                 # conversation summary
                 "conversation_pass", "weighted_pass_rate", "total_user_turns", "failed_turns_count", "failed_metrics",
+                # rollup dims (added for Prompt 12)
+                "risk_tier",
                 # turn
                 "turn_index", "turn_key",
                 # snippets
@@ -149,6 +151,15 @@ class RunArtifactWriter:
                 total_user_turns = summ.get("total_user_turns")
                 failed_turns_count = summ.get("failed_turns_count")
                 failed_metrics = ";".join(summ.get("failed_metrics") or [])
+                # risk tier if computable from axes
+                risk_tier = None
+                try:
+                    axes = (conv.get("axes") or {})
+                    if isinstance(axes, dict) and domain and behavior:
+                        from .risk_sampler import compute_risk_tier  # local import to avoid cycle
+                        risk_tier = compute_risk_tier(__import__('backend.commerce_taxonomy', fromlist=['load_commerce_config']).load_commerce_config(), domain, behavior, axes)
+                except Exception:
+                    risk_tier = None
                 for t in conv.get("turns", []) or []:
                     idx = t.get("turn_index")
                     turn_key = f"{slug}#{idx}" if slug is not None else f"{cid}#{idx}"
@@ -170,6 +181,8 @@ class RunArtifactWriter:
                         dom_desc, conv_desc,
                         # conversation summary
                         cpass, wr, total_user_turns, failed_turns_count, failed_metrics,
+                        # rollup dims
+                        risk_tier,
                         # turn
                         idx, turn_key,
                         # snippets

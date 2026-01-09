@@ -8,6 +8,7 @@ type Settings = {
   gemini_enabled: boolean
   openai_enabled?: boolean
   semantic_threshold: number
+  hallucination_threshold?: number
   models?: { ollama?: string; gemini?: string; openai?: string }
   embed_model?: string
 }
@@ -22,6 +23,7 @@ export default function SettingsPage() {
   const [modelOpenAI, setModelOpenAI] = useState('gpt-5.1')
   const [embedModel, setEmbedModel] = useState('nomic-embed-text')
   const [semThr, setSemThr] = useState(0.8)
+  const [hallThr, setHallThr] = useState(0.8)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
@@ -35,6 +37,7 @@ export default function SettingsPage() {
       setSettings(js)
       setOllama(js.ollama_host || '')
       setSemThr(Number(js.semantic_threshold) || 0.8)
+      if (typeof js.hallucination_threshold === 'number') setHallThr(Number(js.hallucination_threshold))
       const m = js.models || {}
       if (m.ollama) setModelOllama(m.ollama)
       if (m.gemini) setModelGemini(m.gemini)
@@ -50,7 +53,7 @@ export default function SettingsPage() {
   const save = async () => {
     setSaving(true); setMsg(null); setErr(null)
     try {
-      const r = await fetch('/settings', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ollama_host: ollama, google_api_key: apiKeyGemini || undefined, openai_api_key: apiKeyOpenAI || undefined, semantic_threshold: semThr, ollama_model: modelOllama, gemini_model: modelGemini, openai_model: modelOpenAI, embed_model: embedModel }) })
+      const r = await fetch('/settings', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ollama_host: ollama, google_api_key: apiKeyGemini || undefined, openai_api_key: apiKeyOpenAI || undefined, semantic_threshold: semThr, hallucination_threshold: hallThr, ollama_model: modelOllama, gemini_model: modelGemini, openai_model: modelOpenAI, embed_model: embedModel }) })
       const js = await r.json()
       if (!r.ok) throw new Error(js?.detail || 'Save failed')
       setMsg('Saved. Restart backend to apply to providers.')
@@ -98,6 +101,10 @@ export default function SettingsPage() {
             <label className="flex items-center gap-2">
               <span className="w-40">Semantic threshold</span>
               <Input type="number" step="0.01" min={0} max={1} className="w-28" value={semThr} onChange={e => setSemThr(Number(e.target.value))} />
+            </label>
+            <label className="flex items-center gap-2">
+              <span className="w-40">Hallucination threshold</span>
+              <Input type="number" step="0.01" min={0} max={1} className="w-28" value={hallThr} onChange={e => setHallThr(Number(e.target.value))} />
             </label>
             <div className="flex items-center gap-2">
               <Button variant="success" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>

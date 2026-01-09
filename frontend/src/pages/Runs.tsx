@@ -29,6 +29,7 @@ type VersionInfo = {
   ollama_host: string | null
   semantic_threshold: number
   openai_enabled?: boolean
+  hallucination_threshold?: number
 }
 
 type StartRunResponse = {
@@ -56,6 +57,7 @@ export default function RunsPage() {
   const [datasetId, setDatasetId] = useState('')
   const [modelSpec, setModelSpec] = useState('openai:gpt-5.1')
   const [semanticThreshold, setSemanticThreshold] = useState(0.8)
+  const [hallucinationThreshold, setHallucinationThreshold] = useState(0.8)
   const [metricExact, setMetricExact] = useState(true)
   const [metricSemantic, setMetricSemantic] = useState(true)
   const [metricConsistency, setMetricConsistency] = useState(true)
@@ -147,6 +149,9 @@ export default function RunsPage() {
         } catch {}
         setRecentRuns(orderRuns(runs))
         setSemanticThreshold(Number(v.semantic_threshold) || 0.8)
+        if (typeof (v as any).hallucination_threshold === 'number') {
+          setHallucinationThreshold(Number((v as any).hallucination_threshold))
+        }
         // Seed metric toggles from persisted settings.metrics if available
         const cfg = (s && s.metrics && Array.isArray(s.metrics.metrics)) ? s.metrics.metrics : null
         if (cfg) {
@@ -212,7 +217,7 @@ export default function RunsPage() {
         dataset_id: datasetId,
         model_spec: modelSpec,
         metrics,
-        thresholds: { semantic_threshold: semanticThreshold },
+        thresholds: { semantic_threshold: semanticThreshold, hallucination_threshold: hallucinationThreshold },
       }
       const r = await fetch('/runs', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
       const body = await r.json()
@@ -357,6 +362,10 @@ export default function RunsPage() {
               <label className="flex items-center gap-2">
                 <span className="w-28">Semantic thr.</span>
                 <Input type="number" step="0.01" min={0} max={1} className="w-28" value={semanticThreshold} onChange={e => setSemanticThreshold(Number(e.target.value))} />
+              </label>
+              <label className="flex items-center gap-2">
+                <span className="w-28">Halluc. thr.</span>
+                <Input type="number" step="0.01" min={0} max={1} className="w-28" value={hallucinationThreshold} onChange={e => setHallucinationThreshold(Number(e.target.value))} />
               </label>
             </div>
 

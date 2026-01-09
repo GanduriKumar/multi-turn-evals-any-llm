@@ -65,6 +65,7 @@ class VersionInfo(BaseModel):
     semantic_threshold: float
     openai_enabled: bool | None = None
     models: dict[str, str] | None = None
+    hallucination_threshold: float | None = None
 
 
 class SettingsBody(BaseModel):
@@ -72,6 +73,7 @@ class SettingsBody(BaseModel):
     google_api_key: Optional[str] = None
     openai_api_key: Optional[str] = None
     semantic_threshold: Optional[float] = None
+    hallucination_threshold: Optional[float] = None
     ollama_model: Optional[str] = None
     gemini_model: Optional[str] = None
     openai_model: Optional[str] = None
@@ -84,6 +86,7 @@ def get_settings():
     openai_api_key = os.getenv("OPENAI_API_KEY")
     ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
     semantic_threshold = float(os.getenv("SEMANTIC_THRESHOLD", "0.80"))
+    hallucination_threshold = float(os.getenv("HALLUCINATION_THRESHOLD", "0.80"))
     # models per provider (defaults)
     ollama_model = os.getenv("OLLAMA_MODEL", "llama3.2:latest")
     gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5")
@@ -103,6 +106,7 @@ def get_settings():
         "OPENAI_API_KEY": openai_api_key,
         "OLLAMA_HOST": ollama_host,
         "SEMANTIC_THRESHOLD": semantic_threshold,
+        "HALLUCINATION_THRESHOLD": hallucination_threshold,
         "METRICS_CFG": metrics_cfg,
         "DEFAULT_MODELS": {"ollama": ollama_model, "gemini": gemini_model, "openai": openai_model},
         "EMBED_MODEL": embed_model,
@@ -159,6 +163,7 @@ async def version():
         semantic_threshold=s["SEMANTIC_THRESHOLD"],
         openai_enabled=bool(s.get("OPENAI_API_KEY")),
         models=s.get("DEFAULT_MODELS"),
+        hallucination_threshold=s.get("HALLUCINATION_THRESHOLD"),
     )
 
 
@@ -170,6 +175,7 @@ async def get_settings_api():
         "gemini_enabled": bool(s["GOOGLE_API_KEY"]),
         "openai_enabled": bool(s["OPENAI_API_KEY"]),
         "semantic_threshold": s["SEMANTIC_THRESHOLD"],
+        "hallucination_threshold": s["HALLUCINATION_THRESHOLD"],
         "metrics": s.get("METRICS_CFG"),
         "models": s.get("DEFAULT_MODELS"),
         "embed_model": s.get("EMBED_MODEL"),
@@ -201,6 +207,8 @@ async def update_settings_api(body: SettingsBody):
         env['OPENAI_API_KEY'] = body.openai_api_key
     if body.semantic_threshold is not None:
         env['SEMANTIC_THRESHOLD'] = str(body.semantic_threshold)
+    if body.hallucination_threshold is not None:
+        env['HALLUCINATION_THRESHOLD'] = str(body.hallucination_threshold)
     if body.ollama_model is not None:
         env['OLLAMA_MODEL'] = body.ollama_model
     if body.gemini_model is not None:
@@ -217,6 +225,7 @@ async def update_settings_api(body: SettingsBody):
     if 'GOOGLE_API_KEY' in env: os.environ['GOOGLE_API_KEY'] = env['GOOGLE_API_KEY']
     if 'OPENAI_API_KEY' in env: os.environ['OPENAI_API_KEY'] = env['OPENAI_API_KEY']
     if 'SEMANTIC_THRESHOLD' in env: os.environ['SEMANTIC_THRESHOLD'] = env['SEMANTIC_THRESHOLD']
+    if 'HALLUCINATION_THRESHOLD' in env: os.environ['HALLUCINATION_THRESHOLD'] = env['HALLUCINATION_THRESHOLD']
     if 'OLLAMA_MODEL' in env: os.environ['OLLAMA_MODEL'] = env['OLLAMA_MODEL']
     if 'GEMINI_MODEL' in env: os.environ['GEMINI_MODEL'] = env['GEMINI_MODEL']
     if 'OPENAI_MODEL' in env: os.environ['OPENAI_MODEL'] = env['OPENAI_MODEL']

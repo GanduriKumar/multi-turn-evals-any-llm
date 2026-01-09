@@ -56,6 +56,32 @@ def enumerate_all(tax_cfg: Dict[str, Any]) -> List[Scenario]:
     return scenarios
 
 
+def compute_risk_tier(tax_cfg: Dict[str, Any], domain: str, behavior: str, axes: Dict[str, str]) -> str:
+    """Compute overall risk tier for a specific domain/behavior/axes combo
+    using the same aggregation rule as enumerate_all.
+
+    - Collect labels from domain, behavior, and each axis bin
+    - Ignore bins labeled 'excluded'
+    - Overall tier = highest severity among labels: high > medium > low
+    """
+    tax = tax_cfg["taxonomy"]
+    risk = tax_cfg["risk_tiers"]["risk"]
+    labels: List[str] = []
+    # domain/behavior tiers
+    labels.append(risk.get("domains", {}).get(domain, "medium"))
+    labels.append(risk.get("behaviors", {}).get(behavior, "medium"))
+    # axis tiers
+    for a, v in (axes or {}).items():
+        lab = risk.get("axes", {}).get(a, {}).get(v, "medium")
+        if lab != "excluded":
+            labels.append(lab)
+    if "high" in labels:
+        return "high"
+    if "medium" in labels:
+        return "medium"
+    return "low"
+
+
 def _pair_coverage(selected: List[Scenario], axis_names: List[str]) -> float:
     """Estimate pair coverage across all axis pairs and their bin pairs."""
     # build universe of pairs

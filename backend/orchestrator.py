@@ -455,6 +455,20 @@ class Orchestrator:
                 turn_files = sorted(conv_dir.glob("turn_*.json"))
                 per_turn: List[Dict[str, Any]] = []
                 identity = _conv_identity(conv)
+                # Preserve axes for downstream risk rollups
+                try:
+                    axes = (conv.get("metadata") or {}).get("axes") or {}
+                    if isinstance(axes, dict):
+                        identity["axes"] = axes
+                except Exception:
+                    pass
+                # attach axes for downstream rollups/reporting
+                try:
+                    axes = (conv.get("metadata") or {}).get("axes") or {}
+                    if isinstance(axes, dict):
+                        identity["axes"] = axes
+                except Exception:
+                    pass
                 # build golden maps
                 golden_entry = None
                 golden_outcome: Dict[str, Any] = {}
@@ -526,7 +540,9 @@ class Orchestrator:
                         mets["adherence"] = {"metric": "adherence", "pass": False, "error": str(e)}
                     try:
                         history_msgs = [m.get("content", "") for m in (rec.get("request", {}) or {}).get("messages", [])]
-                        mets["hallucination"] = hallucination(out_text, rec.get("state") or {}, history_msgs)
+                        # Threshold from run config or settings
+                        thr = (jr.config.get("thresholds", {}) or {}).get("hallucination_threshold")
+                        mets["hallucination"] = hallucination(out_text, rec.get("state") or {}, history_msgs, threshold=thr)
                     except Exception as e:
                         mets["hallucination"] = {"metric": "hallucination", "pass": False, "error": str(e)}
 
