@@ -19,11 +19,12 @@ Environment / Settings
 - EMBED_MODEL (default `nomic-embed-text`) for semantic scoring via Ollama embeddings
 
 Key endpoints
+Key endpoints
 - Health/version: `GET /health`, `GET /version`
 - Settings: `GET/POST /settings` (.env persistence), `GET /embeddings/test`
-- Datasets: `GET /datasets`, `POST /datasets/upload`, `POST /datasets/save`, `GET /datasets/{id}`, `GET /goldens/{id}`
-- Runs: `POST /runs`, `GET /runs`, `GET /runs/{job_id}/status`, `POST /runs/{job_id}/control`
-- Artifacts: `GET /runs/{run_id}/results`, `GET /runs/{run_id}/artifacts?type=json|csv|html`, `POST /runs/{run_id}/rebuild`
+- Datasets: `GET /datasets?vertical=`, `POST /datasets/upload`, `POST /datasets/save`, `GET /datasets/{id}`, `GET /goldens/{id}`
+- Runs: `POST /runs` (UI passes context.vertical), `GET /runs?vertical=`, `GET /runs/{job_id}/status`, `POST /runs/{job_id}/control`
+- Artifacts: `GET /runs/{run_id}/results?vertical=`, `GET /runs/{run_id}/artifacts?type=json|csv|html&vertical=`, `POST /runs/{run_id}/rebuild`
 - Compare: `GET /compare?runA=&runB=`
 
 Job orchestration
@@ -33,5 +34,9 @@ Job orchestration
 Metrics
 - exact, semantic, consistency, adherence, hallucination
 - Semantic uses Ollama embeddings; ensure Ollama is running and `EMBED_MODEL` is available
+
+Storage layout
+- Datasets are stored under `datasets/<vertical>/`.
+- Runs are stored under `runs/<vertical>/`.
 
 See `UserGuide.md` for usage.

@@ -8,5 +8,6 @@ Project documentation and plans live here.
  - See `multi_turn_evals_implementation_plan_v2.md` for the prompt-by-prompt v2 plan
 
 Quick links:
-- Coverage strategy and settings: configured via `/coverage/settings` and `configs/coverage.json` (Prompt 13)
-- Combined array export (Prompt 14): POST `/coverage/generate` with `as_array: true`
+- Dataset generation strategy: configured via `/coverage/settings` and `configs/coverage.json`
+- Combined array export: POST `/coverage/generate` with `as_array: true`
+- Dataset Generator guide: see `DatasetGeneratorGuide.md`

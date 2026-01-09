@@ -20,8 +20,11 @@ Key capabilities
 - Persistence: filesystem (`runs/`)
 
 What’s new recently
+- Multi-vertical storage and runtime selection (header selector). Data under `datasets/<vertical>/` and `runs/<vertical>/`.
+- Dataset Generator page (was Coverage Generator) to create datasets per strategy; appears first in the navbar.
+- Datasets page renamed to “Datasets Viewer”.
 - OpenAI provider support (set `OPENAI_API_KEY`; pick model in Runs)
-- Settings page now manages API keys, hosts, semantic threshold, default models, and `EMBED_MODEL`
+- Settings page manages API keys, hosts, semantic threshold, default models, and `EMBED_MODEL`
 - Metrics config persisted to `configs/metrics.json` and respected across UI and backend
 - Rebuild endpoint to enrich old runs: `POST /runs/{run_id}/rebuild`
 - Dataset schema additions: conversation `title` and `metadata.short_description`

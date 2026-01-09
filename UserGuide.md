@@ -92,7 +92,7 @@ CI (GitHub Actions):
 
 Open http://localhost:5173 in your browser.
 
-### 1. Datasets page
+### 1. Datasets Viewer
 - Upload a dataset (.dataset.json) and optional golden (.golden.json).
 - Files are validated on the server and saved under the repo `datasets/` folder.
 - The table shows: dataset id, version, domain, difficulty, number of conversations, and validation status.
@@ -193,6 +193,8 @@ OLLAMA_MODEL=llama3.2:latest
 GEMINI_MODEL=gemini-2.5
 OPENAI_MODEL=gpt-5.1
 EMBED_MODEL=nomic-embed-text
+
+Note: “.env (dev-only)” in the UI means these values are stored locally in `.env` for development. Restart the backend to apply.
 ```
 
 ### 5. Metrics page
@@ -212,31 +214,17 @@ Example `configs/metrics.json` structure:
 }
 ```
 
-### 6. Golden Generator page
-- Generate a sample dataset and golden for Commerce or Banking.
-- Choose difficulty and outcome (ALLOW/DENY/PARTIAL).
-– Download the generated JSON files. You can upload them on the Datasets page or edit them in the Golden Editor.
+### 6. Dataset Generator page (formerly “Coverage Generator”)
+- Create evaluation datasets automatically using the configured strategy.
+- Optionally save generated datasets and goldens to disk.
+- Located as the first item in the navigation bar.
 
-Example generation choices:
-- Domain: commerce
-- Difficulty: medium
-- Outcome: PARTIAL
-This generates a 6‑turn conversation with a partial refund and matching golden entries for key assistant turns.
+Tips:
+- Preview coverage first, then enable “Save to server” to write files.
+- Files are stored per vertical under `datasets/<vertical>/`.
 
-### 7. Golden Editor page
-- Load an existing dataset and its golden.
-- Edit JSON directly and save. You can choose to overwrite and bump the patch version.
-– Server validates JSON against schemas before saving. If validation fails, the Save call returns an error list with precise locations.
-
-Example save payload (what the UI sends):
-```json
-{
-  "dataset": { /* full dataset object */ },
-  "golden": { /* full golden object (optional) */ },
-  "overwrite": true,
-  "bump_version": true
-}
-```
+### 7. Golden Editor (deprecated)
+This tool is currently hidden from the main navigation.
 
 ---
 
@@ -245,8 +233,8 @@ Example save payload (what the UI sends):
 - backend/ — FastAPI app and evaluation engine
 - frontend/ — React + Vite UI
 - configs/schemas/ — JSON Schemas (dataset, golden, run_config)
-- datasets/ — Your datasets and golden files
-- runs/ — Generated run artifacts (results.json, results.csv, report.html, per‑turn JSON)
+- datasets/<vertical>/ — Your datasets and golden files (per industry vertical)
+- runs/<vertical>/ — Generated run artifacts (results.json, results.csv, report.html, per‑turn JSON)
 - scripts/ — Helper scripts (dev.ps1, smoke.ps1)
 - docs/ — Additional documentation
   - docs/GOVERNANCE.md — Coverage governance & versioning guide (Prompt 13)
@@ -258,16 +246,16 @@ Example save payload (what the UI sends):
 Common endpoints:
 - GET /health — basic status
 - GET /version — version, provider flags, and default models
-- GET /datasets — list datasets
+- GET /datasets — list datasets (accepts `?vertical=`)
 - POST /datasets/upload — upload dataset and optional golden
 - GET /datasets/{dataset_id} — get dataset JSON
 - GET /goldens/{dataset_id} — get golden JSON
 - POST /datasets/save — validate and write dataset/golden
 - POST /validate — validate JSON against schemas (dataset/golden/run_config)
-- POST /runs — start a run
-- GET /runs — list runs
+- POST /runs — start a run (UI passes context.vertical)
+- GET /runs — list runs (accepts `?vertical=`)
 - GET /runs/{job_id}/status — live job status
-- GET /runs/{run_id}/results — get results.json
+- GET /runs/{run_id}/results — get results.json (accepts `?vertical=`)
 - GET /runs/{run_id}/artifacts?type=json|csv|html — download/export
 - POST /runs/{run_id}/feedback — append human feedback
 - GET /compare?runA=&runB= — compare run summaries
@@ -277,7 +265,7 @@ Common endpoints:
 - GET/POST /metrics-config — read/write metrics configuration
 - GET /coverage/taxonomy — list domains and behaviors
 - GET /coverage/manifest — preview counts per domain×behavior pair (query params: domains, behaviors)
-- POST /coverage/generate — generate datasets/goldens (combined or split) with options to save
+- POST /coverage/generate — generate datasets/goldens (combined or split) with options to save (stores under `datasets/<vertical>/`)
 - POST /coverage/generate (as_array=true) — emit a single JSON array with the combined scenario schema (Prompt 14)
 - GET /coverage/report.csv?type=summary|heatmap — download CSV reports
 - POST /coverage/per-turn.csv — generate a per-turn CSV for a dataset/golden payload
@@ -309,11 +297,15 @@ Common endpoints:
   - Ensure Ollama is running, `EMBED_MODEL` is pulled, and `OLLAMA_HOST` is correct.
   - Use `GET /embeddings/test` to validate before running.
 
+Verticals:
+- Use the “Vertical” selector in the header to switch between industries.
+- Storage is separated by vertical under `datasets/<vertical>/` and `runs/<vertical>/`.
+
 Logs and artifacts:
 - Backend logs in the terminal where uvicorn runs.
 - Per‑turn artifacts under `runs/<run_id>/conversations/<conversation_id>/turn_XXX.json`.
 - Aggregated results in `runs/<run_id>/results.json` and `.csv`.
- - Coverage CSVs via the Coverage Generator page: summary, heatmap, and per-turn exports.
+- Coverage CSVs via the Dataset Generator page: summary, heatmap, and per-turn exports.
 
 ---
 
