@@ -36,13 +36,13 @@ def _clip_text_to_tokens(text: str, max_tokens: int) -> Tuple[str, bool]:
     return clipped, True
 
 
-def build_context(domain: str, turns: List[Dict[str, str]], state: Dict[str, Any], max_tokens: int = 2048, conv_meta: Optional[Dict[str, Any]] = None, params_override: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def build_context(domain: str, turns: List[Dict[str, str]], state: Dict[str, Any], max_tokens: int = 1800, conv_meta: Optional[Dict[str, Any]] = None, params_override: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     Build provider-ready messages from state + last 4 turns with a simple token budget safeguard.
     Returns { messages: [...], audit: {...} }.
     """
-    # last 4 raw turns
-    recent_turns = turns[-4:] if len(turns) > 4 else list(turns)
+    # last 5 raw turns to preserve more context
+    recent_turns = turns[-5:] if len(turns) > 5 else list(turns)
 
     # Try to pull policy+facts from conversation metadata if provided (new datasets)
     cm = conv_meta or {}
@@ -65,12 +65,10 @@ def build_context(domain: str, turns: List[Dict[str, str]], state: Dict[str, Any
         # downstream scoring can reliably extract the final outcome.
         req = (
             "Output Requirements:\n"
-            "- Ask clarifying questions when needed; do not resolve prematurely.\n"
-            "- For the final answer (A2), provide a policy-compliant, actionable resolution.\n"
+            "- Be brief; ask clarifiers only if blocking.\n"
+            "- Final answer must be policy-compliant and actionable.\n"
             "- Do not invent facts.\n"
-            "- At the very end of your final answer, append a single line with a JSON summary in this exact form: \n"
-            "  FINAL_STATE: {\"decision\": \"ALLOW|DENY|PARTIAL\", \"next_action\": <string or null>, \"refund_amount\": <number or null>, \"policy_flags\": [<strings>] }\n"
-            "  Only include this once and keep it on a single line.\n"
+            "- End with: FINAL_STATE: {\"decision\": \"ALLOW|DENY|PARTIAL\", \"next_action\": <string|null>, \"refund_amount\": <number|null>, \"policy_flags\": [<strings>] }\n"
         )
         system_content = (
             f"You are an assistant for {domain}. Follow company policy while being helpful and concise.\n\n"
