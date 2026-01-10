@@ -71,7 +71,7 @@ export default function ReportsPage() {
   useEffect(() => { loadRuns() }, [vertical])
   useEffect(() => { if (runId) loadResults(runId) }, [runId, vertical])
 
-  const download = (type: 'json' | 'csv' | 'html' | 'pdf') => {
+  const download = (type: 'json' | 'csv' | 'html') => {
     window.open(`/runs/${runId}/artifacts?type=${type}&vertical=${encodeURIComponent(vertical)}`, '_blank')
   }
 
@@ -109,7 +109,6 @@ export default function ReportsPage() {
           <Button variant="secondary" disabled={!runId} onClick={() => download('json')}>Download JSON</Button>
           <Button variant="secondary" disabled={!runId} onClick={() => download('csv')}>Download CSV</Button>
           <Button variant="warning" disabled={!runId} onClick={() => download('html')}>Open Report</Button>
-          <Button variant="primary" disabled={!runId} onClick={() => download('pdf')}>Download PDF</Button>
         </div>
       </Card>
 
