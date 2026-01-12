@@ -35,13 +35,31 @@ export default function SettingsPage() {
   const load = async () => {
     setErr(null)
     try {
-      const r = await fetch('/settings')
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      const js = await r.json()
+      const [settingsRes, metricsRes] = await Promise.all([
+        fetch('/settings'),
+        fetch('/metrics-config').catch(() => null),
+      ])
+      if (!settingsRes.ok) throw new Error(`HTTP ${settingsRes.status}`)
+      const js = await settingsRes.json()
+      const metricsCfg = metricsRes && metricsRes.ok ? await metricsRes.json() : null
       setSettings(js)
       setOllama(js.ollama_host || '')
-      setSemThr(Number(js.semantic_threshold) || 0.8)
-      if (typeof js.hallucination_threshold === 'number') setHallThr(Number(js.hallucination_threshold))
+      const semFromSettings = Number(js.semantic_threshold)
+      const hallFromSettings = typeof js.hallucination_threshold === 'number' ? Number(js.hallucination_threshold) : undefined
+      const semFromMetrics = (() => {
+        if (!metricsCfg || !Array.isArray(metricsCfg?.metrics)) return undefined
+        const mm = metricsCfg.metrics.find((m: any) => String(m?.name) === 'semantic_similarity')
+        const t = (mm && typeof mm.threshold === 'number') ? Number(mm.threshold) : undefined
+        return (typeof t === 'number' && isFinite(t)) ? t : undefined
+      })()
+      const hallFromMetrics = (() => {
+        if (!metricsCfg || !Array.isArray(metricsCfg?.metrics)) return undefined
+        const mm = metricsCfg.metrics.find((m: any) => String(m?.name) === 'hallucination')
+        const t = (mm && typeof mm.threshold === 'number') ? Number(mm.threshold) : undefined
+        return (typeof t === 'number' && isFinite(t)) ? t : undefined
+      })()
+      setSemThr(typeof semFromMetrics === 'number' ? semFromMetrics : (isFinite(semFromSettings) ? semFromSettings : 0.8))
+      setHallThr(typeof hallFromMetrics === 'number' ? hallFromMetrics : (typeof hallFromSettings === 'number' ? hallFromSettings : 0.8))
       const m = js.models || {}
       if (m.ollama) setModelOllama(m.ollama)
       if (m.gemini) setModelGemini(m.gemini)
@@ -60,6 +78,23 @@ export default function SettingsPage() {
       const r = await fetch('/settings', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ollama_host: ollama, google_api_key: apiKeyGemini || undefined, openai_api_key: apiKeyOpenAI || undefined, semantic_threshold: semThr, hallucination_threshold: hallThr, ollama_model: modelOllama, gemini_model: modelGemini, openai_model: modelOpenAI, embed_model: embedModel }) })
       const js = await r.json()
       if (!r.ok) throw new Error(js?.detail || 'Save failed')
+      // Keep metrics-config thresholds in sync with LLM Settings values
+      try {
+        const mr = await fetch('/metrics-config')
+        if (mr.ok) {
+          const cfg = await mr.json()
+          if (cfg && Array.isArray(cfg.metrics)) {
+            const updated = { ...cfg }
+            updated.metrics = cfg.metrics.map((m: any) => {
+              const name = String(m?.name || '')
+              if (name === 'semantic_similarity') return { ...m, threshold: Number(semThr) }
+              if (name === 'hallucination') return { ...m, threshold: Number(hallThr) }
+              return m
+            })
+            await fetch('/metrics-config', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(updated) })
+          }
+        }
+      } catch {}
       setMsg('Saved. Restart backend to apply to providers.')
       await load()
     } catch (e:any) {
