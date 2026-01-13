@@ -11,9 +11,12 @@ class Reporter:
     templates_dir: Path
 
     def __post_init__(self):
+        # Disable template caching and enable auto-reload to ensure latest template is used
         self.env = Environment(
             loader=FileSystemLoader(self.templates_dir),
-            autoescape=select_autoescape(['html', 'xml'])
+            autoescape=select_autoescape(['html', 'xml']),
+            auto_reload=True,
+            cache_size=0,
         )
 
     def render_html(self, run_results: Dict[str, Any]) -> str:

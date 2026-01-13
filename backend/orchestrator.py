@@ -692,7 +692,9 @@ class Orchestrator:
                         "metrics": mets,
                         "turn_pass": turn_pass,
                         "user_prompt_snippet": _snippet(user_text),
+                        "user_prompt_full": user_text,
                         "assistant_output_snippet": _snippet(out_text, 200),
+                        "assistant_output_full": out_text,
                     })
                     last_state = rec.get("state") or last_state
 

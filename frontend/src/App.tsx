@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
 import DatasetsPage from './pages/Datasets'
 import RunsPage from './pages/Runs'
@@ -10,6 +10,7 @@ import MetricsPage from './pages/Metrics'
 import CoverageGeneratorPage from './pages/CoverageGenerator'
 import Card from './components/Card'
 import { VerticalProvider, useVertical } from './context/VerticalContext'
+import Button from './components/Button'
 
 function VerticalSelector() {
   const { vertical, supported, setVertical, loading } = useVertical()
@@ -81,17 +82,113 @@ function Layout({ children }: { children: React.ReactNode }) {
 }
 
 function HomeCards() {
+  const [status, setStatus] = useState<{ ok: boolean; version?: string; vertical?: string; ollama_host?: string; models?: Record<string, string>; gemini?: boolean; openai?: boolean; embed_model?: string; errors: string[] }>({ ok: false, errors: [] })
+  const { vertical } = useVertical()
+
+  useEffect(() => {
+    const load = async () => {
+      const errs: string[] = []
+      let ok = false
+      let version: any = null
+      try {
+        const h = await fetch('/health')
+        ok = h.ok
+      } catch (e: any) {
+        errs.push('Backend not reachable at /health')
+      }
+      try {
+        const v = await fetch('/version')
+        if (v.ok) version = await v.json()
+      } catch (e: any) {
+        errs.push('Failed to load /version')
+      }
+      try {
+        const s = await fetch('/settings')
+        if (s.ok) {
+          const js = await s.json()
+          setStatus(prev => ({
+            ...prev,
+            ok,
+            version: version?.version,
+            vertical,
+            ollama_host: js?.ollama_host,
+            models: js?.models,
+            gemini: js?.gemini_enabled,
+            openai: js?.openai_enabled,
+            embed_model: js?.embed_model,
+            errors: errs,
+          }))
+          return
+        }
+      } catch (e: any) {
+        errs.push('Failed to load /settings')
+      }
+      setStatus(prev => ({ ...prev, ok, version: version?.version, vertical, errors: errs }))
+    }
+    load()
+  }, [vertical])
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Card title="Quick Start">
-        <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-          <li>Upload a dataset and golden set</li>
-          <li>Pick a model and metrics</li>
-          <li>Run and review results</li>
-        </ul>
+        <div className="text-sm text-gray-700 space-y-3">
+          <ol className="list-decimal pl-5 space-y-1">
+            <li>
+              Configure models and thresholds
+              <div className="mt-2">
+                <Link to="/settings"><Button variant="primary">Open Settings</Button></Link>
+              </div>
+            </li>
+            <li>
+              Prepare or generate a dataset for the "{vertical}" vertical
+              <div className="mt-2 flex gap-2 flex-wrap">
+                <Link to="/coverage"><Button variant="warning">Dataset Generator</Button></Link>
+                <Link to="/datasets"><Button variant="secondary">Datasets</Button></Link>
+              </div>
+            </li>
+            <li>
+              Choose metrics, then run and review
+              <div className="mt-2 flex gap-2 flex-wrap">
+                <Link to="/metrics"><Button variant="secondary">Metrics</Button></Link>
+                <Link to="/runs"><Button variant="success">Runs</Button></Link>
+                <Link to="/reports"><Button variant="ghost">Reports</Button></Link>
+              </div>
+            </li>
+          </ol>
+        </div>
       </Card>
       <Card title="Status">
-        <div className="text-sm text-gray-700">Backend: configure at backend/app.py</div>
+        <div className="text-sm text-gray-700 space-y-2">
+          <div>
+            Backend: {status.ok ? <span className="text-green-700 font-medium">OK</span> : <span className="text-red-700 font-medium">Unavailable</span>} {status.version ? <span className="text-gray-500">v{status.version}</span> : null}
+          </div>
+          <div>Vertical: <span className="font-medium">{status.vertical || vertical}</span></div>
+          {status.ollama_host ? <div>Ollama host: <span className="font-mono">{status.ollama_host}</span></div> : null}
+          {status.embed_model ? <div>Embed model: <span className="font-mono">{status.embed_model}</span></div> : null}
+          {status.models ? (
+            <div className="text-xs text-gray-600">Defaults → ollama: <span className="font-mono">{status.models.ollama}</span>, gemini: <span className="font-mono">{status.models.gemini}</span>, openai: <span className="font-mono">{status.models.openai}</span></div>
+          ) : null}
+          <div className="text-xs text-gray-600">
+            Providers: Gemini {status.gemini ? '✓' : '×'} · OpenAI {status.openai ? '✓' : '×'}
+          </div>
+          {status.errors.length > 0 && (
+            <ul className="list-disc pl-5 text-xs text-red-700 space-y-1">
+              {status.errors.map((e, i) => <li key={i}>{e}</li>)}
+            </ul>
+          )}
+          <div className="pt-2">
+            <a href="/embeddings/test" target="_blank" rel="noreferrer"><Button variant="ghost">Test embeddings</Button></a>
+          </div>
+        </div>
+      </Card>
+      <Card title="Shortcuts">
+        <div className="flex flex-wrap gap-2 text-sm">
+          <Link to="/datasets"><Button variant="secondary">Datasets</Button></Link>
+          <Link to="/coverage"><Button variant="warning">Dataset Generator</Button></Link>
+          <Link to="/metrics"><Button variant="secondary">Metrics</Button></Link>
+          <Link to="/runs"><Button variant="success">Runs</Button></Link>
+          <Link to="/reports"><Button variant="ghost">Reports</Button></Link>
+        </div>
       </Card>
     </div>
   )

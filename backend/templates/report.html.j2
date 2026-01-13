@@ -13,6 +13,11 @@
     th, td { padding: .5rem; border-bottom: 1px solid #e5e7eb; text-align: left; }
     .muted { color: #64748b; }
     .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; background: #e5f0ff; color: #1e40af; font-size: .8rem; }
+    .metric-failure { padding: 4px 8px; margin: 2px 0; background: #fef2f2; border-left: 3px solid #dc2626; border-radius: 3px; font-size: .9rem; }
+    .metric-name { font-weight: 600; color: #991b1b; }
+    .reason-text { margin-left: 8px; color: #374151; }
+    .output-text { white-space: pre-wrap; font-family: 'Consolas', 'Monaco', monospace; font-size: .9rem; line-height: 1.5; background: #f9fafb; padding: 8px; border-radius: 4px; max-height: 300px; overflow-y: auto; }
+    .prompt-text { white-space: pre-wrap; font-family: system-ui; font-size: .95rem; line-height: 1.4; }
 
     /* Visual donut charts */
     :root { --pass-color: #16a34a; --fail-color: #dc2626; }
@@ -124,31 +129,17 @@
               <td>
                 {% set outcome = c.summary.final_outcome if c.summary is defined and c.summary.final_outcome is defined else none %}
                 {% if outcome and outcome.reasons and outcome.reasons|length > 0 %}
-                  {% set pretty = [] %}
-                  {% for r in outcome.reasons %}
-                    {% if 'decision mismatch' in r %}
-                      {% set exp = (r.split('expected=')|last).split(',')[0] if 'expected=' in r else 'EXPECTED' %}
-                      {% set act = (r.split('actual=')|last) if 'actual=' in r else 'ACTUAL' %}
-                      {% if act == 'None' or act == 'null' %}
-                        {% set _ = pretty.append('Model did not provide a final decision (FINAL_STATE missing or unparsable). Expected ' ~ exp ~ '.') %}
-                      {% else %}
-                        {% set _ = pretty.append('Model decision differs from expected: expected ' ~ exp ~ ', got ' ~ act ~ '.') %}
-                      {% endif %}
-                    {% elif 'mismatch' in r and ('expected=' in r or 'actual=' in r) %}
-                      {% set exp = (r.split('expected=')|last).split(',')[0] if 'expected=' in r else 'EXPECTED' %}
-                      {% set act = (r.split('actual=')|last) if 'actual=' in r else 'ACTUAL' %}
-                      {% set _ = pretty.append('Output differs from golden reference: expected ' ~ exp ~ ', got ' ~ act ~ '.') %}
-                    {% else %}
-                      {% set _ = pretty.append(r) %}
-                    {% endif %}
-                  {% endfor %}
-                  {{ pretty | join(' ') }}
+                  <div style="line-height: 1.6;">
+                    {% for reason in outcome.reasons %}
+                      <div style="margin-bottom: 4px;">• {{ reason }}</div>
+                    {% endfor %}
+                  </div>
                 {% elif c.summary.failed_metrics and (c.summary.failed_metrics|length > 0) %}
-                  Failed metrics: {{ (c.summary.failed_metrics or []) | join(', ') }}
+                  <div><strong>Failed metrics:</strong> {{ (c.summary.failed_metrics or []) | join(', ') }}</div>
                 {% elif c.summary.failed_turns_count is defined and c.summary.failed_turns_count > 0 %}
-                  One or more turns failed their checks. See turn-level failures below.
+                  <div class="muted">One or more turns failed. See turn-level details below.</div>
                 {% else %}
-                  See failed turns and metrics below.
+                  <div class="muted">See detailed turn failures below</div>
                 {% endif %}
               </td>
             </tr>
@@ -177,31 +168,6 @@
                 {% set co = t.metrics.consistency if t.metrics is defined and t.metrics.consistency is defined else none %}
                 {% set ad = t.metrics.adherence if t.metrics is defined and t.metrics.adherence is defined else none %}
                 {% set ha = t.metrics.hallucination if t.metrics is defined and t.metrics.hallucination is defined else none %}
-                {% set reasons = [] %}
-                {% set failed_names = [] %}
-                {% if ex is not none and ex.pass is defined and not ex.pass %}
-                  {% set _ = failed_names.append('exact') %}
-                  {% set _ = reasons.append(ex.reason if ex.reason is defined and ex.reason else 'Exact match differs from expected.') %}
-                {% endif %}
-                {% if se is not none and se.pass is defined and not se.pass %}
-                  {% set _ = failed_names.append('semantic') %}
-                  {% set se_msg = 'Semantic similarity below threshold' %}
-                  {% if se.score_max is defined %}{% set se_msg = se_msg ~ ' (score=' ~ ('%.2f'|format(se.score_max)) ~ ')' %}{% endif %}
-                  {% if se.reason is defined and se.reason %}{% set se_msg = se.reason %}{% endif %}
-                  {% set _ = reasons.append(se_msg) %}
-                {% endif %}
-                {% if co is not none and co.pass is defined and not co.pass %}
-                  {% set _ = failed_names.append('consistency') %}
-                  {% set _ = reasons.append(co.reason if co.reason is defined and co.reason else 'Inconsistent with prior turns or golden.') %}
-                {% endif %}
-                {% if ad is not none and ad.pass is defined and not ad.pass %}
-                  {% set _ = failed_names.append('adherence') %}
-                  {% set _ = reasons.append(ad.reason if ad.reason is defined and ad.reason else 'Policy adherence criteria not met.') %}
-                {% endif %}
-                {% if ha is not none and ha.pass is defined and not ha.pass %}
-                  {% set _ = failed_names.append('hallucination') %}
-                  {% set _ = reasons.append(ha.reason if ha.reason is defined and ha.reason else 'Possible hallucination detected.') %}
-                {% endif %}
                 <tr>
                   <td>
                     <div><strong>{{ c.conversation_title or c.conversation_slug or c.conversation_id }}</strong></div>
@@ -210,11 +176,27 @@
                   <td>
                     <div><em>User:</em> {{ t.user_prompt_snippet or '' }}</div>
                     {% if t.assistant_output_snippet %}<div class="muted"><em>Assistant:</em> {{ t.assistant_output_snippet }}</div>{% endif %}
-                    {% if failed_names|length %}
-                      <div class="muted">Failed: {{ failed_names|join(', ') }}</div>
+                  </td>
+                  <td>
+                    {% if ex is not none and ex.pass is defined and not ex.pass %}
+                      <div class="metric-failure"><span class="metric-name">Exact:</span>{% if ex.reason %}<span class="reason-text">{{ ex.reason }}</span>{% else %}<span class="reason-text">Match differs from expected</span>{% endif %}</div>
+                    {% endif %}
+                    {% if se is not none and se.pass is defined and not se.pass %}
+                      <div class="metric-failure"><span class="metric-name">Semantic:</span>{% if se.reason %}<span class="reason-text">{{ se.reason }}</span>{% elif se.score_max is defined %}<span class="reason-text">Score {{ '%.2f'|format(se.score_max) }} below threshold</span>{% else %}<span class="reason-text">Below similarity threshold</span>{% endif %}</div>
+                    {% endif %}
+                    {% if co is not none and co.pass is defined and not co.pass %}
+                      <div class="metric-failure"><span class="metric-name">Consistency:</span>{% if co.reason %}<span class="reason-text">{{ co.reason }}</span>{% else %}<span class="reason-text">Inconsistent with prior context</span>{% endif %}</div>
+                    {% endif %}
+                    {% if ad is not none and ad.pass is defined and not ad.pass %}
+                      <div class="metric-failure"><span class="metric-name">Adherence:</span>{% if ad.reason %}<span class="reason-text">{{ ad.reason }}</span>{% else %}<span class="reason-text">Policy criteria not met</span>{% endif %}</div>
+                    {% endif %}
+                    {% if ha is not none and ha.pass is defined and not ha.pass %}
+                      <div class="metric-failure"><span class="metric-name">Hallucination:</span>{% if ha.reason %}<span class="reason-text">{{ ha.reason }}</span>{% else %}<span class="reason-text">Possible hallucination detected</span>{% endif %}</div>
+                    {% endif %}
+                    {% if (ex is none or ex.pass is not defined or ex.pass) and (se is none or se.pass is not defined or se.pass) and (co is none or co.pass is not defined or co.pass) and (ad is none or ad.pass is not defined or ad.pass) and (ha is none or ha.pass is not defined or ha.pass) %}
+                      <span class="muted">No specific failures</span>
                     {% endif %}
                   </td>
-                  <td>{{ reasons|join('; ') if reasons|length else 'No specific reason provided.' }}</td>
                 </tr>
               {% endif %}
             {% endfor %}
@@ -240,9 +222,10 @@
         — <span class="badge">{{ 'PASS' if conv.summary.conversation_pass else 'FAIL' }}</span>
       </h3>
       <div class="muted">
-        {% set meta_line = [conv.domain, conv.behavior, conv.scenario] | select | list %}
-        {% if meta_line|length %}{{ meta_line|join(' • ') }}{% endif %}
-        {% if conv.conversation_slug %}{% if meta_line|length %} • {% endif %}<span class="muted">{{ conv.conversation_slug }}</span>{% endif %}
+        {% if conv.domain %}{{ conv.domain }}{% endif %}
+        {% if conv.behavior %}{% if conv.domain %} • {% endif %}{{ conv.behavior }}{% endif %}
+        {% if conv.scenario %}{% if conv.domain or conv.behavior %} • {% endif %}{{ conv.scenario }}{% endif %}
+        {% if conv.conversation_slug %}{% if conv.domain or conv.behavior or conv.scenario %} • {% endif %}<span class="muted">{{ conv.conversation_slug }}</span>{% endif %}
       </div>
       <div class="muted">Weighted pass rate: {{ '%.2f'|format(conv.summary.weighted_pass_rate or 0) }}</div>
       {% if conv.summary.high_severity_violation is defined and conv.summary.high_severity_violation %}
@@ -252,12 +235,15 @@
       <div class="muted">{{ conv.conversation_description }}</div>
       {% endif %}
       <div class="muted">
-        {% set failed_turns = [] %}
-        {% for t in conv.turns %}{% if t.turn_pass is defined and not t.turn_pass %}{% set _ = failed_turns.append(t.turn_index) %}{% endif %}{% endfor %}
-        {% if failed_turns|length %}
-          Failed turns: {{ failed_turns|join(', ') }}
+        <strong>Failed turns:</strong> 
+        {% set has_failures = namespace(value=false) %}
+        {% for t in conv.turns %}{% if t.turn_pass is defined and not t.turn_pass %}{% set has_failures.value = true %}{% endif %}{% endfor %}
+        {% if has_failures.value %}
+          {% for t in conv.turns %}
+            {% if t.turn_pass is defined and not t.turn_pass %}{{ t.turn_index }}{% if not loop.last %}, {% endif %}{% endif %}
+          {% endfor %}
         {% else %}
-          Failed turns: 0
+          <span style="color: #059669;">None</span>
         {% endif %}
         {% if conv.summary.failed_metrics %}
           · Failed metrics: {{ (conv.summary.failed_metrics or [])|join(', ') }}
@@ -265,15 +251,20 @@
       </div>
     </div>
 
-    <h4>Turns (snippets)</h4>
+    <h4>Turns</h4>
     <table>
       <thead><tr><th>Turn</th><th>User prompt</th><th>Assistant output</th><th>Pass</th></tr></thead>
       <tbody>
       {% for t in conv.turns %}
         <tr>
           <td>{{ t.turn_index }}</td>
-          <td>{{ t.user_prompt_snippet or '' }}</td>
-          <td>{{ t.assistant_output_snippet or '' }}</td>
+          <td>
+            <div class="prompt-text">{{ t.user_prompt_full or t.user_prompt_snippet or '' }}</div>
+          </td>
+          <td>
+            {% set a_full = t.assistant_output_full or t.assistant_output_snippet or '' %}
+            <div class="output-text">{{ a_full }}</div>
+          </td>
           <td class="{{ 'pass' if t.turn_pass is not defined or t.turn_pass else 'fail' }}">{{ 'True' if t.turn_pass is not defined or t.turn_pass else 'False' }}</td>
         </tr>
       {% endfor %}
@@ -287,11 +278,11 @@
       {% for t in conv.turns %}
         <tr>
           <td>{{ t.turn_index }}</td>
-          {% set ex = t.metrics.exact if t.metrics is defined and t.metrics.exact is defined else None %}
-          {% set se = t.metrics.semantic if t.metrics is defined and t.metrics.semantic is defined else None %}
-          {% set co = t.metrics.consistency if t.metrics is defined and t.metrics.consistency is defined else None %}
-          {% set ad = t.metrics.adherence if t.metrics is defined and t.metrics.adherence is defined else None %}
-          {% set ha = t.metrics.hallucination if t.metrics is defined and t.metrics.hallucination is defined else None %}
+          {% set ex = t.metrics.exact if t.metrics is defined and t.metrics.exact is defined else none %}
+          {% set se = t.metrics.semantic if t.metrics is defined and t.metrics.semantic is defined else none %}
+          {% set co = t.metrics.consistency if t.metrics is defined and t.metrics.consistency is defined else none %}
+          {% set ad = t.metrics.adherence if t.metrics is defined and t.metrics.adherence is defined else none %}
+          {% set ha = t.metrics.hallucination if t.metrics is defined and t.metrics.hallucination is defined else none %}
           <td class="{{ 'pass' if ex and ex.pass else 'fail' if ex is not none else '' }}">{{ ex.pass if ex else '' }}</td>
           {% if se and se.skipped %}
             <td class="muted" title="{{ se.reason or '' }}">skipped</td>
