@@ -914,6 +914,25 @@ async def submit_dataset_chat(body: ChatDatasetBody, vertical: Optional[str] = N
         job_path.write_text(json.dumps({"status": "queued", "created": _utcnow()}, indent=2), encoding='utf-8')
     except Exception:
         pass
+    # Persist pending user message to dataset chat log
+    try:
+        root = Path(__file__).resolve().parents[1]
+        conv_key = str(body.conversation_id) if body.conversation_id is not None else 'None'
+        out_dir = root / "datasets" / v / "chats" / body.dataset_id
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / f"{conv_key}.jsonl"
+        with out_path.open("a", encoding="utf-8") as f:
+            evt = {
+                "ts": _utcnow(),
+                "model": body.model,
+                "user": body.message,
+                "assistant": None,
+                "ok": None,
+                "provider_meta": {"job_id": job_id, "status": "queued"}
+            }
+            f.write(json.dumps(evt) + "\n")
+    except Exception:
+        pass
     asyncio.create_task(_run_dataset_chat_job(job_path, body, v))
     return {"job_id": job_id}
 
@@ -1000,6 +1019,24 @@ async def submit_report_chat(body: ChatReportBody, vertical: Optional[str] = Non
     job_path = _report_job_path(rd, body.run_id, job_id)
     try:
         job_path.write_text(json.dumps({"status": "queued", "created": _utcnow()}, indent=2), encoding='utf-8')
+    except Exception:
+        pass
+    # Persist pending user message to report chat log
+    try:
+        out_dir = rd.layout.run_dir(body.run_id) / "chats"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        name = f"report-{(body.conversation_id or 'all')}.jsonl"
+        out_path = out_dir / name
+        with out_path.open("a", encoding="utf-8") as f:
+            evt = {
+                "ts": _utcnow(),
+                "model": body.model,
+                "user": body.message,
+                "assistant": None,
+                "ok": None,
+                "provider_meta": {"job_id": job_id, "status": "queued"}
+            }
+            f.write(json.dumps(evt) + "\n")
     except Exception:
         pass
     # Schedule background task

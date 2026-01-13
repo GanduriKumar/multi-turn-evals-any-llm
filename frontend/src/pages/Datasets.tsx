@@ -28,7 +28,8 @@ export default function DatasetsPage() {
   const [chatConvs, setChatConvs] = useState<any[]>([])
   const [chatHistory, setChatHistory] = useState<{ role: 'user'|'assistant'; content: string }[]>([])
   const [chatInput, setChatInput] = useState('')
-  const [chatModel, setChatModel] = useState('openai:gpt-5.1')
+  const [chatModel, setChatModel] = useState('')
+  const [chatModels, setChatModels] = useState<string[]>([])
   const [chatBusy, setChatBusy] = useState(false)
   const chatRef = useRef<HTMLDivElement | null>(null)
   const chatAbortRef = useRef<AbortController | null>(null)
@@ -74,18 +75,25 @@ export default function DatasetsPage() {
     } catch {
       // ignore and keep manual entry
     }
-    // pick a sensible default model based on backend capabilities
+    // Load model options based on /version
     try {
       const v = await fetch('/version')
       if (v.ok) {
         const s = await v.json()
-        const models = s?.models || {}
-        if (s?.openai_enabled) setChatModel(`openai:${models.openai || 'gpt-5.1'}`)
-        else if (s?.gemini_enabled) setChatModel(`gemini:${models.gemini || 'gemini-2.5'}`)
-        else setChatModel(`ollama:${models.ollama || 'llama3.2:latest'}`)
+        const def = s?.models || {}
+        const opts: string[] = []
+        if (s?.openai_enabled && def.openai) opts.push(`openai:${def.openai}`)
+        if (s?.gemini_enabled && def.gemini) opts.push(`gemini:${def.gemini}`)
+        if (def.ollama) opts.push(`ollama:${def.ollama}`)
+        setChatModels(opts.length ? opts : ['openai:gpt-5.1','gemini:gemini-2.5','ollama:llama3.2:latest'])
+        if (!chatHistory.length) setChatModel(opts[0] || 'openai:gpt-5.1')
+      } else {
+        setChatModels(['openai:gpt-5.1','gemini:gemini-2.5','ollama:llama3.2:latest'])
+        if (!chatHistory.length) setChatModel('openai:gpt-5.1')
       }
     } catch {
-      // ignore
+      setChatModels(['openai:gpt-5.1','gemini:gemini-2.5','ollama:llama3.2:latest'])
+      if (!chatHistory.length) setChatModel('openai:gpt-5.1')
     }
   }
 
@@ -110,7 +118,11 @@ export default function DatasetsPage() {
       // persist job
       const convKey = chatConversation || 'None'
       const storageKey = `datasetChatJob:${vertical}:${chatDataset}:${convKey}`
-      try { localStorage.setItem(storageKey, jobId) } catch {}
+      try {
+        localStorage.setItem(storageKey, jobId)
+        // persist the pending user message so we can show it immediately on resume
+        localStorage.setItem(`${storageKey}:userContent`, body.message)
+      } catch {}
       let done = false
       chatPollRef.current = true
       setChatBusy(true)
@@ -122,11 +134,17 @@ export default function DatasetsPage() {
           const sj = await st.json()
           if (sj?.status === 'completed') {
             setChatHistory(h => [...h, { role: 'assistant', content: String(sj.content || '') }])
-            try { localStorage.removeItem(storageKey) } catch {}
+            try {
+              localStorage.removeItem(storageKey)
+              localStorage.removeItem(`${storageKey}:userContent`)
+            } catch {}
             done = true
           } else if (sj?.status === 'failed') {
             setChatHistory(h => [...h, { role: 'assistant', content: `Error: ${String(sj.error || 'failed')}` }])
-            try { localStorage.removeItem(storageKey) } catch {}
+            try {
+              localStorage.removeItem(storageKey)
+              localStorage.removeItem(`${storageKey}:userContent`)
+            } catch {}
             done = true
           }
         } catch { /* ignore transient */ }
@@ -166,6 +184,19 @@ export default function DatasetsPage() {
           if (e?.user) hist.push({ role: 'user', content: String(e.user) })
           if (e?.assistant) hist.push({ role: 'assistant', content: String(e.assistant) })
         }
+        // If a job is in-flight, ensure the pending user message is visible in UI even if file write raced
+        try {
+          const convKey = chatConversation || 'None'
+          const storageKey = `datasetChatJob:${vertical}:${chatDataset}:${convKey}`
+          const pending = localStorage.getItem(storageKey)
+          if (pending) {
+            const pendingMsg = localStorage.getItem(`${storageKey}:userContent`)
+            if (pendingMsg) {
+              const already = hist.some(m => m.role === 'user' && m.content === pendingMsg)
+              if (!already) hist.push({ role: 'user', content: pendingMsg })
+            }
+          }
+        } catch { /* ignore */ }
         if (hist.length) setChatHistory(hist)
       } catch { /* ignore */ }
     })()
@@ -186,6 +217,11 @@ export default function DatasetsPage() {
           setChatConversation(convKey === 'None' ? null : convKey)
           chatPollRef.current = true
           setChatBusy(true)
+          // show pending user message immediately from localStorage if available
+          try {
+            const pendingMsg = localStorage.getItem(`${prefix}${convKey}:userContent`)
+            if (pendingMsg) setChatHistory(h => [...h, { role: 'user', content: pendingMsg }])
+          } catch { /* ignore */ }
           ;(async () => {
             let done = false
             while (!done && chatPollRef.current) {
@@ -196,11 +232,17 @@ export default function DatasetsPage() {
                 const sj = await st.json()
                 if (sj?.status === 'completed') {
                   setChatHistory(h => [...h, { role: 'assistant', content: String(sj.content || '') }])
-                  try { localStorage.removeItem(key) } catch {}
+                  try {
+                    localStorage.removeItem(key)
+                    localStorage.removeItem(`${key}:userContent`)
+                  } catch {}
                   done = true
                 } else if (sj?.status === 'failed') {
                   setChatHistory(h => [...h, { role: 'assistant', content: `Error: ${String(sj.error || 'failed')}` }])
-                  try { localStorage.removeItem(key) } catch {}
+                  try {
+                    localStorage.removeItem(key)
+                    localStorage.removeItem(`${key}:userContent`)
+                  } catch {}
                   done = true
                 }
               } catch { /* ignore */ }
@@ -237,6 +279,7 @@ export default function DatasetsPage() {
         if (!chatOpen) setChatOpen(true)
         setChatDataset(found.datasetId)
         setChatConversation(found.convKey === 'None' ? null : found.convKey)
+        setChatBusy(true) // reflect in-flight until resume polling kicks in
       }
     } catch { /* ignore */ }
   }, [vertical])
@@ -400,9 +443,7 @@ export default function DatasetsPage() {
           <div className="text-xs mb-2">Dataset: <span className="font-mono">{chatDataset}</span></div>
           <div className="flex items-center gap-2 mb-3">
             <select className="select select-bordered select-sm" value={chatModel} onChange={e => setChatModel(e.target.value)}>
-              <option value="openai:gpt-5.1">openai:gpt-5.1</option>
-              <option value="gemini:gemini-2.5">gemini:gemini-2.5</option>
-              <option value="ollama:llama3.2:latest">ollama:llama3.2:latest</option>
+              {chatModels.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
             <Button variant="warning" onClick={() => setChatOpen(false)}>Close</Button>
           </div>

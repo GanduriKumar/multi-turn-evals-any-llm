@@ -57,7 +57,8 @@ export default function ReportsPage() {
   const [rcConversation, setRcConversation] = useState<string>('') // empty => all conversations
   const [rcHistory, setRcHistory] = useState<{ role: 'user'|'assistant'; content: string }[]>([])
   const [rcInput, setRcInput] = useState('')
-  const [rcModel, setRcModel] = useState('openai:gpt-5.1')
+  const [rcModel, setRcModel] = useState('')
+  const [rcModels, setRcModels] = useState<string[]>([])
   const [rcBusy, setRcBusy] = useState(false)
   const rcChatRef = useRef<HTMLDivElement | null>(null)
   const rcAbortRef = useRef<AbortController | null>(null)
@@ -208,6 +209,7 @@ export default function ReportsPage() {
         if (!rcOpen) setRcOpen(true)
         if (runId !== found.runId) setRunId(found.runId)
         setRcConversation(found.convKey === 'all' ? '' : found.convKey)
+        setRcBusy(true) // reflect in-flight immediately until polling starts
       }
     } catch { /* ignore */ }
   }, [vertical])
@@ -273,7 +275,7 @@ export default function ReportsPage() {
     setRcConversation('')
   }
 
-  // When opening the chat, pick a sensible default model based on backend capabilities
+  // Configure chat models list and default selection using run model_spec or backend defaults
   useEffect(() => {
     if (!rcOpen) return
     ;(async () => {
@@ -281,15 +283,29 @@ export default function ReportsPage() {
         const r = await fetch('/version')
         if (!r.ok) return
         const s = await r.json()
-        const models = s?.models || {}
-        if (s?.openai_enabled) setRcModel(`openai:${models.openai || 'gpt-5.1'}`)
-        else if (s?.gemini_enabled) setRcModel(`gemini:${models.gemini || 'gemini-2.5'}`)
-        else setRcModel(`ollama:${models.ollama || 'llama3.2:latest'}`)
+        const def = s?.models || {}
+        const opts: string[] = []
+        if (s?.openai_enabled && def.openai) opts.push(`openai:${def.openai}`)
+        if (s?.gemini_enabled && def.gemini) opts.push(`gemini:${def.gemini}`)
+        if (def.ollama) opts.push(`ollama:${def.ollama}`)
+        // Prefer the run's model_spec if available
+        const runModel = (results as any)?.model_spec as string | undefined
+        const all = [...opts]
+        if (runModel && !all.includes(runModel)) all.unshift(runModel)
+        setRcModels(all.length ? all : ['openai:gpt-5.1','gemini:gemini-2.5','ollama:llama3.2:latest'])
+        // Only set default if user hasn't typed yet
+        if (!rcHistory.length) {
+          if (runModel) setRcModel(runModel)
+          else if (opts.length) setRcModel(opts[0])
+          else setRcModel('openai:gpt-5.1')
+        }
       } catch {
-        // ignore
+        // fallback options
+        setRcModels(['openai:gpt-5.1','gemini:gemini-2.5','ollama:llama3.2:latest'])
+        if (!rcHistory.length && !rcModel) setRcModel('openai:gpt-5.1')
       }
     })()
-  }, [rcOpen])
+  }, [rcOpen, runId, results])
 
   const sendReportChat = async () => {
     if (!runId || !rcInput.trim()) return
@@ -314,7 +330,11 @@ export default function ReportsPage() {
       // persist job so we can resume after navigation
       const convKey = rcConversation || 'all'
       const storageKey = `reportChatJob:${vertical}:${runId}:${convKey}`
-      try { localStorage.setItem(storageKey, jobId) } catch {}
+      try {
+        localStorage.setItem(storageKey, jobId)
+        // persist the pending user message so we can show it immediately on resume
+        localStorage.setItem(`${storageKey}:userContent`, body.message)
+      } catch {}
       // Poll for job status until completed/failed; keep polling even if user navigates away
       rcPollRef.current = true
       setRcBusy(true)
@@ -327,11 +347,17 @@ export default function ReportsPage() {
           const sj = await st.json()
           if (sj?.status === 'completed') {
             setRcHistory(h => [...h, { role: 'assistant', content: String(sj.content || '') }])
-            try { localStorage.removeItem(storageKey) } catch {}
+            try {
+              localStorage.removeItem(storageKey)
+              localStorage.removeItem(`${storageKey}:userContent`)
+            } catch {}
             done = true
           } else if (sj?.status === 'failed') {
             setRcHistory(h => [...h, { role: 'assistant', content: `Error: ${String(sj.error || 'failed')}` }])
-            try { localStorage.removeItem(storageKey) } catch {}
+            try {
+              localStorage.removeItem(storageKey)
+              localStorage.removeItem(`${storageKey}:userContent`)
+            } catch {}
             done = true
           }
         } catch { /* ignore transient */ }
@@ -372,6 +398,27 @@ export default function ReportsPage() {
           if (e?.user) hist.push({ role: 'user', content: String(e.user) })
           if (e?.assistant) hist.push({ role: 'assistant', content: String(e.assistant) })
         }
+        // If a job is in-flight, ensure the pending user message is visible even if the log race missed it
+        try {
+          const convKey = rcConversation || 'all'
+          const storageKey = `reportChatJob:${vertical}:${runId}:${convKey}`
+          const pending = localStorage.getItem(storageKey)
+          if (pending) {
+            const pendingMsg = localStorage.getItem(`${storageKey}:userContent`)
+            if (pendingMsg) {
+              const hasLastUser = hist.length > 0 && hist[hist.length - 1].role === 'user' && hist[hist.length - 1].content === pendingMsg
+              const alreadyIncluded = hist.some(m => m.role === 'user' && m.content === pendingMsg)
+              if (!alreadyIncluded) hist.push({ role: 'user', content: pendingMsg })
+              else if (!hasLastUser) {
+                // move last occurrence to end for clarity
+                const filtered = hist.filter(m => !(m.role === 'user' && m.content === pendingMsg))
+                filtered.push({ role: 'user', content: pendingMsg })
+                while (hist.length) hist.pop()
+                hist.push(...filtered)
+              }
+            }
+          }
+        } catch { /* ignore */ }
         if (hist.length) setRcHistory(hist)
       } catch { /* ignore */ }
     })()
@@ -394,6 +441,11 @@ export default function ReportsPage() {
           // start polling
           rcPollRef.current = true
           setRcBusy(true)
+          // show pending user message immediately from localStorage if available
+          try {
+            const pendingMsg = localStorage.getItem(`${prefix}${convKey}:userContent`)
+            if (pendingMsg) setRcHistory(h => [...h, { role: 'user', content: pendingMsg }])
+          } catch { /* ignore */ }
           ;(async () => {
             let done = false
             while (!done && rcPollRef.current) {
@@ -404,11 +456,17 @@ export default function ReportsPage() {
                 const sj = await st.json()
                 if (sj?.status === 'completed') {
                   setRcHistory(h => [...h, { role: 'assistant', content: String(sj.content || '') }])
-                  try { localStorage.removeItem(key) } catch {}
+                  try {
+                    localStorage.removeItem(key)
+                    localStorage.removeItem(`${key}:userContent`)
+                  } catch {}
                   done = true
                 } else if (sj?.status === 'failed') {
                   setRcHistory(h => [...h, { role: 'assistant', content: `Error: ${String(sj.error || 'failed')}` }])
-                  try { localStorage.removeItem(key) } catch {}
+                  try {
+                    localStorage.removeItem(key)
+                    localStorage.removeItem(`${key}:userContent`)
+                  } catch {}
                   done = true
                 }
               } catch { /* ignore */ }
@@ -800,9 +858,7 @@ export default function ReportsPage() {
           <div className="text-xs mb-2">Run: <span className="font-mono">{runId}</span></div>
           <div className="flex items-center gap-2 mb-3">
             <select className="select select-bordered select-sm" value={rcModel} onChange={e => setRcModel(e.target.value)}>
-              <option value="openai:gpt-5.1">openai:gpt-5.1</option>
-              <option value="gemini:gemini-2.5">gemini:gemini-2.5</option>
-              <option value="ollama:llama3.2:latest">ollama:llama3.2:latest</option>
+              {rcModels.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
             <Button variant="warning" onClick={() => setRcOpen(false)}>Close</Button>
           </div>
