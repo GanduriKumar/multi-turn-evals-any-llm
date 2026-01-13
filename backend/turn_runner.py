@@ -82,6 +82,15 @@ class TurnRunner:
             "domain": domain,
             "params": params,
         })
+        # Allow per-run override for context window via config.context.window_turns
+        try:
+            win_override = (params_override or {}).get("window_turns")
+            if win_override is None:
+                w_from_ctx = (conv_meta or {}).get("window_turns") if isinstance(conv_meta, dict) else None
+                if isinstance(w_from_ctx, (int, float)):
+                    params_override["window_turns"] = int(w_from_ctx)
+        except Exception:
+            pass
         resp = await adapter.chat(req)
         ended_at = self._now_iso()
 

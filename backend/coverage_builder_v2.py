@@ -67,6 +67,7 @@ def build_per_behavior_datasets_v2(
     behaviors: Optional[Iterable[str]] = None,
     version: str = "1.0.0",
     seed: int = 42,
+    user_turns: int = 2,
 ) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
     cfg = load_commerce_config()
     cfg = _apply_sampler_overrides(cfg)
@@ -83,7 +84,7 @@ def build_per_behavior_datasets_v2(
             if domains is not None and d not in all_domains:
                 continue
             axes = sc.get("axes", {})
-            ds, gd = build_records(domain=d, behavior=b, axes=axes, version=version, seed=seed)
+            ds, gd = build_records(domain=d, behavior=b, axes=axes, version=version, seed=seed, user_turns=user_turns)
             outputs.append((ds, gd))
     return outputs
 
@@ -94,9 +95,10 @@ def build_domain_combined_datasets_v2(
     behaviors: Optional[Iterable[str]] = None,
     version: str = "1.0.0",
     seed: int = 42,
+    user_turns: int = 2,
 ) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
     # Group per domain: aggregate conversations and goldens
-    per = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=version, seed=seed)
+    per = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=version, seed=seed, user_turns=user_turns)
     by_domain: Dict[str, Tuple[Dict[str, Any], Dict[str, Any]]] = {}
     import re
     def _slug(s: str) -> str:
@@ -127,8 +129,9 @@ def build_global_combined_dataset_v2(
     behaviors: Optional[Iterable[str]] = None,
     version: str = "1.0.0",
     seed: int = 42,
+    user_turns: int = 2,
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    per = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=version, seed=seed)
+    per = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=version, seed=seed, user_turns=user_turns)
     ds = {
         "dataset_id": f"coverage-global-combined-{version}",
         "version": version,

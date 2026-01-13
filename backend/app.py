@@ -543,6 +543,7 @@ class CoverageGenerateRequest(BaseModel):
     version: str = "1.0.0"
     as_array: bool = False
     vertical: Optional[str] = None
+    user_turns: Optional[int] = 2
 
 
 @app.post("/coverage/generate")
@@ -603,8 +604,8 @@ async def coverage_generate(req: CoverageGenerateRequest):
             return {"ok": True, "saved": True, "file": str(p)}
         if req.combined:
             # Build per-domain combined and a global combined using v2 schema
-            domain_outputs = build_domain_combined_datasets_v2(domains=domains, behaviors=behaviors, version=req.version)
-            global_ds, global_gd = build_global_combined_dataset_v2(domains=domains, behaviors=behaviors, version=req.version)
+            domain_outputs = build_domain_combined_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2))
+            global_ds, global_gd = build_global_combined_dataset_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2))
             # Filter out any empty datasets (no conversations) to avoid schema errors
             outputs = [(ds, gd) for (ds, gd) in domain_outputs if (ds.get('conversations') or [])]
             # Only include global combined when generating for ALL domains (no domain filter)
@@ -612,10 +613,10 @@ async def coverage_generate(req: CoverageGenerateRequest):
                 outputs.append((global_ds, global_gd))
             # Fallback: if combined yielded nothing (e.g., over-filtered), build per-behavior instead
             if not outputs:
-                outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=req.version)
-        else:
+                outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2))
+            else:
             # Per-behavior datasets (v2 schema)
-            outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=req.version)
+                outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2))
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"generation failed: {e}")
 
@@ -819,9 +820,18 @@ async def coverage_settings_set(body: CoverageSettingsBody):
         current['anchors'] = body.anchors
     if body.sampler is not None:
         samp = current.get('sampler') or {}
-        for k in ('rng_seed','per_behavior_total','min_per_domain'):
+        for k in ('rng_seed','per_behavior_total','min_per_domain','max_per_domain'):
             if k in body.sampler and body.sampler[k] is not None:
-                samp[k] = int(body.sampler[k])
+                try:
+                    val = int(body.sampler[k])
+                except Exception:
+                    continue
+                if k == 'max_per_domain':
+                    if val > 100:
+                        val = 100
+                    if val < 1:
+                        val = 1
+                samp[k] = val
         current['sampler'] = samp
     # basic validation
     try:

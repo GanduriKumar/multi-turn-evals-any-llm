@@ -137,7 +137,13 @@ def sample_for_behavior(
     tax = tax_cfg["taxonomy"]
     strat = tax_cfg["risk_tiers"]["strategy"]
     alloc = strat["allocation"]
-    rng = random.Random(strat.get("rng_seed", 42))
+    # Reproducibility control: rng_seed == -1 means reshuffle (non-deterministic); otherwise fixed seed
+    seed_val = strat.get("rng_seed", 42)
+    try:
+        seed_int = int(seed_val)
+    except Exception:
+        seed_int = 42
+    rng = random.Random() if seed_int == -1 else random.Random(seed_int)
 
     all_scenarios = [s for s in enumerate_all(tax_cfg) if s.behavior == behavior]
 
@@ -168,6 +174,27 @@ def sample_for_behavior(
             by_tier[tier] = [s for s in by_tier[tier] if s.id not in picked_ids]
             need -= take
 
+    # Optional per-domain cap (max_per_domain) to avoid over-concentration
+    try:
+        raw = alloc.get("max_per_domain")
+        if raw is None:
+            max_per_domain = 5  # default
+        else:
+            max_per_domain = int(raw)
+    except Exception:
+        max_per_domain = 5
+    # enforce hard cap 1..100
+    if max_per_domain is not None:
+        if max_per_domain < 1:
+            max_per_domain = 1
+        if max_per_domain > 100:
+            max_per_domain = 100
+
+    def domain_can_add(d: str) -> bool:
+        if max_per_domain is None:
+            return True
+        return len(by_domain.get(d, [])) < max_per_domain
+
     # Quotas by tier
     goal_high, goal_med, goal_low = int(alloc["high"]), int(alloc["medium"]), int(alloc["low"])
     have_high = sum(1 for s in selected if s.risk_tier == "high")
@@ -179,9 +206,14 @@ def sample_for_behavior(
         pool = by_tier[tier]
         rng.shuffle(pool)
         needed = max(0, goal - sum(1 for s in selected if s.risk_tier == tier))
-        take = min(needed, len(pool))
-        selected.extend(pool[:take])
-        picked = {p.id for p in pool[:take]}
+        take_list: List[Scenario] = []
+        for s in pool:
+            if len(take_list) >= needed:
+                break
+            if domain_can_add(s.domain):
+                take_list.append(s)
+        selected.extend(take_list)
+        picked = {p.id for p in take_list}
         by_tier[tier] = [s for s in pool if s.id not in picked]
 
     fill_quota("high", goal_high)
@@ -204,6 +236,8 @@ def sample_for_behavior(
         best = None
         best_gain = -1
         for s in pool_sample:
+            if not domain_can_add(s.domain):
+                continue
             cand_pairs = _candidate_pairs(s, axis_names)
             gain = len(cand_pairs - covered_pairs)
             if gain > best_gain:

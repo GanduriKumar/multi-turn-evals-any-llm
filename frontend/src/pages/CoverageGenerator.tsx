@@ -23,6 +23,7 @@ export default function CoverageGeneratorPage() {
   const [combined, setCombined] = useState(true)
   const [save, setSave] = useState(false)
   const [overwrite, setOverwrite] = useState(false)
+  const [userTurns, setUserTurns] = useState<number>(2)
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string| null>(null)
   const [err, setErr] = useState<string| null>(null)
@@ -83,6 +84,7 @@ export default function CoverageGeneratorPage() {
         behaviors: selectedBehaviors.length ? selectedBehaviors : undefined,
         version: '1.0.0',
         vertical,
+        user_turns: userTurns,
       }
       const r = await fetch('/coverage/generate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       let js: any = null
@@ -145,33 +147,46 @@ export default function CoverageGeneratorPage() {
       <Card title="Dataset Generation Strategy (Server)">
         {covSettings ? (
           <div className="grid sm:grid-cols-3 gap-3 text-sm">
-            <label className="flex items-center gap-2"><span className="w-32">Mode</span>
-              <Select className="grow" value={covSettings.mode || 'pairwise'} onChange={e => setCovSettings((x:any)=>({...x, mode: e.target.value}))}>
-                <option value="pairwise">pairwise</option>
-                <option value="exhaustive">exhaustive</option>
-              </Select>
-            </label>
-            <label className="flex items-center gap-2"><span className="w-32">t</span>
-              <Input type="number" min={2} className="w-28" value={covSettings.t || 2} onChange={e => setCovSettings((x:any)=>({...x, t: Number(e.target.value)}))} />
-            </label>
-            <label className="flex items-center gap-2"><span className="w-32">Budget</span>
-              <Input type="number" min={1} className="w-28" value={covSettings.per_behavior_budget || 120} onChange={e => setCovSettings((x:any)=>({...x, per_behavior_budget: Number(e.target.value)}))} />
-            </label>
-            <label className="flex items-center gap-2"><span className="w-32">Seed</span>
-              <Input type="number" className="w-28" value={(covSettings.sampler?.rng_seed) ?? 42} onChange={e => setCovSettings((x:any)=>({
-                ...x, sampler: { ...(x.sampler||{}), rng_seed: Number(e.target.value) }
-              }))} />
-            </label>
-            <label className="flex items-center gap-2"><span className="w-32">Per-behavior</span>
+            {/* Section: Coverage (limits + allocation) */}
+            <div className="col-span-full text-xs font-medium text-gray-700">Coverage</div>
+            <label className="flex items-center gap-2"><span className="w-40" title="Maximum number of scenarios selected for each policy.">Max per policy</span>
               <Input type="number" min={1} className="w-28" value={(covSettings.sampler?.per_behavior_total) ?? 100} onChange={e => setCovSettings((x:any)=>({
                 ...x, sampler: { ...(x.sampler||{}), per_behavior_total: Number(e.target.value) }
               }))} />
             </label>
-            <label className="flex items-center gap-2"><span className="w-32">Min/domain</span>
+            <label className="flex items-center gap-2"><span className="w-40" title="Maximum number of scenarios selected for each workflow.">Max per workflow</span>
+              <Input type="number" min={1} max={100} className="w-28" value={(covSettings.sampler?.max_per_domain) ?? 5} onChange={e => setCovSettings((x:any)=>({
+                ...x, sampler: { ...(x.sampler||{}), max_per_domain: Number(e.target.value) }
+              }))} />
+            </label>
+            <label className="flex items-center gap-2"><span className="w-40" title="Floor per workflow before allocating the rest.">Min per workflow</span>
               <Input type="number" min={0} className="w-28" value={(covSettings.sampler?.min_per_domain) ?? 3} onChange={e => setCovSettings((x:any)=>({
                 ...x, sampler: { ...(x.sampler||{}), min_per_domain: Number(e.target.value) }
               }))} />
             </label>
+            {/* Section: Conversation */}
+            <div className="col-span-full text-xs font-medium text-gray-700 mt-2">Conversation</div>
+            <label className="flex items-center gap-2"><span className="w-40" title="Number of user messages per conversation in the generated dataset.">User turns per conversation</span>
+              <Select className="w-28" value={String(userTurns)} onChange={e=>setUserTurns(Number(e.target.value))}>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </Select>
+            </label>
+            <label className="flex items-center gap-2"><span className="w-40" title="Choices when regenerating the datasets">Reproducibility</span>
+              <Select className="w-44" value={String((covSettings.sampler?.rng_seed ?? 42) === -1 ? 'reshuffle' : 'exact')} onChange={e => {
+                const v = e.target.value
+                setCovSettings((x:any)=>({
+                  ...x,
+                  sampler: { ...(x.sampler||{}), rng_seed: v === 'reshuffle' ? -1 : 42 }
+                }))
+              }}>
+                <option value="exact">Exact scenarios</option>
+                <option value="reshuffle">Reshuffle</option>
+              </Select>
+            </label>
+            {/* User turns selector also available in generator panel below */}
             <div className="col-span-full flex items-center gap-2">
               <Button onClick={async ()=>{
                 setSaveCovMsg(null); setSaveCovBusy(true)
@@ -193,20 +208,21 @@ export default function CoverageGeneratorPage() {
       </Card>
       <Card title="Dataset Generator">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-          <label className="flex items-center gap-2"><span className="w-28">Domains</span>
+          <label className="flex items-center gap-2"><span className="w-28">Workflows</span>
             <Select multiple value={selectedDomains} onChange={e => setSelectedDomains(Array.from(e.target.selectedOptions).map(o => o.value))} className="grow min-h-28">
               {domains.map(d => <option key={d} value={d}>{d}</option>)}
             </Select>
           </label>
-          <label className="flex items-center gap-2"><span className="w-28">Behaviors</span>
+          <label className="flex items-center gap-2"><span className="w-28">Policies</span>
             <Select multiple value={selectedBehaviors} onChange={e => setSelectedBehaviors(Array.from(e.target.selectedOptions).map(o => o.value))} className="grow min-h-28">
               {behaviors.map(b => <option key={b} value={b}>{b}</option>)}
             </Select>
           </label>
           <div className="flex flex-col gap-2">
-            <label className="inline-flex items-center gap-2"><Checkbox checked={combined} onChange={e => setCombined((e.target as HTMLInputElement).checked)} /> Combined (per-domain + global)</label>
+            <label className="inline-flex items-center gap-2"><Checkbox checked={combined} onChange={e => setCombined((e.target as HTMLInputElement).checked)} /> Combined (per-workflow + global)</label>
             <label className="inline-flex items-center gap-2"><Checkbox checked={save} onChange={e => setSave((e.target as HTMLInputElement).checked)} /> Save to server</label>
             <label className="inline-flex items-center gap-2"><Checkbox checked={overwrite} onChange={e => setOverwrite((e.target as HTMLInputElement).checked)} disabled={!save} /> Overwrite</label>
+            {/* user turns moved to Strategy card */}
             <div className="flex gap-2 mt-1">
               <Button variant="primary" onClick={loadManifest} disabled={busy}>Preview coverage</Button>
               <Button variant="success" onClick={triggerGenerate} disabled={busy}>Generate</Button>
@@ -222,7 +238,7 @@ export default function CoverageGeneratorPage() {
             <div className="mt-4 border-t pt-3">
               <div className="font-medium mb-1">Regenerate (optimized)</div>
               <div className="flex items-center gap-2">
-                <input className="border rounded px-2 py-1 grow" placeholder="coverage-<domain>-combined-<version>" value={existingDatasetId} onChange={e => setExistingDatasetId(e.target.value)} />
+                <input className="border rounded px-2 py-1 grow" placeholder="coverage-<workflow>-combined-<version>" value={existingDatasetId} onChange={e => setExistingDatasetId(e.target.value)} />
                 <Button onClick={regenerateOptimized} disabled={regenBusy}>{regenBusy ? 'Regenerating…' : 'Run'}</Button>
               </div>
               <div className="text-xs text-gray-600 mt-1">Overwrites the specified combined dataset using current optimization settings (configs/coverage.json)</div>

@@ -43,8 +43,18 @@ def build_context(domain: str, turns: List[Dict[str, str]], state: Dict[str, Any
     an even cap to each of the included turns. No messages are dropped.
     Returns { messages: [...], audit: {...} }.
     """
-    # last 5 raw turns to preserve more context
-    recent_turns = turns[-5:] if len(turns) > 5 else list(turns)
+    # last N raw turns to preserve more context (default 5); allow override via env
+    try:
+        win = int((params_override or {}).get("window_turns")) if params_override and isinstance(params_override.get("window_turns"), (int, float)) else None
+    except Exception:
+        win = None
+    if win is None:
+        try:
+            win = int(os.getenv("EVAL_CONTEXT_WINDOW_TURNS", "5"))
+        except Exception:
+            win = 5
+    win = 5 if win is None else max(1, int(win))
+    recent_turns = turns[-win:] if len(turns) > win else list(turns)
 
     # Try to pull policy+facts from conversation metadata if provided (new datasets)
     cm = conv_meta or {}
