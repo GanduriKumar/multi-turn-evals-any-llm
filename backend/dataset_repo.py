@@ -38,6 +38,12 @@ class DatasetRepository:
         for p in self._dataset_files():
             data = self._load_json(p)
             errors = self.sv.validate("dataset", data)
+            # derive turns per conversation (typical): use first conversation length if available
+            try:
+                convs = data.get("conversations") or []
+                tpc = len((convs[0] or {}).get("turns", [])) if convs else None
+            except Exception:
+                tpc = None
             if errors:
                 # Skip invalid datasets in listing but annotate error info
                 items.append({
@@ -46,6 +52,7 @@ class DatasetRepository:
                     "domain": data.get("metadata", {}).get("domain"),
                     "difficulty": data.get("metadata", {}).get("difficulty"),
                     "conversations": len(data.get("conversations", []) or []),
+                    "turns_per_conversation": tpc,
                     "has_golden": data.get("dataset_id") in golden_index,
                     "valid": False,
                     "errors": errors,
@@ -57,6 +64,7 @@ class DatasetRepository:
                 "domain": data["metadata"]["domain"],
                 "difficulty": data["metadata"]["difficulty"],
                 "conversations": len(data["conversations"]),
+                "turns_per_conversation": tpc,
                 "has_golden": data["dataset_id"] in golden_index,
                 "valid": True,
             })

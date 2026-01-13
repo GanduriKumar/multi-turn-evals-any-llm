@@ -544,6 +544,7 @@ class CoverageGenerateRequest(BaseModel):
     as_array: bool = False
     vertical: Optional[str] = None
     user_turns: Optional[int] = 2
+    scenario_styles: Optional[list[str]] = None
 
 
 @app.post("/coverage/generate")
@@ -604,8 +605,8 @@ async def coverage_generate(req: CoverageGenerateRequest):
             return {"ok": True, "saved": True, "file": str(p)}
         if req.combined:
             # Build per-domain combined and a global combined using v2 schema
-            domain_outputs = build_domain_combined_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2))
-            global_ds, global_gd = build_global_combined_dataset_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2))
+            domain_outputs = build_domain_combined_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2), scenario_styles=req.scenario_styles)
+            global_ds, global_gd = build_global_combined_dataset_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2), scenario_styles=req.scenario_styles)
             # Filter out any empty datasets (no conversations) to avoid schema errors
             outputs = [(ds, gd) for (ds, gd) in domain_outputs if (ds.get('conversations') or [])]
             # Only include global combined when generating for ALL domains (no domain filter)
@@ -613,10 +614,23 @@ async def coverage_generate(req: CoverageGenerateRequest):
                 outputs.append((global_ds, global_gd))
             # Fallback: if combined yielded nothing (e.g., over-filtered), build per-behavior instead
             if not outputs:
-                outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2))
-            else:
+                outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2), scenario_styles=req.scenario_styles)
+        else:
             # Per-behavior datasets (v2 schema)
-                outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2))
+            outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2), scenario_styles=req.scenario_styles)
+
+        # If styles over-filtered to zero, retry once without styles so user isn't left with 0
+        if (not outputs) and req.scenario_styles:
+            if req.combined:
+                domain_outputs = build_domain_combined_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2), scenario_styles=None)
+                global_ds, global_gd = build_global_combined_dataset_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2), scenario_styles=None)
+                outputs = [(ds, gd) for (ds, gd) in domain_outputs if (ds.get('conversations') or [])]
+                if domains is None and (global_ds.get('conversations') or []):
+                    outputs.append((global_ds, global_gd))
+                if not outputs:
+                    outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2), scenario_styles=None)
+            else:
+                outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=req.version, user_turns=(req.user_turns or 2), scenario_styles=None)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"generation failed: {e}")
 
@@ -995,6 +1009,12 @@ async def run_status(job_id: str):
                 "progress_pct": jr.progress_pct,
                 "total_conversations": jr.total_conversations,
                 "completed_conversations": jr.completed_conversations,
+                "total_turns": getattr(jr, 'total_turns', 0),
+                "completed_turns": getattr(jr, 'completed_turns', 0),
+                "current_conv_id": getattr(jr, 'current_conv_id', None),
+                "current_conv_idx": getattr(jr, 'current_conv_idx', 0),
+                "current_conv_total_turns": getattr(jr, 'current_conv_total_turns', 0),
+                "current_conv_completed_turns": getattr(jr, 'current_conv_completed_turns', 0),
                 "error": jr.error,
             }
     # Try to recover from persisted job status if the process lost in-memory job across verticals
@@ -1010,6 +1030,13 @@ async def run_status(job_id: str):
             if obj.get("job_id") == job_id:
                 if obj.get("boot_id") != BOOT_ID and obj.get("state") in ("running", "paused", "cancelling"):
                     obj = {**obj, "state": "failed", "error": "stale status from previous server session"}
+                # Ensure keys exist for frontend
+                obj.setdefault("total_turns", 0)
+                obj.setdefault("completed_turns", 0)
+                obj.setdefault("current_conv_id", None)
+                obj.setdefault("current_conv_idx", 0)
+                obj.setdefault("current_conv_total_turns", 0)
+                obj.setdefault("current_conv_completed_turns", 0)
                 return obj
     raise HTTPException(status_code=404, detail="job not found")
     return {

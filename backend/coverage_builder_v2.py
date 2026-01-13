@@ -68,7 +68,42 @@ def build_per_behavior_datasets_v2(
     version: str = "1.0.0",
     seed: int = 42,
     user_turns: int = 2,
+    scenario_styles: Optional[Iterable[str]] = None,
 ) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
+    def _matches_styles(behavior: str, axes: Dict[str, Any], styles: Optional[Iterable[str]]) -> bool:
+        if not styles:
+            return True
+        try:
+            sset = {str(s).strip().lower().replace(' ', '_').replace('-', '_') for s in styles}
+        except Exception:
+            return True
+        a = axes or {}
+        pb = a.get("policy_boundary")
+        av = a.get("availability")
+        bb = a.get("brand_bias")
+        ps = a.get("price_sensitivity")
+        def happy_path() -> bool:
+            return (pb == "within_policy") and (av == "in_stock") and (bb in ("none", "soft")) and (ps in ("low", "medium"))
+        def constraint_heavy() -> bool:
+            return (ps == "high") or (bb == "hard") or (av in ("sold_out", "limited_stock", "backorder"))
+        def adversarial() -> bool:
+            return (behavior == "Adversarial/trap attempts") or (pb == "near_edge_allowed")
+        def ambiguous() -> bool:
+            # Approximation using softer preferences and medium price sensitivity within policy
+            return (pb == "within_policy") and (av in ("in_stock", "backorder")) and (bb in ("soft", "none")) and (ps == "medium")
+        # user_corrections could influence later turn templates; multi_turn removed (use user_turns control)
+        checks: List[bool] = []
+        if "happy_path" in sset:
+            checks.append(happy_path())
+        if "constraint_heavy" in sset:
+            checks.append(constraint_heavy())
+        if "adversarial" in sset:
+            checks.append(adversarial())
+        if "ambiguous" in sset:
+            checks.append(ambiguous())
+        if not checks:
+            return True
+        return any(checks)
     cfg = load_commerce_config()
     cfg = _apply_sampler_overrides(cfg)
     tax = cfg["taxonomy"]
@@ -84,6 +119,9 @@ def build_per_behavior_datasets_v2(
             if domains is not None and d not in all_domains:
                 continue
             axes = sc.get("axes", {})
+            # Scenario style filtering (optional)
+            if not _matches_styles(b, axes, scenario_styles):
+                continue
             ds, gd = build_records(domain=d, behavior=b, axes=axes, version=version, seed=seed, user_turns=user_turns)
             outputs.append((ds, gd))
     return outputs
@@ -96,9 +134,10 @@ def build_domain_combined_datasets_v2(
     version: str = "1.0.0",
     seed: int = 42,
     user_turns: int = 2,
+    scenario_styles: Optional[Iterable[str]] = None,
 ) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
     # Group per domain: aggregate conversations and goldens
-    per = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=version, seed=seed, user_turns=user_turns)
+    per = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=version, seed=seed, user_turns=user_turns, scenario_styles=scenario_styles)
     by_domain: Dict[str, Tuple[Dict[str, Any], Dict[str, Any]]] = {}
     import re
     def _slug(s: str) -> str:
@@ -130,8 +169,9 @@ def build_global_combined_dataset_v2(
     version: str = "1.0.0",
     seed: int = 42,
     user_turns: int = 2,
+    scenario_styles: Optional[Iterable[str]] = None,
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    per = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=version, seed=seed, user_turns=user_turns)
+    per = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=version, seed=seed, user_turns=user_turns, scenario_styles=scenario_styles)
     ds = {
         "dataset_id": f"coverage-global-combined-{version}",
         "version": version,

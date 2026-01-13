@@ -46,6 +46,12 @@ type JobStatus = {
   progress_pct: number
   total_conversations: number
   completed_conversations: number
+  total_turns?: number
+  completed_turns?: number
+  current_conv_id?: string | null
+  current_conv_idx?: number
+  current_conv_total_turns?: number
+  current_conv_completed_turns?: number
   error?: string | null
 }
 
@@ -525,6 +531,19 @@ export default function RunsPage() {
                         <div className="text-gray-500">{pct}% complete</div>
                         {status.error && <div className="text-danger">{status.error}</div>}
                       </div>
+                      {typeof status.current_conv_total_turns === 'number' && status.current_conv_total_turns > 0 && (
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="text-sm font-medium">Turn progress (conversation {status.current_conv_idx})</div>
+                          <div className="w-64 bg-gray-200 rounded-full h-3 overflow-hidden">
+                            {(() => {
+                              const t = Math.max(0, Math.min(status.current_conv_total_turns || 0, status.current_conv_completed_turns || 0))
+                              const pctTurns = Math.max(0, Math.min(100, Math.round(100 * t / Math.max(1, status.current_conv_total_turns || 0))))
+                              return <div className="h-3 bg-primary" style={{ width: `${pctTurns}%` }} />
+                            })()}
+                          </div>
+                          <div className="text-xs text-gray-600">{status.current_conv_completed_turns || 0} / {status.current_conv_total_turns}</div>
+                        </div>
+                      )}
                     </>
                   )
                 })()}

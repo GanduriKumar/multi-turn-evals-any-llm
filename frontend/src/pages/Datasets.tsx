@@ -11,6 +11,7 @@ type DatasetItem = {
   domain?: string
   difficulty?: string
   conversations?: number
+  turns_per_conversation?: number | null
   has_golden?: boolean
   valid?: boolean
   errors?: string[]
@@ -146,6 +147,7 @@ export default function DatasetsPage() {
                 <th className="py-2 pr-4">Domain</th>
                 <th className="py-2 pr-4">Difficulty</th>
                 <th className="py-2 pr-4">Conversations</th>
+                <th className="py-2 pr-4">Turns/Conversation</th>
                 <th className="py-2 pr-4">Golden</th>
                 <th className="py-2 pr-4">Valid</th>
                 <th className="py-2 pr-4">Reports</th>
@@ -159,6 +161,7 @@ export default function DatasetsPage() {
                   <td className="py-2 pr-4">{row.domain || '-'}</td>
                   <td className="py-2 pr-4">{row.difficulty || '-'}</td>
                   <td className="py-2 pr-4">{row.conversations ?? '-'}</td>
+                  <td className="py-2 pr-4">{row.turns_per_conversation ?? '-'}</td>
                   <td className="py-2 pr-4">{row.has_golden ? <Badge variant="success">Yes</Badge> : <Badge variant="warning">No</Badge>}</td>
                   <td className="py-2 pr-4">{row.valid ? <Badge variant="success">Valid</Badge> : <Badge variant="danger">Invalid</Badge>}</td>
                   <td className="py-2 pr-4">

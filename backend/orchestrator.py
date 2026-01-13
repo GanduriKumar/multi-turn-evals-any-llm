@@ -54,6 +54,12 @@ class JobRecord:
     progress_pct: int = 0
     total_conversations: int = 0
     completed_conversations: int = 0
+    total_turns: int = 0
+    completed_turns: int = 0
+    current_conv_id: Optional[str] = None
+    current_conv_idx: int = 0
+    current_conv_total_turns: int = 0
+    current_conv_completed_turns: int = 0
     error: Optional[str] = None
     _task: Optional[asyncio.Task] = None
     _cancel: bool = False
@@ -86,6 +92,14 @@ class Orchestrator:
         job_id = f"job-{self._id_seq:04d}"
         jr = JobRecord(job_id=job_id, run_id=run_id, config={"dataset_id": dataset_id, "model_spec": model_spec, **config})
         jr.total_conversations = len(ds.get("conversations", []))
+        # compute total user turns across all conversations for turn-level progress
+        try:
+            jr.total_turns = sum(
+                sum(1 for t in (conv.get("turns", []) or []) if t.get("role") == "user")
+                for conv in (ds.get("conversations", []) or [])
+            )
+        except Exception:
+            jr.total_turns = 0
         self.jobs[job_id] = jr
         # persist initial job status
         try:
@@ -96,6 +110,8 @@ class Orchestrator:
                 "progress_pct": jr.progress_pct,
                 "total_conversations": jr.total_conversations,
                 "completed_conversations": jr.completed_conversations,
+                "total_turns": jr.total_turns,
+                "completed_turns": jr.completed_turns,
                 "error": None,
                 "boot_id": self.boot_id,
             })
@@ -191,6 +207,8 @@ class Orchestrator:
                     "progress_pct": jr.progress_pct,
                     "total_conversations": jr.total_conversations,
                     "completed_conversations": jr.completed_conversations,
+                    "total_turns": jr.total_turns,
+                    "completed_turns": jr.completed_turns,
                     "error": None,
                     "boot_id": self.boot_id,
                 })
@@ -261,7 +279,7 @@ class Orchestrator:
             # Simple per-run embedding cache for semantic metric
             embed_cache: Dict[str, List[float]] = {}
 
-            for conv in ds.get("conversations", []):
+            for cidx, conv in enumerate(ds.get("conversations", [])):
                 if jr._cancel:
                     jr.state = "cancelled"
                     jr.updated_at = _now_iso()
@@ -321,6 +339,34 @@ class Orchestrator:
                 conv_id = conv.get("conversation_id")
                 conv_meta = (conv.get("metadata") or {}) if isinstance(conv.get("metadata"), dict) else {}
                 turns = conv.get("turns", [])
+                # initialize per-conversation turn progress
+                try:
+                    jr.current_conv_id = conv_id
+                    jr.current_conv_idx = int(cidx) + 1
+                    jr.current_conv_total_turns = sum(1 for t in (turns or []) if t.get("role") == "user")
+                    jr.current_conv_completed_turns = 0
+                except Exception:
+                    jr.current_conv_total_turns = 0
+                    jr.current_conv_completed_turns = 0
+                try:
+                    self._writer.write_job_status(jr.run_id, {
+                        "job_id": jr.job_id,
+                        "run_id": jr.run_id,
+                        "state": jr.state,
+                        "progress_pct": jr.progress_pct,
+                        "total_conversations": jr.total_conversations,
+                        "completed_conversations": jr.completed_conversations,
+                        "total_turns": jr.total_turns,
+                        "completed_turns": jr.completed_turns,
+                        "current_conv_id": jr.current_conv_id,
+                        "current_conv_idx": jr.current_conv_idx,
+                        "current_conv_total_turns": jr.current_conv_total_turns,
+                        "current_conv_completed_turns": jr.current_conv_completed_turns,
+                        "error": None,
+                        "boot_id": self.boot_id,
+                    })
+                except Exception:
+                    pass
                 # iterate user turns only
                 for idx, t in enumerate(turns):
                     if t.get("role") == "user":
@@ -336,6 +382,8 @@ class Orchestrator:
                                     "progress_pct": jr.progress_pct,
                                     "total_conversations": jr.total_conversations,
                                     "completed_conversations": jr.completed_conversations,
+                                    "total_turns": jr.total_turns,
+                                    "completed_turns": jr.completed_turns,
                                     "error": None,
                                     "boot_id": self.boot_id,
                                 })
@@ -353,6 +401,8 @@ class Orchestrator:
                                     "progress_pct": jr.progress_pct,
                                     "total_conversations": jr.total_conversations,
                                     "completed_conversations": jr.completed_conversations,
+                                    "total_turns": jr.total_turns,
+                                    "completed_turns": jr.completed_turns,
                                     "error": None,
                                     "boot_id": self.boot_id,
                                 })
@@ -371,6 +421,8 @@ class Orchestrator:
                                         "progress_pct": jr.progress_pct,
                                         "total_conversations": jr.total_conversations,
                                         "completed_conversations": jr.completed_conversations,
+                                        "total_turns": jr.total_turns,
+                                        "completed_turns": jr.completed_turns,
                                         "error": None,
                                         "boot_id": self.boot_id,
                                     })
@@ -387,6 +439,8 @@ class Orchestrator:
                                     "progress_pct": jr.progress_pct,
                                     "total_conversations": jr.total_conversations,
                                     "completed_conversations": jr.completed_conversations,
+                                    "total_turns": jr.total_turns,
+                                    "completed_turns": jr.completed_turns,
                                     "error": None,
                                     "boot_id": self.boot_id,
                                 })
@@ -409,6 +463,31 @@ class Orchestrator:
                             conv_meta=conv_meta,
                             params_override=params_override,
                         )
+                        # update turn-level progress
+                        try:
+                            jr.completed_turns += 1
+                            jr.current_conv_completed_turns += 1
+                        except Exception:
+                            pass
+                        try:
+                            self._writer.write_job_status(jr.run_id, {
+                                "job_id": jr.job_id,
+                                "run_id": jr.run_id,
+                                "state": jr.state,
+                                "progress_pct": jr.progress_pct,
+                                "total_conversations": jr.total_conversations,
+                                "completed_conversations": jr.completed_conversations,
+                                "total_turns": jr.total_turns,
+                                "completed_turns": jr.completed_turns,
+                                "current_conv_id": jr.current_conv_id,
+                                "current_conv_idx": jr.current_conv_idx,
+                                "current_conv_total_turns": jr.current_conv_total_turns,
+                                "current_conv_completed_turns": jr.current_conv_completed_turns,
+                                "error": None,
+                                "boot_id": self.boot_id,
+                            })
+                        except Exception:
+                            pass
                 jr.completed_conversations += 1
                 jr.progress_pct = int(jr.completed_conversations * 100 / max(1, jr.total_conversations))
                 jr.updated_at = _now_iso()
@@ -673,6 +752,8 @@ class Orchestrator:
                     "progress_pct": jr.progress_pct,
                     "total_conversations": jr.total_conversations,
                     "completed_conversations": jr.completed_conversations,
+                    "total_turns": jr.total_turns,
+                    "completed_turns": jr.completed_turns,
                     "error": None,
                     "boot_id": self.boot_id,
                 })
@@ -691,6 +772,8 @@ class Orchestrator:
                     "progress_pct": jr.progress_pct,
                     "total_conversations": jr.total_conversations,
                     "completed_conversations": jr.completed_conversations,
+                    "total_turns": jr.total_turns,
+                    "completed_turns": jr.completed_turns,
                     "error": "cancelled by user",
                     "boot_id": self.boot_id,
                 })
@@ -709,6 +792,8 @@ class Orchestrator:
                     "progress_pct": jr.progress_pct,
                     "total_conversations": jr.total_conversations,
                     "completed_conversations": jr.completed_conversations,
+                    "total_turns": jr.total_turns,
+                    "completed_turns": jr.completed_turns,
                     "error": jr.error,
                     "boot_id": self.boot_id,
                 })

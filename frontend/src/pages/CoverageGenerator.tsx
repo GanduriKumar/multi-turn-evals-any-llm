@@ -32,6 +32,7 @@ export default function CoverageGeneratorPage() {
   const [covSettings, setCovSettings] = useState<any | null>(null)
   const [saveCovBusy, setSaveCovBusy] = useState(false)
   const [saveCovMsg, setSaveCovMsg] = useState<string | null>(null)
+  const [selectedStyles, setSelectedStyles] = useState<string[]>([])
 
   useEffect(() => {
     const load = async () => {
@@ -85,6 +86,7 @@ export default function CoverageGeneratorPage() {
         version: '1.0.0',
         vertical,
         user_turns: userTurns,
+        scenario_styles: selectedStyles.length ? selectedStyles : undefined,
       }
       const r = await fetch('/coverage/generate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       let js: any = null
@@ -144,7 +146,7 @@ export default function CoverageGeneratorPage() {
 
   return (
     <div className="grid gap-4">
-      <Card title="Dataset Generation Strategy (Server)">
+      <Card title="Coverage selections">
         {covSettings ? (
           <div className="grid sm:grid-cols-3 gap-3 text-sm">
             {/* Section: Coverage (limits + allocation) */}
@@ -206,7 +208,7 @@ export default function CoverageGeneratorPage() {
           <div className="text-sm text-gray-600">Loading…</div>
         )}
       </Card>
-      <Card title="Dataset Generator">
+      <Card title="Generate Datasets">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
           <label className="flex items-center gap-2"><span className="w-28">Workflows</span>
             <Select multiple value={selectedDomains} onChange={e => setSelectedDomains(Array.from(e.target.selectedOptions).map(o => o.value))} className="grow min-h-28">
@@ -216,6 +218,16 @@ export default function CoverageGeneratorPage() {
           <label className="flex items-center gap-2"><span className="w-28">Policies</span>
             <Select multiple value={selectedBehaviors} onChange={e => setSelectedBehaviors(Array.from(e.target.selectedOptions).map(o => o.value))} className="grow min-h-28">
               {behaviors.map(b => <option key={b} value={b}>{b}</option>)}
+            </Select>
+          </label>
+          <label className="flex flex-col items-center gap-2">
+            <span className="text-center">User choices</span>
+            <Select multiple value={selectedStyles} onChange={e => setSelectedStyles(Array.from(e.target.selectedOptions).map(o => o.value))} className="w-full min-h-28">
+              <option value="happy_path">happy_path</option>
+              <option value="constraint_heavy">constraint_heavy</option>
+              <option value="ambiguous">ambiguous</option>
+              <option value="user_corrections">user_corrections</option>
+              <option value="adversarial">adversarial</option>
             </Select>
           </label>
           <div className="flex flex-col gap-2">
