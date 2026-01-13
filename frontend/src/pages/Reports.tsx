@@ -44,6 +44,7 @@ export default function ReportsPage() {
   const [resultsA, setResultsA] = useState<any | null>(null)
   const [resultsB, setResultsB] = useState<any | null>(null)
   const metricsList = useMemo(() => ['exact','semantic','consistency','adherence','hallucination'], [])
+  const metricLabel = (m: string) => (m === 'hallucination' ? 'hallucination (risk↓)' : m)
   const [filterMetric, setFilterMetric] = useState<string | null>(null)
   // Full-page side-by-side viewer state
   const [sbsOpen, setSbsOpen] = useState(false)
@@ -391,7 +392,7 @@ export default function ReportsPage() {
                   <tbody>
                     {Object.entries(diff.metrics_delta || {}).map(([m, row]: any) => (
                       <tr key={m} className="border-t">
-                        <td className="py-1 pr-3 font-medium">{m}</td>
+                        <td className="py-1 pr-3 font-medium">{metricLabel(String(m))}</td>
                         <td className="py-1 pr-3">{(row.a_pass_rate || 0).toFixed(2)}%</td>
                         <td className="py-1 pr-3">{(row.b_pass_rate || 0).toFixed(2)}%</td>
                         <td className="py-1 pr-3">
@@ -421,7 +422,7 @@ export default function ReportsPage() {
                   const bd = pos ? 'border-emerald-400' : 'border-rose-400'
                   return (
                     <div key={m} className={`px-2 py-1 rounded border ${bd}`} style={{ background: bg }}>
-                      <span className="font-medium mr-2">{m}</span>
+                      <span className="font-medium mr-2">{metricLabel(String(m))}</span>
                       <span>{(row.a_pass_rate || 0).toFixed(1)}%</span>
                       <span className="mx-1">→</span>
                       <span>{(row.b_pass_rate || 0).toFixed(1)}%</span>
@@ -465,7 +466,7 @@ export default function ReportsPage() {
                       <tr className="text-left text-gray-600">
                         <th className="py-1 pr-3">Conversation</th>
                         {metricsList.map(m => (
-                          <th key={m} className="py-1 px-2">{m}</th>
+                          <th key={m} className="py-1 px-2">{metricLabel(m)}</th>
                         ))}
                         <th className="py-1 px-2">Total</th>
                       </tr>

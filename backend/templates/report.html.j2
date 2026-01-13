@@ -282,7 +282,7 @@
 
     <h4>Per-turn Metrics</h4>
     <table>
-      <thead><tr><th>Turn</th><th>Exact</th><th>Semantic</th><th>Consistency</th><th>Adherence</th><th>Hallucination</th></tr></thead>
+      <thead><tr><th>Turn</th><th>Exact</th><th>Semantic</th><th>Consistency</th><th>Adherence</th><th>Hallucination (risk↓)</th></tr></thead>
       <tbody>
       {% for t in conv.turns %}
         <tr>
@@ -300,7 +300,14 @@
           {% endif %}
           <td class="{{ 'pass' if co and co.pass else 'fail' if co is not none else '' }}">{{ co.pass if co else '' }}</td>
           <td class="{{ 'pass' if ad and ad.pass else 'fail' if ad is not none else '' }}">{{ ad.pass if ad else '' }}</td>
-          <td class="{{ 'pass' if ha and ha.pass else 'fail' if ha is not none else '' }}">{{ ha.pass if ha else '' }}</td>
+          {# Present hallucination as risk: risk = max(0, 1 - score) * 100. Lower is better. #}
+          {% if ha is not none and ha.score is defined %}
+            {% set risk = (1.0 - (ha.score or 0.0)) * 100.0 %}
+            {% if risk < 0 %}{% set risk = 0.0 %}{% endif %}
+            <td class="{{ 'pass' if ha.pass else 'fail' }}" title="score={{ '%.2f'|format(ha.score or 0) }}; threshold={{ '%.2f'|format(ha.threshold or 0) }}">{{ '%.1f'|format(risk) }}%</td>
+          {% else %}
+            <td class="{{ 'pass' if ha and ha.pass else 'fail' if ha is not none else '' }}">{{ ha and (ha.pass and 'OK' or 'Fail') or '' }}</td>
+          {% endif %}
         </tr>
       {% endfor %}
       </tbody>
