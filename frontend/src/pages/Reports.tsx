@@ -61,6 +61,7 @@ export default function ReportsPage() {
   const [rcBusy, setRcBusy] = useState(false)
   const rcChatRef = useRef<HTMLDivElement | null>(null)
   const rcAbortRef = useRef<AbortController | null>(null)
+  const rcPollRef = useRef<boolean>(false)
 
   // Auto-scroll chat to bottom on new messages
   useEffect(() => {
@@ -185,6 +186,32 @@ export default function ReportsPage() {
   useEffect(() => { loadRuns() }, [vertical])
   useEffect(() => { if (runId) loadResults(runId) }, [runId, vertical])
 
+  // Auto-open chat if a background job exists for any run in this vertical
+  useEffect(() => {
+    try {
+      let found: { key: string, runId: string, convKey: string } | null = null
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i) || ''
+        const prefix = `reportChatJob:${vertical}:`
+        if (key.startsWith(prefix)) {
+          const rest = key.substring(prefix.length) // <runId>:<convKey>
+          const sep = rest.indexOf(':')
+          if (sep > 0) {
+            const rId = rest.substring(0, sep)
+            const cKey = rest.substring(sep + 1)
+            found = { key, runId: rId, convKey: cKey }
+            break
+          }
+        }
+      }
+      if (found) {
+        if (!rcOpen) setRcOpen(true)
+        if (runId !== found.runId) setRunId(found.runId)
+        setRcConversation(found.convKey === 'all' ? '' : found.convKey)
+      }
+    } catch { /* ignore */ }
+  }, [vertical])
+
   const compareNow = async () => {
     if (!runA || !runB || runA === runB) { setDiff(null); setDiffError('Pick two different runs'); return }
     setDiffError(null); setDiff(null); setDiffLoading(true)
@@ -284,9 +311,15 @@ export default function ReportsPage() {
         return
       }
       const jobId = js.job_id as string
+      // persist job so we can resume after navigation
+      const convKey = rcConversation || 'all'
+      const storageKey = `reportChatJob:${vertical}:${runId}:${convKey}`
+      try { localStorage.setItem(storageKey, jobId) } catch {}
       // Poll for job status until completed/failed; keep polling even if user navigates away
+      rcPollRef.current = true
+      setRcBusy(true)
       let done = false
-      while (!done) {
+      while (!done && rcPollRef.current) {
         await new Promise(res => setTimeout(res, 1200))
         try {
           const st = await fetch(`/chat/report/job/${encodeURIComponent(jobId)}?run_id=${encodeURIComponent(runId)}&vertical=${encodeURIComponent(vertical)}`)
@@ -294,13 +327,16 @@ export default function ReportsPage() {
           const sj = await st.json()
           if (sj?.status === 'completed') {
             setRcHistory(h => [...h, { role: 'assistant', content: String(sj.content || '') }])
+            try { localStorage.removeItem(storageKey) } catch {}
             done = true
           } else if (sj?.status === 'failed') {
             setRcHistory(h => [...h, { role: 'assistant', content: `Error: ${String(sj.error || 'failed')}` }])
+            try { localStorage.removeItem(storageKey) } catch {}
             done = true
           }
         } catch { /* ignore transient */ }
       }
+      setRcBusy(false)
     } catch (e:any) {
       const aborted = e && (e.name === 'AbortError' || e.message === 'The user aborted a request.')
       const hist = [...rcHistory, { role: 'user', content: rcInput }, { role: 'assistant', content: aborted ? 'Cancelled.' : `Error: ${e.message || 'failed to chat'}` }]
@@ -316,6 +352,8 @@ export default function ReportsPage() {
     if (rcBusy && rcAbortRef.current) {
       rcAbortRef.current.abort()
     }
+    rcPollRef.current = false
+    setRcBusy(false)
   }
 
   // Restore chat history when user reopens the page/card
@@ -338,6 +376,50 @@ export default function ReportsPage() {
       } catch { /* ignore */ }
     })()
   }, [rcOpen, runId, rcConversation, vertical])
+
+  // Resume polling if a job exists for this run when returning to page
+  useEffect(() => {
+    if (!runId) return
+    try {
+      // find any job for this run/vertical
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i) || ''
+        const prefix = `reportChatJob:${vertical}:${runId}:`
+        if (key.startsWith(prefix)) {
+          const convKey = key.substring(prefix.length)
+          const jobId = localStorage.getItem(key) || ''
+          if (!jobId) continue
+          if (!rcOpen) setRcOpen(true)
+          setRcConversation(convKey === 'all' ? '' : convKey)
+          // start polling
+          rcPollRef.current = true
+          setRcBusy(true)
+          ;(async () => {
+            let done = false
+            while (!done && rcPollRef.current) {
+              await new Promise(res => setTimeout(res, 1200))
+              try {
+                const st = await fetch(`/chat/report/job/${encodeURIComponent(jobId)}?run_id=${encodeURIComponent(runId)}&vertical=${encodeURIComponent(vertical)}`)
+                if (!st.ok) break
+                const sj = await st.json()
+                if (sj?.status === 'completed') {
+                  setRcHistory(h => [...h, { role: 'assistant', content: String(sj.content || '') }])
+                  try { localStorage.removeItem(key) } catch {}
+                  done = true
+                } else if (sj?.status === 'failed') {
+                  setRcHistory(h => [...h, { role: 'assistant', content: `Error: ${String(sj.error || 'failed')}` }])
+                  try { localStorage.removeItem(key) } catch {}
+                  done = true
+                }
+              } catch { /* ignore */ }
+            }
+            setRcBusy(false)
+          })()
+          break
+        }
+      }
+    } catch { /* ignore */ }
+  }, [runId, vertical])
 
   return (
     <div className="grid gap-4">

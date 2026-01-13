@@ -32,6 +32,7 @@ export default function DatasetsPage() {
   const [chatBusy, setChatBusy] = useState(false)
   const chatRef = useRef<HTMLDivElement | null>(null)
   const chatAbortRef = useRef<AbortController | null>(null)
+  const chatPollRef = useRef<boolean>(false)
 
   // Auto-scroll chat to bottom on new messages
   useEffect(() => {
@@ -106,8 +107,14 @@ export default function DatasetsPage() {
         return
       }
       const jobId = js.job_id as string
+      // persist job
+      const convKey = chatConversation || 'None'
+      const storageKey = `datasetChatJob:${vertical}:${chatDataset}:${convKey}`
+      try { localStorage.setItem(storageKey, jobId) } catch {}
       let done = false
-      while (!done) {
+      chatPollRef.current = true
+      setChatBusy(true)
+      while (!done && chatPollRef.current) {
         await new Promise(res => setTimeout(res, 1200))
         try {
           const st = await fetch(`/chat/dataset/job/${encodeURIComponent(jobId)}?dataset_id=${encodeURIComponent(chatDataset)}&vertical=${encodeURIComponent(vertical)}`)
@@ -115,13 +122,16 @@ export default function DatasetsPage() {
           const sj = await st.json()
           if (sj?.status === 'completed') {
             setChatHistory(h => [...h, { role: 'assistant', content: String(sj.content || '') }])
+            try { localStorage.removeItem(storageKey) } catch {}
             done = true
           } else if (sj?.status === 'failed') {
             setChatHistory(h => [...h, { role: 'assistant', content: `Error: ${String(sj.error || 'failed')}` }])
+            try { localStorage.removeItem(storageKey) } catch {}
             done = true
           }
         } catch { /* ignore transient */ }
       }
+      setChatBusy(false)
     } catch (e:any) {
       const aborted = e && (e.name === 'AbortError' || e.message === 'The user aborted a request.')
       const newHist = [...chatHistory, { role: 'user', content: chatInput }, { role: 'assistant', content: aborted ? 'Cancelled.' : `Error: ${e.message || 'failed to chat'}` }]
@@ -137,6 +147,8 @@ export default function DatasetsPage() {
     if (chatBusy && chatAbortRef.current) {
       chatAbortRef.current.abort()
     }
+    chatPollRef.current = false
+    setChatBusy(false)
   }
 
   // Restore dataset chat history on reopen
@@ -159,7 +171,75 @@ export default function DatasetsPage() {
     })()
   }, [chatOpen, chatDataset, chatConversation, vertical])
 
+  // Resume polling if a dataset chat job exists for this dataset when returning
+  useEffect(() => {
+    if (!chatDataset) return
+    try {
+      const prefix = `datasetChatJob:${vertical}:${chatDataset}:`
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i) || ''
+        if (key.startsWith(prefix)) {
+          const convKey = key.substring(prefix.length)
+          const jobId = localStorage.getItem(key) || ''
+          if (!jobId) continue
+          if (!chatOpen) setChatOpen(true)
+          setChatConversation(convKey === 'None' ? null : convKey)
+          chatPollRef.current = true
+          setChatBusy(true)
+          ;(async () => {
+            let done = false
+            while (!done && chatPollRef.current) {
+              await new Promise(res => setTimeout(res, 1200))
+              try {
+                const st = await fetch(`/chat/dataset/job/${encodeURIComponent(jobId)}?dataset_id=${encodeURIComponent(chatDataset)}&vertical=${encodeURIComponent(vertical)}`)
+                if (!st.ok) break
+                const sj = await st.json()
+                if (sj?.status === 'completed') {
+                  setChatHistory(h => [...h, { role: 'assistant', content: String(sj.content || '') }])
+                  try { localStorage.removeItem(key) } catch {}
+                  done = true
+                } else if (sj?.status === 'failed') {
+                  setChatHistory(h => [...h, { role: 'assistant', content: `Error: ${String(sj.error || 'failed')}` }])
+                  try { localStorage.removeItem(key) } catch {}
+                  done = true
+                }
+              } catch { /* ignore */ }
+            }
+            setChatBusy(false)
+          })()
+          break
+        }
+      }
+    } catch { /* ignore */ }
+  }, [chatDataset, vertical])
+
   useEffect(() => { fetchList() }, [vertical])
+
+  // Auto-open dataset chat if a background job exists for any dataset in this vertical
+  useEffect(() => {
+    try {
+      let found: { key: string, datasetId: string, convKey: string } | null = null
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i) || ''
+        const prefix = `datasetChatJob:${vertical}:`
+        if (key.startsWith(prefix)) {
+          const rest = key.substring(prefix.length) // <datasetId>:<convKey>
+          const sep = rest.indexOf(':')
+          if (sep > 0) {
+            const dsId = rest.substring(0, sep)
+            const cKey = rest.substring(sep + 1)
+            found = { key, datasetId: dsId, convKey: cKey }
+            break
+          }
+        }
+      }
+      if (found) {
+        if (!chatOpen) setChatOpen(true)
+        setChatDataset(found.datasetId)
+        setChatConversation(found.convKey === 'None' ? null : found.convKey)
+      }
+    } catch { /* ignore */ }
+  }, [vertical])
 
   const [fileDataset, setFileDataset] = useState<File | null>(null)
   const [fileGolden, setFileGolden] = useState<File | null>(null)
