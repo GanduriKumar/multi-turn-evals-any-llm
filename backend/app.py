@@ -375,12 +375,54 @@ async def chat_with_dataset(body: ChatDatasetBody, vertical: Optional[str] = Non
         ]
         try:
             convs = (ds.get("conversations") or [])
-            titles = []
-            for c in convs[:6]:
-                titles.append(c.get("conversation_title") or c.get("conversation_slug") or str(c.get("conversation_id")))
+            total = len(convs)
+            titles = [
+                (c.get("conversation_title") or c.get("conversation_slug") or str(c.get("conversation_id")))
+                for c in convs
+            ]
             if titles:
-                sys_lines.append("Sample conversations: " + "; ".join(titles))
+                # Show all when reasonably small; otherwise show a capped list with counts
+                cap = 30
+                if total <= cap:
+                    sys_lines.append(f"Conversations ({total}): " + "; ".join(titles))
+                else:
+                    sys_lines.append(f"Conversations (showing {cap} of {total}): " + "; ".join(titles[:cap]))
         except Exception:
+            pass
+    # Lightweight RAG: retrieve top passages from the selected conversation or whole dataset
+    try:
+        from .rag import build_dataset_index  # type: ignore
+    except Exception:
+        try:
+            from backend.rag import build_dataset_index  # type: ignore
+        except Exception:
+            build_dataset_index = None  # type: ignore
+    if build_dataset_index is not None:
+        try:
+            # Build index and search using last user messages + current message
+            idx = build_dataset_index(ds, restrict_conversation_id=(conv.get("conversation_id") if conv else None))
+            # Compose a retrieval query from recent user turns
+            user_hist = [m.get("content") for m in (body.history or []) if isinstance(m, dict) and m.get("role") == "user" and isinstance(m.get("content"), str)]
+            query_text = "\n".join(([t for t in user_hist[-2:]] + [body.message or ""]) or [])
+            try:
+                from .embeddings.ollama_embed import OllamaEmbeddings  # type: ignore
+            except Exception:
+                from backend.embeddings.ollama_embed import OllamaEmbeddings  # type: ignore
+            embedder = OllamaEmbeddings()
+            hits = []
+            try:
+                hits = await idx.search(query_text, embedder, top_k=6)  # type: ignore[attr-defined]
+            except Exception:
+                hits = []
+            if hits:
+                sys_lines.append("Retrieved context (top matches):")
+                for e, s in hits:
+                    try:
+                        sys_lines.append(f"- {e.text}")
+                    except Exception:
+                        continue
+        except Exception:
+            # Non-fatal: if RAG fails, continue without retrieved context
             pass
     system_prompt = "\n".join([l for l in sys_lines if l])
     # Build messages
@@ -520,7 +562,40 @@ async def chat_with_report(body: ChatReportBody, vertical: Optional[str] = None)
             conv_block.append(f"[{idx+1}] U: {snip(u)}")
             if a:
                 conv_block.append(f"    A: {snip(a, 160)}")
-    system_prompt = "\n".join([*header, *conv_block])
+    # Lightweight RAG over report results to enrich context
+    sys_lines = [*header, *conv_block]
+    try:
+        from .rag import build_report_index  # type: ignore
+    except Exception:
+        try:
+            from backend.rag import build_report_index  # type: ignore
+        except Exception:
+            build_report_index = None  # type: ignore
+    if build_report_index is not None:
+        try:
+            idx = build_report_index(results)
+            user_hist = [m.get("content") for m in (body.history or []) if isinstance(m, dict) and m.get("role") == "user" and isinstance(m.get("content"), str)]
+            query_text = "\n".join(([t for t in user_hist[-2:]] + [body.message or ""]) or [])
+            try:
+                from .embeddings.ollama_embed import OllamaEmbeddings  # type: ignore
+            except Exception:
+                from backend.embeddings.ollama_embed import OllamaEmbeddings  # type: ignore
+            embedder = OllamaEmbeddings()
+            hits = []
+            try:
+                hits = await idx.search(query_text, embedder, top_k=6)  # type: ignore[attr-defined]
+            except Exception:
+                hits = []
+            if hits:
+                sys_lines.append("Retrieved context (top matches):")
+                for e, s in hits:
+                    try:
+                        sys_lines.append(f"- {e.text}")
+                    except Exception:
+                        continue
+        except Exception:
+            pass
+    system_prompt = "\n".join(sys_lines)
     # Messages
     history = body.history or []
     msgs = ([{"role": "system", "content": system_prompt}] +
