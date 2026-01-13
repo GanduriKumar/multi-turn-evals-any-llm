@@ -257,13 +257,22 @@
       <tbody>
       {% for t in conv.turns %}
         <tr>
-          <td>{{ t.turn_index }}</td>
+          <td>{{ (t.turn_index or 0) + 1 }}</td>
           <td>
             <div class="prompt-text">{{ t.user_prompt_full or t.user_prompt_snippet or '' }}</div>
           </td>
           <td>
             {% set a_full = t.assistant_output_full or t.assistant_output_snippet or '' %}
-            <div class="output-text">{{ a_full }}</div>
+            {% if a_full %}
+              <div class="output-text">{{ a_full }}</div>
+            {% else %}
+              <div class="muted">
+                No assistant output captured.
+                {% if t.assistant_ok is defined and not t.assistant_ok %}
+                  <div class="metric-failure"><span class="metric-name">Provider error:</span> <span class="reason-text">{{ t.assistant_error or 'Unknown error' }}</span></div>
+                {% endif %}
+              </div>
+            {% endif %}
           </td>
           <td class="{{ 'pass' if t.turn_pass is not defined or t.turn_pass else 'fail' }}">{{ 'True' if t.turn_pass is not defined or t.turn_pass else 'False' }}</td>
         </tr>
@@ -277,7 +286,7 @@
       <tbody>
       {% for t in conv.turns %}
         <tr>
-          <td>{{ t.turn_index }}</td>
+          <td>{{ (t.turn_index or 0) + 1 }}</td>
           {% set ex = t.metrics.exact if t.metrics is defined and t.metrics.exact is defined else none %}
           {% set se = t.metrics.semantic if t.metrics is defined and t.metrics.semantic is defined else none %}
           {% set co = t.metrics.consistency if t.metrics is defined and t.metrics.consistency is defined else none %}

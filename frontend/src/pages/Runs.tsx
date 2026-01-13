@@ -538,7 +538,9 @@ export default function RunsPage() {
                             {(() => {
                               const t = Math.max(0, Math.min(status.current_conv_total_turns || 0, status.current_conv_completed_turns || 0))
                               const pctTurns = Math.max(0, Math.min(100, Math.round(100 * t / Math.max(1, status.current_conv_total_turns || 0))))
-                              return <div className="h-3 bg-primary" style={{ width: `${pctTurns}%` }} />
+                              const allTurnsDone = typeof status.total_turns === 'number' && typeof status.completed_turns === 'number' && status.total_turns > 0 && status.completed_turns >= status.total_turns
+                              const barClass = allTurnsDone ? 'bg-success' : 'bg-primary'
+                              return <div className={`h-3 ${barClass}`} style={{ width: `${pctTurns}%` }} />
                             })()}
                           </div>
                           <div className="text-xs text-gray-600">{status.current_conv_completed_turns || 0} / {status.current_conv_total_turns}</div>

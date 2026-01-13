@@ -574,13 +574,45 @@ class Orchestrator:
                     print(f"[DEBUG] Failed to load golden for {cid}: {e}", file=sys.stderr)
                     pass
 
-                last_state: Dict[str, Any] = {}
+                # Build a map of available turn records by index
+                rec_map: Dict[int, Dict[str, Any]] = {}
                 for tf in turn_files:
                     try:
                         rec = json.loads(tf.read_text(encoding="utf-8"))
+                        try:
+                            ridx = int(rec.get("turn_index", -1))
+                        except Exception:
+                            ridx = -1
+                        if ridx >= 0:
+                            rec_map[ridx] = rec
                     except Exception:
                         continue
+
+                # Determine expected user turn indices from dataset conversation
+                tlist = conv.get("turns", []) or []
+                expected_user_idxs: List[int] = []
+                try:
+                    # Prefer explicit roles; fallback to all indices when roles absent
+                    user_positions = [i for i, tt in enumerate(tlist) if (tt or {}).get("role", "user") == "user"]
+                    expected_user_idxs = user_positions if user_positions else list(range(len(tlist)))
+                except Exception:
+                    expected_user_idxs = list(range(len(tlist)))
+
+                last_state: Dict[str, Any] = {}
+                for uidx in expected_user_idxs:
+                    rec = rec_map.get(uidx)
+                    # Read fields from record if present; otherwise synthesize placeholders
+                    if rec is None:
+                        rec = {
+                            "turn_index": uidx,
+                            "request": {"messages": [], "params": {}},
+                            "response": {"ok": False, "content": "", "latency_ms": 0, "provider_meta": {}, "error": "turn artifact missing"},
+                            "state": {},
+                        }
                     out_text = ((rec.get("response", {}) or {}).get("content")) or ""
+                    resp_ok = bool(((rec.get("response", {}) or {}).get("ok")))
+                    resp_err = ((rec.get("response", {}) or {}).get("error"))
+                    resp_meta = ((rec.get("response", {}) or {}).get("provider_meta"))
                     uidx = int(rec.get("turn_index", 0))
                     # Token accounting from provider metadata when available; otherwise approximate
                     try:
@@ -631,9 +663,8 @@ class Orchestrator:
                     # derive user prompt snippet from dataset conversation
                     user_text = ""
                     try:
-                        tlist = conv.get("turns", []) or []
                         if 0 <= uidx < len(tlist):
-                            user_text = str(tlist[uidx].get("text") or "")
+                            user_text = str((tlist[uidx] or {}).get("text") or "")
                     except Exception:
                         user_text = ""
                     def _snippet(t: str, n: int = 160) -> str:
@@ -695,6 +726,9 @@ class Orchestrator:
                         "user_prompt_full": user_text,
                         "assistant_output_snippet": _snippet(out_text, 200),
                         "assistant_output_full": out_text,
+                        "assistant_ok": resp_ok,
+                        "assistant_error": resp_err,
+                        "provider_meta": resp_meta,
                     })
                     last_state = rec.get("state") or last_state
 
