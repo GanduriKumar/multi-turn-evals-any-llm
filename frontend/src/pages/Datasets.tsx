@@ -91,38 +91,37 @@ export default function DatasetsPage() {
   const sendChat = async () => {
     if (!chatDataset || !chatInput.trim()) return
     const [provider, model] = chatModel.includes(':') ? chatModel.split(':', 1) && [chatModel.split(':')[0], chatModel.split(':').slice(1).join(':')] : ['openai', chatModel]
-    const body = {
-      dataset_id: chatDataset,
-      // allow empty to chat about the dataset holistically
-      conversation_id: chatConversation || undefined,
-      message: chatInput,
-      model: chatModel,
-      history: chatHistory,
-    }
+    const body = { dataset_id: chatDataset, conversation_id: chatConversation || undefined, message: chatInput, model: chatModel, history: chatHistory }
     setChatBusy(true)
     try {
-      const controller = new AbortController()
-      chatAbortRef.current = controller
-      const r = await fetch(`/chat/dataset?vertical=${encodeURIComponent(vertical)}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: controller.signal })
-      const ct = r.headers.get('content-type') || ''
-      let js: any = null
-      let txt: string | null = null
-      try {
-        if (ct.includes('application/json')) js = await r.json()
-        else txt = await r.text()
-      } catch {
-        try { txt = await r.text() } catch { txt = null }
-      }
       const newHist = [...chatHistory, { role: 'user', content: chatInput }]
-      if (r.ok && js?.content) {
-        newHist.push({ role: 'assistant', content: js.content })
-      } else {
-        const msg = (js?.detail || js?.error || txt || 'failed to chat') as string
-        const tag = `HTTP ${r.status}${r.statusText ? ' ' + r.statusText : ''}`
-        newHist.push({ role: 'assistant', content: `Error (${tag}): ${msg}` })
-      }
       setChatHistory(newHist)
       setChatInput('')
+      // Submit background job and poll
+      const submit = await fetch(`/chat/dataset/submit?vertical=${encodeURIComponent(vertical)}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      const js = await submit.json().catch(() => ({} as any))
+      if (!submit.ok || !js?.job_id) {
+        const msg = (js?.detail || 'Failed to submit job') as string
+        setChatHistory(h => [...h, { role: 'assistant', content: `Error: ${msg}` }])
+        return
+      }
+      const jobId = js.job_id as string
+      let done = false
+      while (!done) {
+        await new Promise(res => setTimeout(res, 1200))
+        try {
+          const st = await fetch(`/chat/dataset/job/${encodeURIComponent(jobId)}?dataset_id=${encodeURIComponent(chatDataset)}&vertical=${encodeURIComponent(vertical)}`)
+          if (!st.ok) break
+          const sj = await st.json()
+          if (sj?.status === 'completed') {
+            setChatHistory(h => [...h, { role: 'assistant', content: String(sj.content || '') }])
+            done = true
+          } else if (sj?.status === 'failed') {
+            setChatHistory(h => [...h, { role: 'assistant', content: `Error: ${String(sj.error || 'failed')}` }])
+            done = true
+          }
+        } catch { /* ignore transient */ }
+      }
     } catch (e:any) {
       const aborted = e && (e.name === 'AbortError' || e.message === 'The user aborted a request.')
       const newHist = [...chatHistory, { role: 'user', content: chatInput }, { role: 'assistant', content: aborted ? 'Cancelled.' : `Error: ${e.message || 'failed to chat'}` }]
@@ -139,6 +138,26 @@ export default function DatasetsPage() {
       chatAbortRef.current.abort()
     }
   }
+
+  // Restore dataset chat history on reopen
+  useEffect(() => {
+    if (!chatOpen || !chatDataset) return
+    ;(async () => {
+      try {
+        const url = `/chat/dataset/log?dataset_id=${encodeURIComponent(chatDataset)}&vertical=${encodeURIComponent(vertical)}${chatConversation ? `&conversation_id=${encodeURIComponent(chatConversation)}` : ''}`
+        const r = await fetch(url)
+        if (!r.ok) return
+        const js = await r.json()
+        const events = Array.isArray(js?.events) ? js.events : []
+        const hist: { role:'user'|'assistant'; content:string }[] = []
+        for (const e of events) {
+          if (e?.user) hist.push({ role: 'user', content: String(e.user) })
+          if (e?.assistant) hist.push({ role: 'assistant', content: String(e.assistant) })
+        }
+        if (hist.length) setChatHistory(hist)
+      } catch { /* ignore */ }
+    })()
+  }, [chatOpen, chatDataset, chatConversation, vertical])
 
   useEffect(() => { fetchList() }, [vertical])
 
@@ -297,69 +316,62 @@ export default function DatasetsPage() {
       </Card>
 
       {chatOpen && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setChatOpen(false)}>
-          <div className="bg-base-100 text-base-content w-full max-w-5xl max-h-[90vh] overflow-auto rounded shadow-lg border" onClick={e => e.stopPropagation()}>
-            <div className="p-3 border-b flex items-center justify-between">
-              <div className="text-sm">
-                <div className="font-medium text-white text-2xl">Chat with dataset</div>
-                <div className="text-white">Dataset: <span className="font-mono">{chatDataset}</span></div>
-              </div>
-              <div className="flex items-center gap-2">
-                <select className="select select-bordered select-sm" value={chatModel} onChange={e => setChatModel(e.target.value)}>
-                  <option value="openai:gpt-5.1">openai:gpt-5.1</option>
-                  <option value="gemini:gemini-2.5">gemini:gemini-2.5</option>
-                  <option value="ollama:llama3.2:latest">ollama:llama3.2:latest</option>
-                </select>
-                <Button variant="warning" onClick={() => setChatOpen(false)}>Close</Button>
-              </div>
-            </div>
-            <div className="p-3 space-y-3">
-              <label className="text-xs">Conversation</label>
-              {chatConvs.length > 0 ? (
-                <select className="select select-bordered w-full select-sm" value={chatConversation || ''} onChange={e => setChatConversation(e.target.value)}>
-                  <option value="">All conversations</option>
-                  {chatConvs.map((c:any) => {
-                    const title = c.conversation_title || c.conversation_slug || c.conversation_id
-                    return <option key={c.conversation_id} value={c.conversation_id}>{title} — {c.conversation_id}</option>
-                  })}
-                </select>
+        <Card title="Chat with dataset">
+          <div className="text-xs mb-2">Dataset: <span className="font-mono">{chatDataset}</span></div>
+          <div className="flex items-center gap-2 mb-3">
+            <select className="select select-bordered select-sm" value={chatModel} onChange={e => setChatModel(e.target.value)}>
+              <option value="openai:gpt-5.1">openai:gpt-5.1</option>
+              <option value="gemini:gemini-2.5">gemini:gemini-2.5</option>
+              <option value="ollama:llama3.2:latest">ollama:llama3.2:latest</option>
+            </select>
+            <Button variant="warning" onClick={() => setChatOpen(false)}>Close</Button>
+          </div>
+          <div className="space-y-3">
+            <label className="text-xs">Conversation</label>
+            {chatConvs.length > 0 ? (
+              <select className="select select-bordered w-full select-sm" value={chatConversation || ''} onChange={e => setChatConversation(e.target.value)}>
+                <option value="">All conversations</option>
+                {chatConvs.map((c:any) => {
+                  const title = c.conversation_title || c.conversation_slug || c.conversation_id
+                  return <option key={c.conversation_id} value={c.conversation_id}>{title} — {c.conversation_id}</option>
+                })}
+              </select>
+            ) : (
+              <input className="input input-bordered w-full input-sm" placeholder="e.g. conv-001" value={chatConversation || ''} onChange={e => setChatConversation(e.target.value)} />
+            )}
+            <div ref={chatRef} className="border rounded p-2 h-72 overflow-auto bg-base-200 text-base-content">
+              {chatHistory.length === 0 ? (
+                <div className="text-[12px] text-gray-800">Ask a question about the selected conversation. The assistant will use the conversation metadata and user turns as context.</div>
               ) : (
-                <input className="input input-bordered w-full input-sm" placeholder="e.g. conv-001" value={chatConversation || ''} onChange={e => setChatConversation(e.target.value)} />
+                <div className="space-y-2">
+                  {chatHistory.map((m,i) => (
+                    <div key={i} className={`p-2 rounded ${m.role === 'user' ? 'bg-base-100' : 'bg-base-300'}`}>
+                      <div className="text-base font-semibold opacity-70">{m.role}</div>
+                      <div className="text-sm whitespace-pre-wrap break-words">{m.content}</div>
+                    </div>
+                  ))}
+                </div>
               )}
-              <div ref={chatRef} className="border rounded p-2 h-72 overflow-auto bg-base-200 text-base-content">
-                {chatHistory.length === 0 ? (
-                  <div className="text-[12px] text-gray-800">Ask a question about the selected conversation. The assistant will use the conversation metadata and user turns as context.</div>
-                ) : (
-                  <div className="space-y-2">
-                    {chatHistory.map((m,i) => (
-                      <div key={i} className={`p-2 rounded ${m.role === 'user' ? 'bg-base-100' : 'bg-base-300'}`}>
-                        <div className="text-base font-semibold text-white opacity-70">{m.role}</div>
-                        <div className="text-sm whitespace-pre-wrap break-words text-white">{m.content}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <input className="input input-bordered w-full input-sm" placeholder="Type your question" value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat() } }} />
-                {chatBusy ? (
-                  <Button onClick={cancelChat} aria-label="Cancel sending" title="Cancel sending">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                      <rect x="9" y="9" width="6" height="6" fill="currentColor" className="animate-pulse" />
-                    </svg>
-                  </Button>
-                ) : (
-                  <Button onClick={sendChat} aria-label="Send" title="Send">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                      <path d="M12 3c.3 0 .6.12.8.34l7 7a1.14 1.14 0 0 1 .2 1.26A1 1 0 0 1 19 12h-5v8a1 1 0 1 1-2 0v-8H7a1 1 0 0 1-1-.4 1.14 1.14 0 0 1 .2-1.26l7-7c.2-.22.5-.34.8-.34z" />
-                    </svg>
-                  </Button>
-                )}
-              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <input className="input input-bordered w-full input-sm" placeholder="Type your question" value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat() } }} />
+              {chatBusy ? (
+                <Button onClick={cancelChat} aria-label="Cancel sending" title="Cancel sending">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                    <rect x="9" y="9" width="6" height="6" fill="currentColor" className="animate-pulse" />
+                  </svg>
+                </Button>
+              ) : (
+                <Button onClick={sendChat} aria-label="Send" title="Send">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                    <path d="M12 3c.3 0 .6.12.8.34l7 7a1.14 1.14 0 0 1 .2 1.26A1 1 0 0 1 19 12h-5v8a1 1 0 1 1-2 0v-8H7a1 1 0 0 1-1-.4 1.14 1.14 0 0 1 .2-1.26l7-7c.2-.22.5-.34.8-.34z" />
+                  </svg>
+                </Button>
+              )}
             </div>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   )

@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 import csv
 from datetime import datetime
+import asyncio
+from typing import List
 
 try:
     from .dataset_repo import DatasetRepository
@@ -154,12 +156,16 @@ try:
 except Exception:
     from backend.providers.registry import ProviderRegistry  # type: ignore
 app.state.providers = ProviderRegistry()
+app.state.chat_jobs: dict[str, dict[str, Any]] = {}
 
 def _ensure_vertical_name(name: Optional[str]) -> str:
     v = (name or os.getenv("INDUSTRY_VERTICAL") or "commerce").lower()
     if v not in SUPPORTED_VERTICALS:
         v = "commerce"
     return v
+
+def _utcnow() -> str:
+    return datetime.utcnow().isoformat() + "Z"
 
 def _get_or_create_vertical_context(vertical: Optional[str] = None) -> dict[str, Any]:
     v = _ensure_vertical_name(vertical)
@@ -283,6 +289,7 @@ class ChatDatasetBody(BaseModel):
     message: str
     model: Optional[str] = None  # provider:model
     history: Optional[list[dict[str, str]]] = None  # [{role, content}]
+    async_mode: Optional[bool] = None
 
 class ChatReportBody(BaseModel):
     run_id: str
@@ -290,6 +297,7 @@ class ChatReportBody(BaseModel):
     model: Optional[str] = None  # provider:model
     history: Optional[list[dict[str, str]]] = None
     conversation_id: Optional[str] = None  # optional focus on a single conversation
+    async_mode: Optional[bool] = None  # when true, use background job
 
 @app.get("/health", response_model=Health)
 async def health():
@@ -411,7 +419,12 @@ async def chat_with_dataset(body: ChatDatasetBody, vertical: Optional[str] = Non
             embedder = OllamaEmbeddings()
             hits = []
             try:
-                hits = await idx.search(query_text, embedder, top_k=6)  # type: ignore[attr-defined]
+                # Adaptive top_k for dataset queries too
+                ql = (body.message or "").strip()
+                short = len(ql.split()) <= 4
+                diag = any(w in ql.lower() for w in ("turn","user","assistant","domain","behavior","scenario","title","id","slug"))
+                topk = 16 if (short or diag) else 8
+                hits = await idx.search(query_text, embedder, top_k=topk)  # type: ignore[attr-defined]
             except Exception:
                 hits = []
             if hits:
@@ -449,13 +462,72 @@ async def chat_with_dataset(body: ChatDatasetBody, vertical: Optional[str] = Non
         else:
             raise RuntimeError("provider missing chat interface")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"provider call failed: {e}")
+        # Fallback: synthesize a facts-only response from dataset when provider fails
+        facts = []
+        try:
+            facts.append("Provider failed; returning dataset facts-only summary.")
+            if conv is not None:
+                meta = conv.get("metadata") or {}
+                title = conv.get("conversation_title") or conv.get("conversation_slug") or conv.get("conversation_id")
+                dom = meta.get("domain") or conv.get("domain")
+                beh = meta.get("behavior") or conv.get("behavior")
+                tcount = len(conv.get("turns") or [])
+                facts.append(f"Conversation: {title} | Domain: {dom} | Behavior: {beh} | Turns: {tcount}")
+                # Include a few user snippets as evidence
+                shown = 0
+                for t in (conv.get("turns") or []):
+                    if shown >= 6:
+                        break
+                    try:
+                        idx = int(t.get("turn_index", shown))
+                        u = t.get("text") or t.get("user") or t.get("user_text") or t.get("user_prompt_snippet") or ""
+                        if u:
+                            facts.append(f"[{idx+1}] U: {u[:180]}")
+                            shown += 1
+                    except Exception:
+                        continue
+            else:
+                convs = (ds.get("conversations") or [])
+                facts.append(f"Dataset: {body.dataset_id} | Conversations: {len(convs)}")
+                titles = [c.get("conversation_title") or c.get("conversation_slug") or str(c.get("conversation_id")) for c in convs[:30]]
+                if titles:
+                    facts.append("Sample titles: " + "; ".join(titles))
+            return {
+                "ok": False,
+                "content": "\n".join(facts),
+                "error": f"provider call failed: {e}",
+                "provider_meta": {},
+                "model": model_spec,
+            }
+        except Exception:
+            raise HTTPException(status_code=500, detail=f"provider call failed: {e}")
     # Validate provider response
     _content = getattr(resp, 'content', None)
     _ok = bool(getattr(resp, 'ok', False))
     _err = getattr(resp, 'error', None)
     if (not _ok) or (not isinstance(_content, str)) or (isinstance(_content, str) and not _content.strip()):
-        raise HTTPException(status_code=502, detail=_err or "empty provider response")
+        # Fallback: facts-only when provider returns empty
+        try:
+            facts = ["Provider returned empty content; dataset facts-only summary:"]
+            if conv is not None:
+                meta = conv.get("metadata") or {}
+                title = conv.get("conversation_title") or conv.get("conversation_slug") or conv.get("conversation_id")
+                dom = meta.get("domain") or conv.get("domain")
+                beh = meta.get("behavior") or conv.get("behavior")
+                tcount = len(conv.get("turns") or [])
+                facts.append(f"Conversation: {title} | Domain: {dom} | Behavior: {beh} | Turns: {tcount}")
+            else:
+                convs = (ds.get("conversations") or [])
+                facts.append(f"Dataset: {body.dataset_id} | Conversations: {len(convs)}")
+            return {
+                "ok": False,
+                "content": "\n".join(facts),
+                "error": _err or "empty provider response",
+                "provider_meta": getattr(resp, 'provider_meta', {}),
+                "model": model_spec,
+            }
+        except Exception:
+            raise HTTPException(status_code=502, detail=_err or "empty provider response")
     # Persist chat transcript under datasets/<vertical>/chats/<dataset_id>/<conversation_id>.jsonl
     root = Path(__file__).resolve().parents[1]
     out_dir = root / "datasets" / ctx['vertical'] / "chats" / body.dataset_id
@@ -482,6 +554,38 @@ async def chat_with_dataset(body: ChatDatasetBody, vertical: Optional[str] = Non
         "provider_meta": getattr(resp, 'provider_meta', {}),
         "model": model_spec,
     }
+
+
+@app.get("/chat/dataset/log")
+async def get_dataset_chat_log(dataset_id: str, conversation_id: Optional[str] = None, vertical: Optional[str] = None, limit: int = 50):
+    """Return recent dataset chat events persisted on disk for this dataset/conversation.
+    The dataset chat persists to datasets/<vertical>/chats/<dataset_id>/<conversation_id>.jsonl
+    where conversation_id is the literal 'None' when not provided.
+    """
+    try:
+        v = _ensure_vertical_name(vertical)
+        root = Path(__file__).resolve().parents[1]
+        conv_key = str(conversation_id) if conversation_id is not None else 'None'
+        path = root / "datasets" / v / "chats" / dataset_id / f"{conv_key}.jsonl"
+        events: List[dict] = []
+        if path.exists():
+            try:
+                with path.open("r", encoding="utf-8") as f:
+                    lines = f.readlines()[-max(1, min(limit, 500)):]
+                import json as _json
+                for line in lines:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        events.append(_json.loads(line))
+                    except Exception:
+                        continue
+            except Exception:
+                events = []
+        return {"events": events}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/chat/report")
@@ -564,6 +668,21 @@ async def chat_with_report(body: ChatReportBody, vertical: Optional[str] = None)
                 conv_block.append(f"    A: {snip(a, 160)}")
     # Lightweight RAG over report results to enrich context
     sys_lines = [*header, *conv_block]
+    # Facts-first: if user asks about pass/fail, pre-append a deterministic overview list
+    try:
+        qtext = (body.message or "").lower()
+        if any(w in qtext for w in ("pass", "passed", "fail", "failed", "conversation_pass")):
+            passed_list = []
+            failed_list = []
+            for c in convs:
+                title = c.get("conversation_title") or c.get("conversation_slug") or c.get("conversation_id")
+                ok = bool((c.get("summary") or {}).get("conversation_pass"))
+                (passed_list if ok else failed_list).append(str(title))
+            sys_lines.append("Pass/Fail overview:")
+            sys_lines.append(f"Passed ({len(passed_list)}): " + (", ".join(passed_list) if passed_list else "none"))
+            sys_lines.append(f"Failed ({len(failed_list)}): " + (", ".join(failed_list) if failed_list else "none"))
+    except Exception:
+        pass
     try:
         from .rag import build_report_index  # type: ignore
     except Exception:
@@ -583,7 +702,12 @@ async def chat_with_report(body: ChatReportBody, vertical: Optional[str] = None)
             embedder = OllamaEmbeddings()
             hits = []
             try:
-                hits = await idx.search(query_text, embedder, top_k=6)  # type: ignore[attr-defined]
+                # Adaptive top_k: more for short or diagnostic queries
+                ql = (body.message or "").strip()
+                short = len(ql.split()) <= 4
+                diag = any(w in ql.lower() for w in ("pass","passed","fail","failed","conversation_pass","metric","domain","behavior","id","slug"))
+                topk = 16 if (short or diag) else 8
+                hits = await idx.search(query_text, embedder, top_k=topk)  # type: ignore[attr-defined]
             except Exception:
                 hits = []
             if hits:
@@ -619,13 +743,63 @@ async def chat_with_report(body: ChatReportBody, vertical: Optional[str] = None)
         else:
             raise RuntimeError("provider missing chat interface")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"provider call failed: {e}")
+        # Fallback: synthesize a facts-only response from results.json when provider fails
+        facts = []
+        try:
+            facts.append("Provider failed; returning facts-only summary.")
+            passed_list = []
+            failed_list = []
+            for c in convs:
+                title = c.get("conversation_title") or c.get("conversation_slug") or c.get("conversation_id")
+                ok = bool((c.get("summary") or {}).get("conversation_pass"))
+                (passed_list if ok else failed_list).append(title)
+            facts.append(f"Passed ({len(passed_list)}): " + (", ".join(map(str, passed_list)) or "none"))
+            facts.append(f"Failed ({len(failed_list)}): " + (", ".join(map(str, failed_list)) or "none"))
+            # list failed metrics per failed conversation
+            fm_lines = []
+            for c in convs:
+                summ = c.get("summary") or {}
+                if not bool(summ.get("conversation_pass")):
+                    title = c.get("conversation_title") or c.get("conversation_slug") or c.get("conversation_id")
+                    fms = ", ".join((summ.get("failed_metrics") or [])[:8]) or "(none listed)"
+                    fm_lines.append(f"- {title}: failed_metrics={fms}; failed_turns={summ.get('failed_turns_count')}")
+            if fm_lines:
+                facts.append("Failures detail:")
+                facts.extend(fm_lines[:12])
+            return {
+                "ok": False,
+                "content": "\n".join(facts),
+                "error": f"provider call failed: {e}",
+                "provider_meta": {},
+                "model": model_spec,
+            }
+        except Exception:
+            raise HTTPException(status_code=500, detail=f"provider call failed: {e}")
     # Validate provider response to avoid returning HTTP 200 with empty content
     _content = getattr(resp, 'content', None)
     _ok = bool(getattr(resp, 'ok', False))
     _err = getattr(resp, 'error', None)
     if (not _ok) or (not isinstance(_content, str)) or (isinstance(_content, str) and not _content.strip()):
-        raise HTTPException(status_code=502, detail=_err or "empty provider response")
+        # Fallback: facts-only when provider returns empty
+        try:
+            facts = ["Provider returned empty content; facts-only summary:"]
+            passed_list = []
+            failed_list = []
+            for c in convs:
+                title = c.get("conversation_title") or c.get("conversation_slug") or c.get("conversation_id")
+                ok = bool((c.get("summary") or {}).get("conversation_pass"))
+                (passed_list if ok else failed_list).append(title)
+            facts.append(f"Passed ({len(passed_list)}): " + (", ".join(map(str, passed_list)) or "none"))
+            facts.append(f"Failed ({len(failed_list)}): " + (", ".join(map(str, failed_list)) or "none"))
+            return {
+                "ok": False,
+                "content": "\n".join(facts),
+                "error": _err or "empty provider response",
+                "provider_meta": getattr(resp, 'provider_meta', {}),
+                "model": model_spec,
+            }
+        except Exception:
+            raise HTTPException(status_code=502, detail=_err or "empty provider response")
     # Persist under run folder
     out_dir = rd.layout.run_dir(body.run_id) / "chats"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -652,6 +826,208 @@ async def chat_with_report(body: ChatReportBody, vertical: Optional[str] = None)
         "provider_meta": getattr(resp, 'provider_meta', {}),
         "model": model_spec,
     }
+
+
+@app.get("/chat/report/log")
+async def get_report_chat_log(run_id: str, conversation_id: Optional[str] = None, vertical: Optional[str] = None, limit: int = 50):
+    """Return recent report chat events persisted on disk for this run/conversation.
+    Stored at runs/<vertical>/<run_id>/chats/report-<conversation_id or 'all'>.jsonl
+    """
+    # Resolve reader/run dir
+    readers: list[RunArtifactReader] = []
+    if vertical:
+        readers = [_get_or_create_vertical_context(vertical)['reader']]
+    else:
+        readers = [c['reader'] for c in _iter_all_contexts()]
+    out_dir = None
+    for r in readers:
+        d = r.layout.run_dir(run_id)
+        if d.exists():
+            out_dir = d
+            break
+    if out_dir is None:
+        raise HTTPException(status_code=404, detail="run not found")
+    name = f"report-{(conversation_id or 'all')}.jsonl"
+    path = out_dir / "chats" / name
+    events: List[dict] = []
+    if path.exists():
+        try:
+            with path.open("r", encoding="utf-8") as f:
+                lines = f.readlines()[-max(1, min(limit, 500)):]
+            import json as _json
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    events.append(_json.loads(line))
+                except Exception:
+                    continue
+        except Exception:
+            events = []
+    return {"events": events}
+
+
+# ---------------- Background jobs for dataset chat -----------------
+
+def _dataset_job_path(vertical: str, dataset_id: str, job_id: str) -> Path:
+    root = Path(__file__).resolve().parents[1]
+    d = root / "datasets" / vertical / "chats" / dataset_id / "jobs"
+    d.mkdir(parents=True, exist_ok=True)
+    return d / f"{job_id}.json"
+
+async def _run_dataset_chat_job(job_path: Path, body: ChatDatasetBody, vertical: Optional[str]):
+    def write_job(data: dict):
+        try:
+            job_path.write_text(json.dumps(data, indent=2), encoding='utf-8')
+        except Exception:
+            pass
+    try:
+        import httpx
+        async with httpx.AsyncClient(timeout=None) as client:
+            payload = body.model_dump()
+            url = f"http://127.0.0.1:8000/chat/dataset?vertical={vertical or ''}"
+            write_job({"status": "running", "updated": _utcnow()})
+            resp = await client.post(url, json=payload)
+            if resp.status_code == 200:
+                js = resp.json()
+                write_job({"status": "completed", "content": js.get("content"), "ok": js.get("ok"), "model": js.get("model"), "updated": _utcnow()})
+            else:
+                try:
+                    js = resp.json()
+                    err = js.get("detail") or js.get("error")
+                except Exception:
+                    err = resp.text
+                write_job({"status": "failed", "error": err, "updated": _utcnow()})
+    except Exception as e:
+        write_job({"status": "failed", "error": str(e), "updated": _utcnow()})
+
+
+@app.post("/chat/dataset/submit")
+async def submit_dataset_chat(body: ChatDatasetBody, vertical: Optional[str] = None):
+    v = _ensure_vertical_name(vertical)
+    if not body.dataset_id:
+        raise HTTPException(status_code=400, detail="dataset_id required")
+    job_id = str(uuid.uuid4())
+    job_path = _dataset_job_path(v, body.dataset_id, job_id)
+    try:
+        job_path.write_text(json.dumps({"status": "queued", "created": _utcnow()}, indent=2), encoding='utf-8')
+    except Exception:
+        pass
+    asyncio.create_task(_run_dataset_chat_job(job_path, body, v))
+    return {"job_id": job_id}
+
+
+@app.get("/chat/dataset/job/{job_id}")
+async def get_dataset_chat_job(job_id: str, dataset_id: str, vertical: Optional[str] = None):
+    v = _ensure_vertical_name(vertical)
+    p = _dataset_job_path(v, dataset_id, job_id)
+    if not p.exists():
+        raise HTTPException(status_code=404, detail="job not found")
+    try:
+        return json.loads(p.read_text(encoding='utf-8'))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------- Background jobs for report chat -----------------
+
+def _report_job_path(run_reader: RunArtifactReader, run_id: str, job_id: str) -> Path:
+    d = run_reader.layout.run_dir(run_id) / "chats" / "jobs"
+    d.mkdir(parents=True, exist_ok=True)
+    return d / f"{job_id}.json"
+
+async def _run_report_chat_job(job_path: Path, body: ChatReportBody, vertical: Optional[str]):
+    # Write running status
+    def write_job(data: dict):
+        try:
+            job_path.write_text(json.dumps(data, indent=2), encoding='utf-8')
+        except Exception:
+            pass
+    # Resolve reader for paths
+    readers: list[RunArtifactReader] = []
+    if vertical:
+        readers = [_get_or_create_vertical_context(vertical)['reader']]
+    else:
+        readers = [c['reader'] for c in _iter_all_contexts()]
+    rd = None
+    for r in readers:
+        if r.layout.run_dir(body.run_id).exists():
+            rd = r; break
+    if rd is None:
+        write_job({"status": "failed", "error": "run not found", "updated": _utcnow()})
+        return
+    # Build a synthetic request to reuse the same logic: call provider locally without streaming
+    try:
+        # Reuse the same logic by invoking the internal function (duplicate minimal parts)
+        # We'll call the chat_with_report endpoint logic by constructing messages inline for the job
+        # For simplicity and consistency, we perform an HTTP call to ourselves
+        import httpx
+        async with httpx.AsyncClient(timeout=None) as client:
+            payload = body.model_dump()
+            url = f"http://127.0.0.1:8000/chat/report?vertical={vertical or ''}"
+            write_job({"status": "running", "updated": _utcnow()})
+            resp = await client.post(url, json=payload)
+            if resp.status_code == 200:
+                js = resp.json()
+                write_job({"status": "completed", "content": js.get("content"), "ok": js.get("ok"), "model": js.get("model"), "updated": _utcnow()})
+            else:
+                try:
+                    js = resp.json()
+                    err = js.get("detail") or js.get("error")
+                except Exception:
+                    err = resp.text
+                write_job({"status": "failed", "error": err, "updated": _utcnow()})
+    except Exception as e:
+        write_job({"status": "failed", "error": str(e), "updated": _utcnow()})
+
+
+@app.post("/chat/report/submit")
+async def submit_report_chat(body: ChatReportBody, vertical: Optional[str] = None):
+    # Create job id and persist queued
+    job_id = str(uuid.uuid4())
+    readers: list[RunArtifactReader] = []
+    if vertical:
+        readers = [_get_or_create_vertical_context(vertical)['reader']]
+    else:
+        readers = [c['reader'] for c in _iter_all_contexts()]
+    rd = None
+    for r in readers:
+        if r.layout.run_dir(body.run_id).exists():
+            rd = r; break
+    if rd is None:
+        raise HTTPException(status_code=404, detail="run not found")
+    job_path = _report_job_path(rd, body.run_id, job_id)
+    try:
+        job_path.write_text(json.dumps({"status": "queued", "created": _utcnow()}, indent=2), encoding='utf-8')
+    except Exception:
+        pass
+    # Schedule background task
+    asyncio.create_task(_run_report_chat_job(job_path, body, vertical))
+    return {"job_id": job_id}
+
+
+@app.get("/chat/report/job/{job_id}")
+async def get_report_chat_job(job_id: str, run_id: str, vertical: Optional[str] = None):
+    readers: list[RunArtifactReader] = []
+    if vertical:
+        readers = [_get_or_create_vertical_context(vertical)['reader']]
+    else:
+        readers = [c['reader'] for c in _iter_all_contexts()]
+    rd = None
+    for r in readers:
+        p = r.layout.run_dir(run_id)
+        if p.exists():
+            rd = r; break
+    if rd is None:
+        raise HTTPException(status_code=404, detail="run not found")
+    p = _report_job_path(rd, run_id, job_id)
+    if not p.exists():
+        raise HTTPException(status_code=404, detail="job not found")
+    try:
+        return json.loads(p.read_text(encoding='utf-8'))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/settings")

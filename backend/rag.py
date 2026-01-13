@@ -39,6 +39,9 @@ class SimpleRAGIndex:
             raise e
 
     async def search(self, query: str, embedder, top_k: int = 6) -> List[Tuple[RAGEntry, float]]:
+        """Robust hybrid retrieval: embeddings + keyword scoring with field-aware boosts.
+        Designed to avoid misses for a wide range of report/dataset questions.
+        """
         if not query or not self.entries:
             return []
         await self.ensure_embeddings(embedder)
@@ -46,7 +49,6 @@ class SimpleRAGIndex:
             return []
         # Embed query
         qv = (await embedder.embed([query]))[0]
-        # cosine similarity
         from .embeddings.ollama_embed import OllamaEmbeddings  # local import to avoid cycles
         sims: List[Tuple[int, float]] = []
         for i, v in enumerate(self.vectors):
@@ -56,9 +58,103 @@ class SimpleRAGIndex:
                 s = 0.0
             sims.append((i, s))
         sims.sort(key=lambda x: x[1], reverse=True)
+
+        # Keyword scoring
+        import re
+        def tokenize(text: str) -> list[str]:
+            toks = re.findall(r"[a-zA-Z0-9_]+", text.lower())
+            stop = {"the","a","an","and","or","is","to","of","in","on","for","with","by","at","as","it","this","that"}
+            return [t for t in toks if t not in stop]
+
+        ql = query.lower()
+        q_tokens = tokenize(query)
+        metric_terms = {"exact","semantic","consistency","adherence","hallucination","bleu","rouge","f1","precision","recall"}
+        wants_metric = ("metric" in ql) or any(m in ql for m in metric_terms)
+        wants_domain = ("domain" in ql)
+        wants_behavior = ("behavior" in ql)
+        status_query = any(w in ql for w in ("pass","passed","conversation_pass","fail","failed","status"))
+
+        # Precompute document frequencies for IDF weighting
+        docs_tokens: list[list[str]] = []
+        for e in self.entries:
+            docs_tokens.append(tokenize(e.text))
+        from collections import Counter
+        N_docs = max(1, len(docs_tokens))
+        df_counter: Counter[str] = Counter()
+        for toks in docs_tokens:
+            df_counter.update(set(toks))
+        def idf(term: str) -> float:
+            # smooth IDF
+            return max(0.0, __import__("math").log(1.0 + N_docs / (1.0 + df_counter.get(term, 0))))
+
+        kw_scores: list[float] = []
+        qset = set(q_tokens)
+        q_idf_sum = sum(idf(t) for t in qset) or 1.0
+        for idx, e in enumerate(self.entries):
+            t = e.text
+            etoks = docs_tokens[idx]
+            eset = set(etoks)
+            # IDF-weighted overlap
+            inter = qset & eset
+            overlap = sum(idf(tok) for tok in inter) / q_idf_sum
+            phrase_boost = 0.2 if t.lower().find(ql.strip()) >= 0 and len(ql.strip()) >= 4 else 0.0
+            field_boost = 0.0
+            sec = (e.meta or {}).get("section")
+            tl = t.lower()
+            if status_query and sec == "summary":
+                field_boost += 0.1
+            if wants_metric and ("failed_metrics=" in tl or "metrics_changed=" in tl or sec == "summary"):
+                field_boost += 0.1
+            if wants_domain and "domain:" in tl:
+                field_boost += 0.1
+            if wants_behavior and "behavior:" in tl:
+                field_boost += 0.1
+            kw_scores.append(min(1.0, overlap + phrase_boost + field_boost))
+
+        # Combine scores
+        # Normalize cosine from [-1,1] to [0,1]
+        sims01 = [(i, max(0.0, min(1.0, (s + 1.0) / 2.0))) for i, s in sims]
+        # Dynamic weighting
+        alpha, beta = 0.7, 0.3
+        if len(q_tokens) <= 2:
+            alpha, beta = 0.5, 0.5
+        if sims01 and sims01[0][1] < 0.1:
+            alpha, beta = 0.4, 0.6
+
+        scored: list[Tuple[int, float]] = []
+        for i, s in sims01:
+            kw = kw_scores[i] if i < len(kw_scores) else 0.0
+            scored.append((i, alpha * s + beta * kw))
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        # Ensure critical keyword hits are present for status queries
+        keyword_indices: List[int] = []
+        if status_query:
+            wants_pass = ("passed" in ql) or ("pass" in ql and "fail" not in ql) or ("conversation_pass=true" in ql)
+            wants_fail = ("fail" in ql or "failed" in ql or "conversation_pass=false" in ql) and not wants_pass
+            for i, e in enumerate(self.entries):
+                tl = e.text.lower()
+                if wants_pass and ("status: passed" in tl or "conversation_pass=true" in tl or "passed=true" in tl or "failed turns: 0" in tl):
+                    keyword_indices.append(i)
+                elif wants_fail and ("status: failed" in tl or "conversation_pass=false" in tl or "failed=true" in tl):
+                    keyword_indices.append(i)
+
+        picked: list[int] = []
+        for i, _s in scored:
+            if i not in picked:
+                picked.append(i)
+            if len(picked) >= max(1, top_k):
+                break
+        for i in keyword_indices:
+            if i not in picked:
+                picked.append(i)
+            if len(picked) >= max(1, top_k):
+                break
+
         out: List[Tuple[RAGEntry, float]] = []
-        for i, s in sims[: max(1, top_k)]:
-            out.append((self.entries[i], s))
+        score_map = {i: s for i, s in scored}
+        for i in picked[: max(1, top_k)]:
+            out.append((self.entries[i], score_map.get(i, 0.5)))
         return out
 
 
@@ -93,8 +189,28 @@ def build_report_index(results: Dict[str, Any], max_turns_per_conv: int = 12) ->
     for c in convs:
         cid = str(c.get("conversation_id"))
         title = c.get("conversation_title") or c.get("conversation_slug") or cid
+        slug = c.get("conversation_slug")
+        dom = (c.get("metadata") or {}).get("domain") or c.get("domain")
+        beh = (c.get("metadata") or {}).get("behavior") or c.get("behavior")
         summ = c.get("summary") or {}
-        header = f"Report: {title} — pass={bool(summ.get('conversation_pass'))} failed_turns={summ.get('failed_turns_count')}"
+        passed = bool(summ.get("conversation_pass"))
+        status = "passed" if passed else "failed"
+        failed_turns = summ.get("failed_turns_count")
+        # Enrich header with explicit, searchable synonyms
+        header_bits = [
+            f"Report: {title}",
+            f"ConversationID: {cid}",
+            f"Slug: {slug}" if slug else None,
+            f"Domain: {dom}" if dom else None,
+            f"Behavior: {beh}" if beh else None,
+            f"pass={passed}",
+            f"failed_turns={failed_turns}",
+            f"Status: {status}",
+            f"conversation_pass={'true' if passed else 'false'}",
+            f"passed={'true' if passed else 'false'}",
+            f"failed={'false' if passed else 'true'}",
+        ]
+        header = "; ".join([h for h in header_bits if h])
         if summ.get("failed_metrics"):
             header += f"; failed_metrics={', '.join((summ.get('failed_metrics') or [])[:8])}"
         entries.append(RAGEntry(text=header, meta={"section": "summary", "conversation_id": cid}))

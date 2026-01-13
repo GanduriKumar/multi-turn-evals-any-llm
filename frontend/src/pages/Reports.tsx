@@ -266,49 +266,41 @@ export default function ReportsPage() {
 
   const sendReportChat = async () => {
     if (!runId || !rcInput.trim()) return
-    const body: any = {
-      run_id: runId,
-      message: rcInput,
-      model: rcModel,
-      history: rcHistory,
-    }
+    const body: any = { run_id: runId, message: rcInput, model: rcModel, history: rcHistory }
     if (rcConversation) body.conversation_id = rcConversation
     setRcBusy(true)
     try {
       const hist = [...rcHistory, { role: 'user', content: rcInput }]
-      const controller = new AbortController()
-      rcAbortRef.current = controller
-      const attempt = async (url: string) => {
-        const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: controller.signal })
-        const ct = r.headers.get('content-type') || ''
-        let js: any = null
-        let txt: string | null = null
-        try {
-          if (ct.includes('application/json')) js = await r.json()
-          else txt = await r.text()
-        } catch {
-          try { txt = await r.text() } catch { txt = null }
-        }
-        return { r, js, txt }
-      }
-      // Try with vertical first; retry without on 404
-      let { r, js, txt } = await attempt(`/chat/report?vertical=${encodeURIComponent(vertical)}`)
-      if (r.status === 404) {
-        const retry = await attempt('/chat/report')
-        r = retry.r; js = retry.js; txt = retry.txt
-      }
-      if (r.ok && js?.content) {
-        hist.push({ role: 'assistant', content: js.content })
-      } else {
-        let msg = (js?.detail || js?.error || txt || 'failed to chat') as string
-        if (r.status === 404 && (msg.includes('results.json not found') || !results)) {
-          msg = 'No report found for this run. Please open a run with results and try again.'
-        }
-        const tag = `HTTP ${r.status}${r.statusText ? ' ' + r.statusText : ''}`
-        hist.push({ role: 'assistant', content: `Error (${tag}): ${msg}` })
-      }
       setRcHistory(hist)
       setRcInput('')
+      // Submit background job so it continues across navigation
+      const submit = await fetch(`/chat/report/submit?vertical=${encodeURIComponent(vertical)}`, {
+        method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body)
+      })
+      const js = await submit.json().catch(() => ({} as any))
+      if (!submit.ok || !js?.job_id) {
+        const msg = (js?.detail || 'Failed to submit job') as string
+        setRcHistory([...hist, { role: 'assistant', content: `Error: ${msg}` }])
+        return
+      }
+      const jobId = js.job_id as string
+      // Poll for job status until completed/failed; keep polling even if user navigates away
+      let done = false
+      while (!done) {
+        await new Promise(res => setTimeout(res, 1200))
+        try {
+          const st = await fetch(`/chat/report/job/${encodeURIComponent(jobId)}?run_id=${encodeURIComponent(runId)}&vertical=${encodeURIComponent(vertical)}`)
+          if (!st.ok) break
+          const sj = await st.json()
+          if (sj?.status === 'completed') {
+            setRcHistory(h => [...h, { role: 'assistant', content: String(sj.content || '') }])
+            done = true
+          } else if (sj?.status === 'failed') {
+            setRcHistory(h => [...h, { role: 'assistant', content: `Error: ${String(sj.error || 'failed')}` }])
+            done = true
+          }
+        } catch { /* ignore transient */ }
+      }
     } catch (e:any) {
       const aborted = e && (e.name === 'AbortError' || e.message === 'The user aborted a request.')
       const hist = [...rcHistory, { role: 'user', content: rcInput }, { role: 'assistant', content: aborted ? 'Cancelled.' : `Error: ${e.message || 'failed to chat'}` }]
@@ -325,6 +317,27 @@ export default function ReportsPage() {
       rcAbortRef.current.abort()
     }
   }
+
+  // Restore chat history when user reopens the page/card
+  useEffect(() => {
+    if (!rcOpen || !runId) return
+    ;(async () => {
+      try {
+        const url = `/chat/report/log?run_id=${encodeURIComponent(runId)}&vertical=${encodeURIComponent(vertical)}${rcConversation ? `&conversation_id=${encodeURIComponent(rcConversation)}` : ''}`
+        const r = await fetch(url)
+        if (!r.ok) return
+        const js = await r.json()
+        const events = Array.isArray(js?.events) ? js.events : []
+        // Convert persisted events to UI history
+        const hist: { role:'user'|'assistant'; content:string }[] = []
+        for (const e of events) {
+          if (e?.user) hist.push({ role: 'user', content: String(e.user) })
+          if (e?.assistant) hist.push({ role: 'assistant', content: String(e.assistant) })
+        }
+        if (hist.length) setRcHistory(hist)
+      } catch { /* ignore */ }
+    })()
+  }, [rcOpen, runId, rcConversation, vertical])
 
   return (
     <div className="grid gap-4">
@@ -700,6 +713,63 @@ export default function ReportsPage() {
         </div>
       </Card>
 
+      {rcOpen && (
+        <Card title="Chat with report">
+          <div className="text-xs mb-2">Run: <span className="font-mono">{runId}</span></div>
+          <div className="flex items-center gap-2 mb-3">
+            <select className="select select-bordered select-sm" value={rcModel} onChange={e => setRcModel(e.target.value)}>
+              <option value="openai:gpt-5.1">openai:gpt-5.1</option>
+              <option value="gemini:gemini-2.5">gemini:gemini-2.5</option>
+              <option value="ollama:llama3.2:latest">ollama:llama3.2:latest</option>
+            </select>
+            <Button variant="warning" onClick={() => setRcOpen(false)}>Close</Button>
+          </div>
+          {!results && (
+            <div className="alert alert-warning text-xs mb-2">No report found for this run. Open a run with a generated report first.</div>
+          )}
+          <label className="text-xs">Conversation (optional focus)</label>
+          <select className="select select-bordered w-full select-sm" value={rcConversation} onChange={e => setRcConversation(e.target.value)}>
+            <option value="">All conversations</option>
+            {(results?.conversations || []).map((c:any) => {
+              const title = c.conversation_title || c.conversation_slug || c.conversation_id
+              const id = c.conversation_id || c.conversation_slug
+              return <option key={id} value={id}>{title} — {id}</option>
+            })}
+          </select>
+          <div ref={rcChatRef} className="border rounded p-2 h-72 overflow-auto bg-base-200 text-base-content mt-3">
+            {rcHistory.length === 0 ? (
+              <div className="text-[12px] text-gray-800">Ask about failures, deltas, or a specific conversation. The assistant has summary context and optionally a conversation transcript snippet.</div>
+            ) : (
+              <div className="space-y-2">
+                {rcHistory.map((m,i) => (
+                  <div key={i} className={`p-2 rounded ${m.role === 'user' ? 'bg-base-100' : 'bg-base-300'}`}>
+                    <div className="text-base font-semibold opacity-70">{m.role}</div>
+                    <div className="text-sm whitespace-pre-wrap break-words">{m.content}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <input className="input input-bordered w-full input-sm" placeholder="Type your question" value={rcInput} onChange={e => setRcInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReportChat() } }} />
+            {rcBusy ? (
+              <Button onClick={cancelReportChat} aria-label="Cancel sending" title="Cancel sending">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                  <rect x="9" y="9" width="6" height="6" fill="currentColor" className="animate-pulse" />
+                </svg>
+              </Button>
+            ) : (
+              <Button onClick={sendReportChat} aria-label="Send" title="Send">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                  <path d="M12 3c.3 0 .6.12.8.34l7 7a1.14 1.14 0 0 1 .2 1.26A1 1 0 0 1 19 12h-5v8a1 1 0 1 1-2 0v-8H7a1 1 0 0 1-1-.4 1.14 1.14 0 0 1 .2-1.26l7-7c.2-.22.5-.34.8-.34z" />
+                </svg>
+              </Button>
+            )}
+          </div>
+        </Card>
+      )}
+
       <Card title="Report Summary">
         {loading ? (
           <div className="text-sm text-gray-600">Loading…</div>
@@ -812,71 +882,6 @@ export default function ReportsPage() {
         )}
       </Card>
 
-      {rcOpen && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4" onClick={() => setRcOpen(false)}>
-          <div className="bg-base-100 text-base-content w-full max-w-5xl max-h-[90vh] overflow-auto rounded shadow-lg border" onClick={e => e.stopPropagation()}>
-            <div className="p-3 border-b flex items-center justify-between">
-              <div className="text-sm">
-                <div className="font-medium text-white text-2xl">Chat with report</div>
-                <div className="text-white">Run: <span className="font-mono">{runId}</span></div>
-              </div>
-              <div className="flex items-center gap-2">
-                <select className="select select-bordered select-sm" value={rcModel} onChange={e => setRcModel(e.target.value)}>
-                  <option value="openai:gpt-5.1">openai:gpt-5.1</option>
-                  <option value="gemini:gemini-2.5">gemini:gemini-2.5</option>
-                  <option value="ollama:llama3.2:latest">ollama:llama3.2:latest</option>
-                </select>
-                <Button variant="warning" onClick={() => setRcOpen(false)}>Close</Button>
-              </div>
-            </div>
-            <div className="p-3 space-y-3">
-              {!results && (
-                <div className="alert alert-warning text-xs">No report found for this run. Open a run with a generated report first.</div>
-              )}
-              <label className="text-xs">Conversation (optional focus)</label>
-              <select className="select select-bordered w-full select-sm" value={rcConversation} onChange={e => setRcConversation(e.target.value)}>
-                <option value="">All conversations</option>
-                {(results?.conversations || []).map((c:any) => {
-                  const title = c.conversation_title || c.conversation_slug || c.conversation_id
-                  const id = c.conversation_id || c.conversation_slug
-                  return <option key={id} value={id}>{title} — {id}</option>
-                })}
-              </select>
-              <div ref={rcChatRef} className="border rounded p-2 h-72 overflow-auto bg-base-200 text-base-content">
-                {rcHistory.length === 0 ? (
-                  <div className="text-[12px] text-gray-800">Ask about failures, deltas, or a specific conversation. The assistant has summary context and optionally a conversation transcript snippet.</div>
-                ) : (
-                  <div className="space-y-2">
-                    {rcHistory.map((m,i) => (
-                      <div key={i} className={`p-2 rounded ${m.role === 'user' ? 'bg-base-100' : 'bg-base-300'}`}>
-                        <div className="text-base font-semibold text-white opacity-70">{m.role}</div>
-                        <div className="text-sm whitespace-pre-wrap break-words text-white">{m.content}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <input className="input input-bordered w-full input-sm" placeholder="Type your question" value={rcInput} onChange={e => setRcInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReportChat() } }} />
-                {rcBusy ? (
-                  <Button onClick={cancelReportChat} aria-label="Cancel sending" title="Cancel sending">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                      <rect x="9" y="9" width="6" height="6" fill="currentColor" className="animate-pulse" />
-                    </svg>
-                  </Button>
-                ) : (
-                  <Button onClick={sendReportChat} aria-label="Send" title="Send">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                      <path d="M12 3c.3 0 .6.12.8.34l7 7a1.14 1.14 0 0 1 .2 1.26A1 1 0 0 1 19 12h-5v8a1 1 0 1 1-2 0v-8H7a1 1 0 0 1-1-.4 1.14 1.14 0 0 1 .2-1.26l7-7c.2-.22.5-.34.8-.34z" />
-                    </svg>
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
