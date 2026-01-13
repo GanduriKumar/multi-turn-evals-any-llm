@@ -1,13 +1,12 @@
-# Docs
+# Docs (what’s here)
 
-Project documentation and plans live here.
+This folder stores extra documentation and plans.
 
-- See `mvp-implementation-plan.md` for the plan
-- See `../UserGuide.md` for end‑to‑end usage
-- See `GOVERNANCE.md` for coverage governance/versioning
- - See `multi_turn_evals_implementation_plan_v2.md` for the prompt-by-prompt v2 plan
+Start here
+- ../UserGuide.md — the simple, step‑by‑step guide
 
-Quick links:
-- Dataset generation strategy: configured via `/coverage/settings` and `configs/coverage.json` (v2 pipeline)
-- Combined array export: POST `/coverage/generate` with `as_array: true`
-- Dataset Generator guide: see `DatasetGeneratorGuide.md`
+More details
+- DatasetGeneratorGuide.md — how to create datasets
+- GOVERNANCE.md — rules for coverage and versions
+- mvp-implementation-plan.md — older plan for the first version
+- multi_turn_evals_implementation_plan_v2.md — plan for the newer generator

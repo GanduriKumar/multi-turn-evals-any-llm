@@ -1,20 +1,22 @@
-# Frontend
+# Frontend (plain explanation)
 
-React + Vite + TypeScript + Tailwind UI for datasets, runs, reports, settings, metrics, and golden tools.
+This is the web app. It lets you click through everything instead of using only the command line.
 
-Main pages
-- Dataset Generator: create datasets from server strategy (first nav item)
-- Datasets Viewer: upload/validate datasets and goldens
-- Runs: start runs, live status, Pause/Resume/Abort, recent runs, stale handling
-- Reports: view/download HTML/CSV/JSON with identity and per‑turn snippets
- - Reports: view/download HTML/CSV/JSON with identity, per‑turn snippets, and token usage totals
-- Settings: configure OLLAMA_HOST, GOOGLE_API_KEY, OPENAI_API_KEY, semantic threshold, default models, EMBED_MODEL
-- Metrics: toggle metrics and thresholds (persisted to `configs/metrics.json`)
-- Golden Editor / Generator
- - Coverage generation uses the v2 pipeline exclusively (backend `coverage_builder_v2.py`).
+How to run it
+1) Start the backend first (http://localhost:8000)
+2) In this folder:
+	- npm install (first time)
+	- npm run dev
+3) Open the URL shown (usually http://localhost:5173)
 
-Dev
-- `npm install` then `npm run dev`
-- Backend must run at http://localhost:8000
-- Vite proxy forwards API calls; ensure backend host/port matches `frontend/vite.config.ts`.
- - PDF button is hidden by default; backend supports PDF if system dependencies are installed.
+What you can do here
+- Dataset Generator — make new test datasets
+- Datasets Viewer — upload or pick a dataset to test
+- Runs — start a run and watch progress
+- Reports — open or download the results (HTML/CSV/JSON)
+- Settings — set API keys, default models, and thresholds
+- Metrics — turn metrics on/off and adjust thresholds
+
+Notes
+- The dev server proxies calls to http://localhost:8000 so the UI can reach the backend.
+- PDF export works when the server has its system tools installed.

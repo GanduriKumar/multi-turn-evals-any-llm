@@ -1,23 +1,25 @@
-# Scripts
+# Scripts (what they do)
 
-This folder contains helper scripts for development and operations.
+These are small helpers to run and stop the app easily on Windows.
 
-- Dev orchestration scripts
-- Data seeding or sample generation
-- Utility tools for CI and linting
+Most useful
+- dev.ps1 — runs backend and frontend for local development
+- start-detached.ps1 — runs them in separate windows that keep running
+- stop.ps1 — stops the default dev ports (8000 and 5173)
+- smoke.ps1 — quick check that the backend is alive and has datasets
 
-Available scripts:
-- `dev.ps1` — starts backend and frontend as background jobs (stops when terminal closes)
-- `start-detached.ps1` — starts backend and frontend in separate persistent windows (continues running even if VS Code closes or screen locks)
-- `stop.ps1` — stops backend and frontend by port (8000, 5173)
-- `smoke.ps1` — quick backend health/datasets checks
-
-For persistent runs (survives VS Code/screen lock):
+Examples
+Run both servers now:
 ```powershell
-.\scripts\start-detached.ps1
+./scripts/dev.ps1
 ```
 
-To stop:
+Keep them running even if you close VS Code:
 ```powershell
-.\scripts\stop.ps1
+./scripts/start-detached.ps1
+```
+
+Stop them:
+```powershell
+./scripts/stop.ps1
 ```

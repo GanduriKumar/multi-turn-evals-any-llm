@@ -1,52 +1,42 @@
-# Multi-Turn LLM Evaluation System (MVP)
+# Multi‑Turn LLM Evaluation – in simple words
 
-Monorepo for a multi‑turn LLM evaluation platform.
+This project helps you test AI chat models (LLMs) using short, realistic conversations. You give it a set of example chats and what the correct answers should be. It runs the model, scores the replies, and shows an easy report.
 
-- Backend: FastAPI REST API (under `backend/`)
-- Frontend: React + Vite + TypeScript + Tailwind (under `frontend/`)
-- Shared: `configs/`, `datasets/`, `scripts/`, `docs/`
+What you can do
+- Upload or pick a dataset of conversations to test
+- Choose a model (Ollama, Google Gemini, or OpenAI)
+- Run the evaluation and get a clear pass/fail report
+- Compare two runs to see what got better or worse
 
-Key capabilities
-- Upload JSON datasets and goldens (multiple acceptable variants per turn)
-- Select LLM provider/model: Ollama, Gemini, OpenAI
-	- Default models configurable in Settings: `OLLAMA_MODEL`, `GEMINI_MODEL`, `OPENAI_MODEL`
-- Configure/run evaluations with conversation state + last‑N turns context
-- Job controls: Pause, Resume, Abort; stale run detection and “Mark as cancelled” for stale rows
-- Metrics: exact, semantic (via local embeddings), consistency, adherence, hallucination
-	- Semantic uses Ollama embeddings; set `EMBED_MODEL` (e.g., `nomic-embed-text`) and `OLLAMA_HOST`
-	- Quick check endpoint: `GET /embeddings/test`
-- Reports: HTML/CSV/JSON with conversation identity (slug/title/metadata), per‑turn snippets, rollups, token totals
-- Compare two runs: `GET /compare?runA=&runB=`
-- Persistence: filesystem (`runs/`)
+What you need (basics)
+- Windows 10/11
+- Python 3.12
+- Optional: Node.js (only if you want the web app UI)
+- At least one model provider:
+  - Ollama (local) or
+  - Google Gemini (GOOGLE_API_KEY) or
+  - OpenAI (OPENAI_API_KEY)
 
-What’s new recently
-- Multi-vertical storage and runtime selection (header selector). Data under `datasets/<vertical>/` and `runs/<vertical>/`.
-- Dataset Generator page (was Coverage Generator) to create datasets per strategy; appears first in the navbar.
-- Datasets page renamed to “Datasets Viewer”.
-- OpenAI provider support (set `OPENAI_API_KEY`; pick model in Runs)
-- Settings page manages API keys, hosts, semantic threshold, default models, and `EMBED_MODEL`
-- Metrics config persisted to `configs/metrics.json` and respected across UI and backend
-- Rebuild endpoint to enrich old runs: `POST /runs/{run_id}/rebuild`
-- Dataset schema additions: conversation `title` and `metadata.short_description`
-- Report revamp: overview donut charts, failure tables, stacked summary
-- Token accounting: Input/Output tokens aggregated per run; shown in HTML report and exported in CSV
-- HTML artifact filenames: `report-{domain}-{behavior}-{model}.html`
-- PDF backend fallbacks (WeasyPrint → Playwright → wkhtmltopdf); UI PDF button removed pending env readiness
-- Runs page ring color reflects state (green success, red fail/cancel, amber otherwise)
-- Prompt/context optimization: last 5 turns; budgets ~1800 input tokens, 400 max completion tokens
-- Deterministic evaluation: temperature=0.0, seed=42 for reproducible results across runs
+Two ways to use it
+1) With the web app (recommended for beginners)
+	- Start: .\scripts\dev.ps1
+	- Open: http://localhost:5173
+	- Click “Dataset Generator” to create or “Datasets Viewer” to pick one, then start a run. Open the report when it finishes.
 
-Getting started
-- See `UserGuide.md` for end‑to‑end setup and usage.
+2) With the CLI (no UI)
+	- python -m backend.cli init
+	- python -m backend.cli run --file configs/sample.run.json
 
-Notes
-- HTML report now includes:
-	- Overview with conversation and turn pass donuts
-	- Token usage totals (Input/Output)
-	- Failure explanations tables (conversation and turn level)
-	- Detailed per‑conversation metrics
-- CSV adds `input_tokens_total` and `output_tokens_total` columns.
-- PDF generation is supported by backend if dependencies are present, but the UI hides the button by default.
+Where things live
+- backend/ — the API and evaluation engine
+- frontend/ — the web app
+- datasets/<vertical>/ — your test data
+- runs/<vertical>/ — results and reports
+- configs/ — settings used by the app
+
+Helpful links
+- User Guide: UserGuide.md (step‑by‑step)
+- Dataset Generator Guide: docs/DatasetGeneratorGuide.md (optional)
 
 License
-- Licensed under GNU GPL v3. See `LICENSE`.
+- GPL v3 (see LICENSE)

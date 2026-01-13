@@ -36,7 +36,13 @@ function Layout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-gray-200">
         <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <span className="font-extrabold text-4xl text-orange-600">LLM Evals</span>
+            <div className="flex flex-col leading-tight">
+              <span className="font-extrabold text-4xl text-orange-600">LLM Evals</span>
+              <span className="flex items-baseline gap-1 tracking-wide">
+                <span className="text-2xl text-orange-600 font-semibold">SatyaPramana</span>
+                <sup className="text-xs text-orange-600 align-top" aria-hidden="true">{'\u2122'}</sup>
+              </span>
+            </div>
           </Link>
           <nav className="flex items-center gap-4 text-sm">
             {(() => {
@@ -57,7 +63,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                   case 'success':
                     return `${base} bg-success text-white hover:opacity-90 focus-visible:ring-success/60`
                   case 'warning':
-                    return `${base} bg-warning text-black hover:opacity-90 focus-visible:ring-warning/60`
+                    return `${base} bg-warning text-white hover:opacity-90 focus-visible:ring-warning/60`
                   case 'danger':
                     return `${base} bg-danger text-white hover:opacity-90 focus-visible:ring-danger/60`
                   default:
@@ -129,36 +135,39 @@ function HomeCards() {
   }, [vertical])
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <Card title="Quick Start">
-        <div className="text-sm text-gray-700 space-y-3">
-          <ol className="list-decimal pl-5 space-y-1">
+    <div className="grid grid-cols-2 gap-4 items-start">
+      <div className="w-full">
+        <Card title="Quick Start" className="h-full" borderless>
+          <div className="text-base text-gray-800 space-y-3">
+            <ol className="list-decimal pl-5 space-y-1">
             <li>
               Configure models and thresholds
               <div className="mt-2">
-                <Link to="/settings"><Button variant="primary">Open Settings</Button></Link>
+                <Link to="/settings"><Button variant="primary" className="bg-[#4285F4] text-white">Open Settings</Button></Link>
               </div>
             </li>
             <li>
               Prepare or generate a dataset for the "{vertical}" vertical
               <div className="mt-2 flex gap-2 flex-wrap">
-                <Link to="/coverage"><Button variant="warning">Dataset Generator</Button></Link>
-                <Link to="/datasets"><Button variant="secondary">Datasets</Button></Link>
+                <Link to="/coverage"><Button variant="warning" className="bg-[#F4B400] text-black">Dataset Generator</Button></Link>
+                <Link to="/datasets"><Button variant="secondary" className="bg-[#0F9D58] text-white">Datasets</Button></Link>
               </div>
             </li>
             <li>
               Choose metrics, then run and review
               <div className="mt-2 flex gap-2 flex-wrap">
-                <Link to="/metrics"><Button variant="secondary">Metrics</Button></Link>
-                <Link to="/runs"><Button variant="success">Runs</Button></Link>
-                <Link to="/reports"><Button variant="ghost">Reports</Button></Link>
+                <Link to="/metrics"><Button variant="secondary" className="bg-[#4285F4] text-white">Metrics</Button></Link>
+                <Link to="/runs"><Button variant="success" className="bg-[#DB4437] text-white">Runs</Button></Link>
+                <Link to="/reports"><Button variant="ghost" className="bg-[#F4B400] text-white">Reports</Button></Link>
               </div>
             </li>
-          </ol>
-        </div>
-      </Card>
-      <Card title="Status">
-        <div className="text-sm text-gray-700 space-y-2">
+            </ol>
+          </div>
+        </Card>
+      </div>
+      <div className="w-full">
+        <Card title="Health" className="h-full" borderless>
+          <div className="text-base text-gray-800 space-y-2">
           <div>
             Backend: {status.ok ? <span className="text-green-700 font-medium">OK</span> : <span className="text-red-700 font-medium">Unavailable</span>} {status.version ? <span className="text-gray-500">v{status.version}</span> : null}
           </div>
@@ -176,20 +185,9 @@ function HomeCards() {
               {status.errors.map((e, i) => <li key={i}>{e}</li>)}
             </ul>
           )}
-          <div className="pt-2">
-            <a href="/embeddings/test" target="_blank" rel="noreferrer"><Button variant="ghost">Test embeddings</Button></a>
           </div>
-        </div>
-      </Card>
-      <Card title="Shortcuts">
-        <div className="flex flex-wrap gap-2 text-sm">
-          <Link to="/datasets"><Button variant="secondary">Datasets</Button></Link>
-          <Link to="/coverage"><Button variant="warning">Dataset Generator</Button></Link>
-          <Link to="/metrics"><Button variant="secondary">Metrics</Button></Link>
-          <Link to="/runs"><Button variant="success">Runs</Button></Link>
-          <Link to="/reports"><Button variant="ghost">Reports</Button></Link>
-        </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   )
 }

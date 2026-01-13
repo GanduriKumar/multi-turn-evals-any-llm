@@ -1,8 +1,6 @@
-# User Guide — Multi‑Turn LLM Evaluation (Beginner Friendly)
+# User Guide — Plain and simple
 
-Welcome! This guide explains, in plain English, what this tool does, why it matters, and how to use it step by step. Every section has short examples and small tips.
-
-If you are new, read “What and Why”, then “Quick Starts”, then “Automate in CI/CD”.
+Welcome! This guide explains what this tool does and how to use it, step by step, with simple language and examples.
 
 ---
 

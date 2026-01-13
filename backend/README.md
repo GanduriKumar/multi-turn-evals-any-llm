@@ -1,47 +1,31 @@
-# Backend
+# Backend (plain explanation)
 
-FastAPI REST API providing dataset management, run orchestration, metrics, and reports.
+This folder is the server. It receives requests from the web app or CLI, runs the model, scores answers, and writes the report.
 
-- Stack: Python, FastAPI, Uvicorn
-- Providers: Ollama, Gemini, OpenAI
-- Artifacts: filesystem under `runs/`
+Run it locally
+1) Create a virtual env and install:
+	- pip install -r backend/requirements.txt
+2) Start the server (from the repo root):
+	- python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000
 
-Run locally
-- Create a virtual env and install requirements: `pip install -r backend/requirements.txt`
-- Start server (from repo root): `python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000`
+What it needs
+- A model provider (Ollama, Google Gemini, or OpenAI)
+- Optional .env file in the repo root with keys like GOOGLE_API_KEY or OPENAI_API_KEY
 
-Environment / Settings
-- .env at repo root is auto‑loaded on startup
-- OLLAMA_HOST (default http://localhost:11434)
-- GOOGLE_API_KEY, OPENAI_API_KEY
-- SEMANTIC_THRESHOLD (default 0.80)
-- OLLAMA_MODEL, GEMINI_MODEL, OPENAI_MODEL (defaults for Runs dropdown)
-- EMBED_MODEL (default `nomic-embed-text`) for semantic scoring via Ollama embeddings
+Useful endpoints
+- GET /health — quick “am I alive?”
+- GET /version — shows available defaults
+- GET /settings and POST /settings — read/save local dev settings
+- GET /embeddings/test — quick semantic check
+- GET /datasets — list datasets; POST /datasets/upload — upload your own
+- POST /runs — start a test run; then GET results/artifacts
+- GET /reports/compare — compare two runs
 
-Key endpoints
-Key endpoints
-- Health/version: `GET /health`, `GET /version`
-- Settings: `GET/POST /settings` (.env persistence), `GET /embeddings/test`
-- Datasets: `GET /datasets?vertical=`, `POST /datasets/upload`, `POST /datasets/save`, `GET /datasets/{id}`, `GET /goldens/{id}`
-- Runs: `POST /runs` (UI passes context.vertical), `GET /runs?vertical=`, `GET /runs/{job_id}/status`, `POST /runs/{job_id}/control`
-- Artifacts: `GET /runs/{run_id}/results?vertical=`, `GET /runs/{run_id}/artifacts?type=json|csv|html&vertical=`, `POST /runs/{run_id}/rebuild`
-- Compare: `GET /compare?runA=&runB=`
+Where files go
+- runs/<vertical>/ — results.json, results.csv, report.html
+- datasets/<vertical>/ — your datasets and goldens
 
-Job orchestration
-- Pause/Resume/Abort controls with persisted `job.json`
-- Stale detection via `boot_id`; UI can “Mark as cancelled” stale runs
+Tip
+- Restart the server after changing .env in development.
 
-Metrics
-- exact, semantic, consistency, adherence, hallucination
-- Semantic uses Ollama embeddings; ensure Ollama is running and `EMBED_MODEL` is available
-
-Storage layout
-- Datasets are stored under `datasets/<vertical>/`.
-- Runs are stored under `runs/<vertical>/`.
-
-Coverage generation
-- Uses v2 pipeline only: `coverage_builder_v2.py`, `convgen_v2.py`, `array_builder_v2.py`.
-- API: POST `/coverage/generate` (combined or split) and `/coverage/taxonomy_v2`.
-- CLI: `python -m backend.cli coverage` (v2 by default).
-
-See `UserGuide.md` for usage.
+See UserGuide.md for the step‑by‑step flow.
