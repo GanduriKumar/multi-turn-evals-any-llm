@@ -39,4 +39,9 @@ Storage layout
 - Datasets are stored under `datasets/<vertical>/`.
 - Runs are stored under `runs/<vertical>/`.
 
+Coverage generation
+- Uses v2 pipeline only: `coverage_builder_v2.py`, `convgen_v2.py`, `array_builder_v2.py`.
+- API: POST `/coverage/generate` (combined or split) and `/coverage/taxonomy_v2`.
+- CLI: `python -m backend.cli coverage` (v2 by default).
+
 See `UserGuide.md` for usage.

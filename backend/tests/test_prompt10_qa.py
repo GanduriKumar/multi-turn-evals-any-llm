@@ -1,7 +1,7 @@
-from backend.coverage_builder import (
-    build_domain_combined_datasets,
-    build_global_combined_dataset,
-    build_per_behavior_datasets,
+from backend.coverage_builder_v2 import (
+    build_domain_combined_datasets_v2 as build_domain_combined_datasets,
+    build_global_combined_dataset_v2 as build_global_combined_dataset,
+    build_per_behavior_datasets_v2 as build_per_behavior_datasets,
 )
 from backend.coverage_engine import CoverageEngine
 from backend.coverage_manifest import CoverageManifestor

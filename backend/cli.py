@@ -9,40 +9,20 @@ try:
     from .orchestrator import Orchestrator
     from .schemas import SchemaValidator
     from .reporter import Reporter
-    from .coverage_builder import (
-        build_per_behavior_datasets,
-        build_domain_combined_datasets,
-        build_global_combined_dataset,
+    from .coverage_builder_v2 import (
+        build_per_behavior_datasets_v2,
+        build_domain_combined_datasets_v2,
+        build_global_combined_dataset_v2,
     )
-    try:
-        from .coverage_builder_v2 import (
-            build_per_behavior_datasets_v2,
-            build_domain_combined_datasets_v2,
-            build_global_combined_dataset_v2,
-        )
-    except Exception:
-        build_per_behavior_datasets_v2 = None  # type: ignore
-        build_domain_combined_datasets_v2 = None  # type: ignore
-        build_global_combined_dataset_v2 = None  # type: ignore
 except ImportError:
     from backend.orchestrator import Orchestrator
     from backend.schemas import SchemaValidator
     from backend.reporter import Reporter
-    from backend.coverage_builder import (
-        build_per_behavior_datasets,
-        build_domain_combined_datasets,
-        build_global_combined_dataset,
+    from backend.coverage_builder_v2 import (
+        build_per_behavior_datasets_v2,
+        build_domain_combined_datasets_v2,
+        build_global_combined_dataset_v2,
     )
-    try:
-        from backend.coverage_builder_v2 import (
-            build_per_behavior_datasets_v2,
-            build_domain_combined_datasets_v2,
-            build_global_combined_dataset_v2,
-        )
-    except Exception:
-        build_per_behavior_datasets_v2 = None  # type: ignore
-        build_domain_combined_datasets_v2 = None  # type: ignore
-        build_global_combined_dataset_v2 = None  # type: ignore
 
 
 DEMO_DATASET = {
@@ -182,7 +162,6 @@ def build_parser() -> argparse.ArgumentParser:
     # coverage generate options
     p.add_argument("--combined", dest="combined", action="store_true", help="Generate combined datasets (per-domain + global)")
     p.add_argument("--split", dest="split", action="store_true", help="Generate split per-behavior datasets")
-    p.add_argument("--v2", dest="v2", action="store_true", help="Use risk-sampler + convgen_v2 coverage pipeline")
     p.add_argument("--dry-run", dest="dry_run", action="store_true", help="Do not write files, only print summary")
     p.add_argument("--save", dest="save", action="store_true", help="Write generated dataset/golden files to datasets/")
     p.add_argument("--overwrite", dest="overwrite", action="store_true", help="Allow overwriting existing files")
@@ -220,7 +199,7 @@ def main(argv: List[str] | None = None) -> int:
             out_dir=Path(args.out) if args.out else None,
             shards=args.shards,
             shard_index=args.shard_index,
-            v2=args.v2,
+            v2=True,
         )
     parser.print_help()
     return 2
@@ -268,20 +247,13 @@ def cmd_coverage_generate(
     out_dir = out_dir or (root / "datasets")
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Build outputs according to combined/split and v2 flag
-    if v2 and (build_per_behavior_datasets_v2 is not None):
-        if combined:
-            outputs = build_domain_combined_datasets_v2(domains=domains, behaviors=behaviors, version=version)
-            outputs.append(build_global_combined_dataset_v2(domains=domains, behaviors=behaviors, version=version))
-        else:
-            outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=version)
+    # Build outputs using v2 pipeline only
+    if combined:
+        outputs = build_domain_combined_datasets_v2(domains=domains, behaviors=behaviors, version=version)
+        # Append global combined as last element
+        outputs.append(build_global_combined_dataset_v2(domains=domains, behaviors=behaviors, version=version))
     else:
-        if combined:
-            outputs = build_domain_combined_datasets(domains=domains, behaviors=behaviors, version=version)
-            # Append global combined as last element
-            outputs.append(build_global_combined_dataset(domains=domains, behaviors=behaviors, version=version))
-        else:
-            outputs = build_per_behavior_datasets(domains=domains, behaviors=behaviors, version=version)
+        outputs = build_per_behavior_datasets_v2(domains=domains, behaviors=behaviors, version=version)
 
     # Shard selection by index over outputs
     selected: List[Tuple[dict, dict]] = []

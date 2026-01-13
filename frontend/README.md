@@ -11,6 +11,7 @@ Main pages
 - Settings: configure OLLAMA_HOST, GOOGLE_API_KEY, OPENAI_API_KEY, semantic threshold, default models, EMBED_MODEL
 - Metrics: toggle metrics and thresholds (persisted to `configs/metrics.json`)
 - Golden Editor / Generator
+ - Coverage generation uses the v2 pipeline exclusively (backend `coverage_builder_v2.py`).
 
 Dev
 - `npm install` then `npm run dev`

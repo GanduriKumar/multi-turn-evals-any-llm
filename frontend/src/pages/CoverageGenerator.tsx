@@ -34,12 +34,15 @@ export default function CoverageGeneratorPage() {
 
   useEffect(() => {
     const load = async () => {
-      // Prefer v2 taxonomy for generation; fallback to legacy if unavailable
+      // Use v2 taxonomy first (matches v2-only backend); fallback to legacy if needed.
       let r = await fetch('/coverage/taxonomy_v2')
       if (!r.ok) r = await fetch('/coverage/taxonomy')
       const js = await r.json()
       setDomains(js.domains || [])
       setBehaviors(js.behaviors || [])
+      // Reset selections to avoid stale labels from a different taxonomy source
+      setSelectedDomains([])
+      setSelectedBehaviors([])
       try {
         const cs = await fetch('/coverage/settings')
         if (cs.ok) setCovSettings(await cs.json())
@@ -54,7 +57,11 @@ export default function CoverageGeneratorPage() {
       const params = new URLSearchParams()
       if (selectedDomains.length) params.set('domains', selectedDomains.join(','))
       if (selectedBehaviors.length) params.set('behaviors', selectedBehaviors.join(','))
-      const r = await fetch('/coverage/manifest' + (params.toString() ? `?${params.toString()}` : ''))
+      // Use v2 manifest to match v2 taxonomy values; fallback to legacy
+      let r = await fetch('/coverage/manifest_v2' + (params.toString() ? `?${params.toString()}` : ''))
+      if (!r.ok) {
+        r = await fetch('/coverage/manifest' + (params.toString() ? `?${params.toString()}` : ''))
+      }
       const js = await r.json()
       setManifestPairs(js.pairs || [])
     } catch (e:any) {
@@ -113,7 +120,7 @@ export default function CoverageGeneratorPage() {
     if (!parsed) { setRegenMsg('Only coverage-<domain>-combined-<version> dataset ids are supported.'); return }
     setRegenBusy(true)
     try {
-      const t = await fetch('/coverage/taxonomy')
+      const t = await fetch('/coverage/taxonomy_v2')
       if (!t.ok) throw new Error(`Taxonomy HTTP ${t.status}`)
       const tj = await t.json()
       const domains: string[] = Array.isArray(tj.domains) ? tj.domains : []

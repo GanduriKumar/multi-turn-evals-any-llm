@@ -9,7 +9,7 @@
       "name": "semantic_similarity",
       "enabled": true,
       "weight": 0.8,
-      "threshold": 0.9
+      "threshold": 0.93
     },
     {
       "name": "consistency",
@@ -25,7 +25,7 @@
       "name": "hallucination",
       "enabled": true,
       "weight": 1,
-      "threshold": 0.06
+      "threshold": 0.08
     }
   ]
 }
