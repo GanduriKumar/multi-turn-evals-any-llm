@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 import json
+import csv
+from datetime import datetime
 
 try:
     from .dataset_repo import DatasetRepository
@@ -24,6 +26,7 @@ except ImportError:  # fallback for test runs importing as top-level modules
         build_global_combined_dataset_v2,
     )
     from backend.coverage_manifest import CoverageManifestor, build_manifest
+    from backend.report_diff import diff_results
 else:
     from .coverage_builder_v2 import (
         build_per_behavior_datasets_v2,
@@ -31,6 +34,7 @@ else:
         build_global_combined_dataset_v2,
     )
     from .coverage_manifest import CoverageManifestor, build_manifest
+    from .report_diff import diff_results
     from .coverage_reports import coverage_summary_csv, coverage_heatmap_csv, per_turn_csv
     from .coverage_config import CoverageConfig
     from .array_builder_v2 import build_combined_array
@@ -144,6 +148,12 @@ BOOT_ID = str(uuid.uuid4())
 # Per-vertical contexts { vertical: { 'orch', 'artifacts', 'reader' } }
 app.state.vctx: dict[str, dict[str, Any]] = {}
 app.state.reporter = Reporter(Path(__file__).resolve().parent / "templates")
+try:
+    # Provider registry for chat endpoints
+    from .providers.registry import ProviderRegistry  # type: ignore
+except Exception:
+    from backend.providers.registry import ProviderRegistry  # type: ignore
+app.state.providers = ProviderRegistry()
 
 def _ensure_vertical_name(name: Optional[str]) -> str:
     v = (name or os.getenv("INDUSTRY_VERTICAL") or "commerce").lower()
@@ -267,6 +277,20 @@ class StartRunResponse(BaseModel):
 class ControlBody(BaseModel):
     action: str  # 'pause' | 'resume' | 'cancel'
 
+class ChatDatasetBody(BaseModel):
+    dataset_id: str
+    conversation_id: Optional[str] = None  # optional: when omitted, chat about the whole dataset
+    message: str
+    model: Optional[str] = None  # provider:model
+    history: Optional[list[dict[str, str]]] = None  # [{role, content}]
+
+class ChatReportBody(BaseModel):
+    run_id: str
+    message: str
+    model: Optional[str] = None  # provider:model
+    history: Optional[list[dict[str, str]]] = None
+    conversation_id: Optional[str] = None  # optional focus on a single conversation
+
 @app.get("/health", response_model=Health)
 async def health():
     return Health(status="ok")
@@ -284,6 +308,275 @@ async def version():
         hallucination_threshold=s.get("HALLUCINATION_THRESHOLD"),
         industry_vertical=s.get("INDUSTRY_VERTICAL"),
     )
+
+
+@app.post("/chat/dataset")
+async def chat_with_dataset(body: ChatDatasetBody, vertical: Optional[str] = None):
+    # Resolve model: allow provider:model or fallback to defaults
+    model_spec = (body.model or os.getenv("OPENAI_MODEL") or os.getenv("GEMINI_MODEL") or os.getenv("OLLAMA_MODEL") or "")
+    if ":" not in model_spec:
+        # default to openai: if OPENAI enabled else ollama
+        if os.getenv("OPENAI_API_KEY"):
+            model_spec = f"openai:{model_spec or os.getenv('OPENAI_MODEL','gpt-5.1')}"
+        elif os.getenv("GOOGLE_API_KEY"):
+            model_spec = f"gemini:{model_spec or os.getenv('GEMINI_MODEL','gemini-2.5')}"
+        else:
+            model_spec = f"ollama:{model_spec or os.getenv('OLLAMA_MODEL','llama3.2:latest')}"
+    provider_name, model_name = model_spec.split(":", 1)
+    # Load dataset/conversation for context
+    ctx = _get_or_create_vertical_context(vertical)
+    repo: DatasetRepository = ctx['orch'].repo
+    try:
+        ds = repo.get_dataset(body.dataset_id)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"dataset not found: {e}")
+    conv = None
+    if body.conversation_id:
+        for c in (ds.get("conversations") or []):
+            if str(c.get("conversation_id")) == str(body.conversation_id):
+                conv = c; break
+        if conv is None:
+            raise HTTPException(status_code=404, detail="conversation not found in dataset")
+    # Build system prompt and few-shot context from conversation or dataset
+    sys_lines = []
+    if conv is not None:
+        sys_lines = [
+            "You are assisting with analyzing a specific dataset conversation.",
+            "Answer succinctly and cite turns by index when referring to them.",
+        ]
+        meta = conv.get("metadata") or {}
+        identity = [
+            f"Domain: {meta.get('domain') or conv.get('domain') or ''}",
+            f"Behavior: {meta.get('behavior') or conv.get('behavior') or ''}",
+            f"Scenario: {meta.get('scenario') or meta.get('case') or ''}",
+        ]
+        sys_lines += [" | ".join([p for p in identity if p and p.strip()])]
+        # Include brief transcript snippets (user only) for context
+        def snip(t: str, n: int = 200) -> str:
+            t = (t or "").replace("\n", " ").strip()
+            return t if len(t) <= n else (t[: n - 1] + "…")
+        uturns = []
+        for t in (conv.get("turns") or []):
+            try:
+                if t.get("role") == "user" or t.get("user") is not None:
+                    idx = int(t.get("turn_index", len(uturns)))
+                    uturns.append(f"[{idx+1}] {snip(t.get('text') or t.get('user') or '')}")
+            except Exception:
+                continue
+        if uturns:
+            sys_lines.append("User turns:")
+            sys_lines += uturns[:8]
+    else:
+        # Dataset-level chat (no specific conversation selected)
+        sys_lines = [
+            "You are assisting with analyzing a dataset.",
+            "Answer succinctly and, when relevant, refer to conversations by title or ID.",
+            f"Dataset: {body.dataset_id}",
+        ]
+        try:
+            convs = (ds.get("conversations") or [])
+            titles = []
+            for c in convs[:6]:
+                titles.append(c.get("conversation_title") or c.get("conversation_slug") or str(c.get("conversation_id")))
+            if titles:
+                sys_lines.append("Sample conversations: " + "; ".join(titles))
+        except Exception:
+            pass
+    system_prompt = "\n".join([l for l in sys_lines if l])
+    # Build messages
+    history = body.history or []
+    msgs = ([{"role": "system", "content": system_prompt}] +
+            [m for m in history if isinstance(m, dict) and m.get("role") in ("user","assistant") and isinstance(m.get("content"), str)] +
+            [{"role": "user", "content": body.message or ''}])
+    # Call provider
+    try:
+        provider = app.state.providers.get(provider_name)
+    except KeyError:
+        raise HTTPException(status_code=400, detail=f"unknown provider: {provider_name}")
+    try:
+        from .providers.types import ProviderRequest  # type: ignore
+    except Exception:
+        from backend.providers.types import ProviderRequest  # type: ignore
+    req = ProviderRequest(model=model_name, messages=msgs, metadata={"dataset_id": body.dataset_id, "conversation_id": body.conversation_id})
+    try:
+        # Support either .complete(req) or .chat(req) depending on provider implementation
+        if hasattr(provider, 'complete'):
+            resp = await provider.complete(req)  # type: ignore[attr-defined]
+        elif hasattr(provider, 'chat'):
+            resp = await provider.chat(req)  # type: ignore[attr-defined]
+        else:
+            raise RuntimeError("provider missing chat interface")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"provider call failed: {e}")
+    # Validate provider response
+    _content = getattr(resp, 'content', None)
+    _ok = bool(getattr(resp, 'ok', False))
+    _err = getattr(resp, 'error', None)
+    if (not _ok) or (not isinstance(_content, str)) or (isinstance(_content, str) and not _content.strip()):
+        raise HTTPException(status_code=502, detail=_err or "empty provider response")
+    # Persist chat transcript under datasets/<vertical>/chats/<dataset_id>/<conversation_id>.jsonl
+    root = Path(__file__).resolve().parents[1]
+    out_dir = root / "datasets" / ctx['vertical'] / "chats" / body.dataset_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{body.conversation_id}.jsonl"
+    try:
+        with out_path.open("a", encoding="utf-8") as f:
+            import json as _json
+            evt = {
+                "ts": datetime.utcnow().isoformat() + "Z",
+                "model": model_spec,
+                "user": body.message,
+                "assistant": getattr(resp, 'content', None),
+                "ok": getattr(resp, 'ok', False),
+                "provider_meta": getattr(resp, 'provider_meta', {})
+            }
+            f.write(_json.dumps(evt) + "\n")
+    except Exception:
+        pass
+    return {
+        "ok": bool(getattr(resp, 'ok', False)),
+        "content": getattr(resp, 'content', None),
+        "error": getattr(resp, 'error', None),
+        "provider_meta": getattr(resp, 'provider_meta', {}),
+        "model": model_spec,
+    }
+
+
+@app.post("/chat/report")
+async def chat_with_report(body: ChatReportBody, vertical: Optional[str] = None):
+    # Resolve run results path by vertical or search
+    readers: list[RunArtifactReader] = []
+    if vertical:
+        readers = [_get_or_create_vertical_context(vertical)['reader']]
+    else:
+        readers = [c['reader'] for c in _iter_all_contexts()]
+    rd = None
+    json_path = None
+    for r in readers:
+        p = r.layout.results_json_path(body.run_id)
+        if p.exists():
+            rd = r
+            json_path = p
+            break
+    # Fallback: if a vertical was provided but not found there, search all contexts
+    if json_path is None and vertical is not None:
+        for c in _iter_all_contexts():
+            r = c['reader']
+            p = r.layout.results_json_path(body.run_id)
+            if p.exists():
+                rd = r
+                json_path = p
+                break
+    if json_path is None:
+        raise HTTPException(status_code=404, detail="results.json not found")
+    results = get_json_file(json_path)
+    # Determine model
+    model_spec = (body.model or os.getenv("OPENAI_MODEL") or os.getenv("GEMINI_MODEL") or os.getenv("OLLAMA_MODEL") or "")
+    if ":" not in model_spec:
+        if os.getenv("OPENAI_API_KEY"):
+            model_spec = f"openai:{model_spec or os.getenv('OPENAI_MODEL','gpt-5.1')}"
+        elif os.getenv("GOOGLE_API_KEY"):
+            model_spec = f"gemini:{model_spec or os.getenv('GEMINI_MODEL','gemini-2.5')}"
+        else:
+            model_spec = f"ollama:{model_spec or os.getenv('OLLAMA_MODEL','llama3.2:latest')}"
+    provider_name, model_name = model_spec.split(":", 1)
+    # Build system prompt summarizing report
+    convs = (results.get("conversations") or []) if isinstance(results, dict) else []
+    total = len(convs)
+    passed = sum(1 for c in convs if (c.get("summary") or {}).get("conversation_pass") is True)
+    turns_total = sum((c.get("summary") or {}).get("total_user_turns", len(c.get("turns") or [])) for c in convs)
+    turns_failed = sum((c.get("summary") or {}).get("failed_turns_count", 0) for c in convs)
+    meta = results if isinstance(results, dict) else {}
+    header = [
+        "You are an evaluation report assistant.",
+        "Explain failures, drill down into outliers, and cite conversation titles and turn indices when relevant.",
+        f"Run: {meta.get('run_id')} | Dataset: {meta.get('dataset_id')} | Model: {meta.get('model_spec')}",
+        f"Conversations: {total} (passed {passed}) | Turns failed: {turns_failed} of ~{turns_total}",
+    ]
+    # Optionally include a specific conversation context
+    conv_block = []
+    focus_id = body.conversation_id
+    focus_conv = None
+    if focus_id:
+        for c in convs:
+            if str(c.get("conversation_id")) == str(focus_id) or str(c.get("conversation_slug")) == str(focus_id):
+                focus_conv = c
+                break
+    if focus_conv:
+        title = focus_conv.get("conversation_title") or focus_conv.get("conversation_slug") or focus_conv.get("conversation_id")
+        summ = focus_conv.get("summary") or {}
+        conv_block.append(f"Focus: {title} — pass={bool(summ.get('conversation_pass'))}, failed_turns={summ.get('failed_turns_count')}")
+        failed_metrics = ", ".join((summ.get("failed_metrics") or [])[:8])
+        if failed_metrics:
+            conv_block.append(f"Failed metrics: {failed_metrics}")
+        # Include a few user/assistant snippets
+        def snip(t: str, n: int = 200) -> str:
+            t = (t or "").replace("\n", " ").strip()
+            return t if len(t) <= n else (t[: n - 1] + "…")
+        for t in (focus_conv.get("turns") or [])[:6]:
+            idx = int(t.get("turn_index", 0))
+            u = t.get("user_prompt_snippet") or ""
+            a = t.get("assistant_output_snippet") or ""
+            conv_block.append(f"[{idx+1}] U: {snip(u)}")
+            if a:
+                conv_block.append(f"    A: {snip(a, 160)}")
+    system_prompt = "\n".join([*header, *conv_block])
+    # Messages
+    history = body.history or []
+    msgs = ([{"role": "system", "content": system_prompt}] +
+            [m for m in history if isinstance(m, dict) and m.get("role") in ("user","assistant") and isinstance(m.get("content"), str)] +
+            [{"role": "user", "content": body.message or ''}])
+    # Call provider
+    try:
+        provider = app.state.providers.get(provider_name)
+    except KeyError:
+        raise HTTPException(status_code=400, detail=f"unknown provider: {provider_name}")
+    try:
+        from .providers.types import ProviderRequest  # type: ignore
+    except Exception:
+        from backend.providers.types import ProviderRequest  # type: ignore
+    req = ProviderRequest(model=model_name, messages=msgs, metadata={"run_id": body.run_id, "conversation_id": focus_id})
+    try:
+        if hasattr(provider, 'complete'):
+            resp = await provider.complete(req)  # type: ignore[attr-defined]
+        elif hasattr(provider, 'chat'):
+            resp = await provider.chat(req)  # type: ignore[attr-defined]
+        else:
+            raise RuntimeError("provider missing chat interface")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"provider call failed: {e}")
+    # Validate provider response to avoid returning HTTP 200 with empty content
+    _content = getattr(resp, 'content', None)
+    _ok = bool(getattr(resp, 'ok', False))
+    _err = getattr(resp, 'error', None)
+    if (not _ok) or (not isinstance(_content, str)) or (isinstance(_content, str) and not _content.strip()):
+        raise HTTPException(status_code=502, detail=_err or "empty provider response")
+    # Persist under run folder
+    out_dir = rd.layout.run_dir(body.run_id) / "chats"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    name = f"report-{(focus_id or 'all')}.jsonl"
+    out_path = out_dir / name
+    try:
+        with out_path.open("a", encoding="utf-8") as f:
+            import json as _json
+            evt = {
+                "ts": datetime.utcnow().isoformat() + "Z",
+                "model": model_spec,
+                "user": body.message,
+                "assistant": getattr(resp, 'content', None),
+                "ok": getattr(resp, 'ok', False),
+                "provider_meta": getattr(resp, 'provider_meta', {})
+            }
+            f.write(_json.dumps(evt) + "\n")
+    except Exception:
+        pass
+    return {
+        "ok": bool(getattr(resp, 'ok', False)),
+        "content": getattr(resp, 'content', None),
+        "error": getattr(resp, 'error', None),
+        "provider_meta": getattr(resp, 'provider_meta', {}),
+        "model": model_spec,
+    }
 
 
 @app.get("/settings")
@@ -1446,7 +1739,271 @@ async def run_artifacts(run_id: str, type: str = "json", vertical: Optional[str]
 
 
 @app.post("/runs/{run_id}/feedback")
-async def submit_feedback(run_id: str, body: Dict[str, Any], vertical: Optional[str] = None):
+async def submit_feedback_api(run_id: str, body: Dict[str, Any], vertical: Optional[str] = None):
+    return await _submit_feedback(run_id, body, vertical)
+
+@app.get("/reports/compare")
+async def compare_reports(runA: str, runB: str, vertical: Optional[str] = None, type: str = "json"):
+    # Locate results for each run; if vertical is provided but doesn't contain the run, fallback to search all
+    def _find_reader(run_id: str) -> Optional[RunArtifactReader]:
+        if vertical:
+            rd = _get_or_create_vertical_context(vertical)['reader']
+            p = rd.layout.results_json_path(run_id)
+            if p.exists():
+                return rd
+            # fallback cross-vertical search
+            for c in _iter_all_contexts():
+                rdx: RunArtifactReader = c['reader']
+                if (rdx.layout.results_json_path(run_id)).exists():
+                    return rdx
+            return None
+        # No vertical specified: search all
+        for c in _iter_all_contexts():
+            rd: RunArtifactReader = c['reader']
+            if (rd.layout.results_json_path(run_id)).exists():
+                return rd
+        return None
+    rdA = _find_reader(runA)
+    rdB = _find_reader(runB)
+    if rdA is None:
+        raise HTTPException(status_code=404, detail=f"results.json not found for runA={runA}")
+    if rdB is None:
+        raise HTTPException(status_code=404, detail=f"results.json not found for runB={runB}")
+    pA = rdA.layout.results_json_path(runA)
+    pB = rdB.layout.results_json_path(runB)
+    if not pA.exists():
+        raise HTTPException(status_code=404, detail=f"results.json not found for runA={runA}")
+    if not pB.exists():
+        raise HTTPException(status_code=404, detail=f"results.json not found for runB={runB}")
+    a = json.loads(pA.read_text(encoding='utf-8'))
+    b = json.loads(pB.read_text(encoding='utf-8'))
+    diff = diff_results(a, b)
+    if type == "json":
+        return diff
+    if type == "csv":
+        # Write a compact CSV with sections for per_conversation and per_turn
+        # Store under runA folder for convenience
+        out_dir = rdA.layout.run_dir(runA)
+        safeA = (runA or "").replace("/", "_")[:12]
+        safeB = (runB or "").replace("/", "_")[:12]
+        out_path = out_dir / f"compare-{safeA}-vs-{safeB}.csv"
+        with out_path.open("w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            # per-conversation
+            w.writerow(["section", "key", "a_conversation_pass", "b_conversation_pass", "failed_turns_delta"]) 
+            for r in (diff.get("per_conversation") or []):
+                w.writerow(["per_conversation", r.get("key"), (r.get("a") or {}).get("conversation_pass"), (r.get("b") or {}).get("conversation_pass"), (r.get("delta") or {}).get("failed_turns_delta")])
+            # blank line
+            w.writerow([])
+            # per-turn
+            w.writerow(["section", "key", "turn_index", "turn_pass_a", "turn_pass_b", "metrics_changed"]) 
+            for r in (diff.get("per_turn") or []):
+                m = r.get("metrics") or {}
+                changed = sorted([k for k, v in m.items() if (v or {}).get("changed")])
+                w.writerow(["per_turn", r.get("key"), r.get("turn_index"), (r.get("turn_pass") or {}).get("a"), (r.get("turn_pass") or {}).get("b"), ";".join(changed)])
+        return FileResponse(str(out_path), media_type="text/csv", filename=out_path.name)
+    if type == "pdf":
+        # Render a simple HTML summary of the diff and convert to PDF
+        out_dir = rdA.layout.run_dir(runA)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        safeA = (runA or "").replace("/", "_")[:32]
+        safeB = (runB or "").replace("/", "_")[:32]
+        pdf_name = f"compare-{safeA}-vs-{safeB}.pdf"
+        pdf_path = out_dir / pdf_name
+
+        def pct(v):
+            try:
+                return f"{float(v):.2f}%"
+            except Exception:
+                return "0.00%"
+
+        # Build minimal HTML (self-contained)
+        import datetime
+        ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        html = [
+            "<!doctype html>",
+            "<html><head><meta charset='utf-8'>",
+            "<style>body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#111;padding:20px;}",
+            "h1{font-size:20px;margin:0 0 8px;} h2{font-size:16px;margin:16px 0 8px;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #ddd;padding:6px 8px;} th{background:#f6f6f6;text-align:left;} .note{color:#a15c00;font-weight:600;margin:8px 0;} .muted{color:#666;} .good{color:#167516;} .bad{color:#b30000;} .mono{font-family:Consolas,monospace;}</style>",
+            "</head><body>",
+            f"<h1>Report Comparison</h1>",
+            f"<div class='muted'>Generated {ts}</div>",
+            f"<div class='mono'>A: {runA} &nbsp;&nbsp; B: {runB}</div>",
+        ]
+        note = diff.get("note") or (diff.get("alignment") or {}).get("note")
+        if note:
+            html.append(f"<div class='note'>Note: {note}</div>")
+        # Summary cards
+        try:
+            ca = diff.get("runA", {}).get("summary", {})
+            cb = diff.get("runB", {}).get("summary", {})
+            html.append("<h2>Summary</h2>")
+            html.append("<table><thead><tr><th></th><th>A</th><th>B</th></tr></thead><tbody>")
+            html.append(f"<tr><td>Conversations pass rate</td><td>{pct(ca.get('conv',{}).get('pass_rate',0))}</td><td>{pct(cb.get('conv',{}).get('pass_rate',0))}</td></tr>")
+            html.append(f"<tr><td>Turns pass rate</td><td>{pct(ca.get('turn',{}).get('pass_rate',0))}</td><td>{pct(cb.get('turn',{}).get('pass_rate',0))}</td></tr>")
+            html.append("</tbody></table>")
+        except Exception:
+            pass
+        # Metrics delta
+        md = diff.get("metrics_delta") or {}
+        if md:
+            html.append("<h2>Per-metric Pass Rate Delta</h2>")
+            html.append("<table><thead><tr><th>Metric</th><th>A</th><th>B</th><th>Δ (B−A)</th></tr></thead><tbody>")
+            for k, row in md.items():
+                a_pr = row.get("a_pass_rate", 0)
+                b_pr = row.get("b_pass_rate", 0)
+                d = row.get("delta", 0)
+                cls = "good" if d >= 0 else "bad"
+                html.append(f"<tr><td>{k}</td><td>{pct(a_pr)}</td><td>{pct(b_pr)}</td><td class='{cls}'>{pct(d)}</td></tr>")
+            html.append("</tbody></table>")
+        # Domain/behavior
+        db = diff.get("domain_behavior_delta") or []
+        if db:
+            html.append("<h2>Domain/Behavior Delta</h2>")
+            html.append("<table><thead><tr><th>Domain</th><th>Behavior</th><th>A pass%</th><th>B pass%</th><th>Δ</th></tr></thead><tbody>")
+            for r in db[:200]:
+                a_pr = (r.get("a") or {}).get("pass_rate", 0)
+                b_pr = (r.get("b") or {}).get("pass_rate", 0)
+                d = (r.get("delta") or {}).get("pass_rate", 0)
+                cls = "good" if d >= 0 else "bad"
+                html.append(f"<tr><td>{r.get('domain')}</td><td>{r.get('behavior')}</td><td>{pct(a_pr)}</td><td>{pct(b_pr)}</td><td class='{cls}'>{pct(d)}</td></tr>")
+            html.append("</tbody></table>")
+        # Per conversation
+        pc = diff.get("per_conversation") or []
+        if pc:
+            html.append("<h2>Per-conversation Changes (Top 50)</h2>")
+            html.append("<table><thead><tr><th>Key</th><th>Pass A→B</th><th>Failed turns Δ</th></tr></thead><tbody>")
+            for r in pc[:50]:
+                atxt = str(((r.get("a") or {}).get("conversation_pass")))
+                btxt = str(((r.get("b") or {}).get("conversation_pass")))
+                delta = (r.get("delta") or {}).get("failed_turns_delta", 0)
+                cls = "good" if delta < 0 else ("bad" if delta > 0 else "")
+                html.append(f"<tr><td>{r.get('key')}</td><td>{atxt} → {btxt}</td><td class='{cls}'>{delta}</td></tr>")
+            html.append("</tbody></table>")
+        html.append("</body></html>")
+        html = "".join(html)
+
+        # Try WeasyPrint first
+        weasy_error = None
+        try:
+            from weasyprint import HTML  # type: ignore
+            HTML(string=html, base_url=str(out_dir)).write_pdf(str(pdf_path))
+            return FileResponse(str(pdf_path), media_type="application/pdf", filename=pdf_path.name)
+        except Exception as e:
+            weasy_error = e
+
+        # Fallback 1: Playwright (Chromium) rendering
+        playwright_error = None
+        try:
+            from playwright.sync_api import sync_playwright  # type: ignore
+            with sync_playwright() as p:
+                browser = None
+                for ch in ("msedge", "chrome"):
+                    try:
+                        browser = p.chromium.launch(channel=ch)
+                        break
+                    except Exception:
+                        browser = None
+                if browser is None:
+                    import os
+                    cand_paths = [
+                        os.environ.get("PLAYWRIGHT_CHROME_PATH"),
+                        os.environ.get("CHROME_PATH"),
+                        os.environ.get("EDGE_PATH"),
+                        r"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                        r"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+                        r"C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+                        r"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+                    ]
+                    for ep in [c for c in cand_paths if c]:
+                        try:
+                            if os.path.exists(ep):
+                                browser = p.chromium.launch(executable_path=ep)
+                                break
+                        except Exception:
+                            browser = None
+                if browser is None:
+                    browser = p.chromium.launch()
+                context = browser.new_context()
+                page = context.new_page()
+                page.set_content(html, wait_until="load")
+                page.pdf(path=str(pdf_path), format="A4", print_background=True)
+                context.close()
+                browser.close()
+                return FileResponse(str(pdf_path), media_type="application/pdf", filename=pdf_path.name)
+        except Exception as e:
+            playwright_error = e
+
+        # Fallback 2: wkhtmltopdf via pdfkit
+        try:
+            import pdfkit  # type: ignore
+        except Exception as e:
+            raise HTTPException(status_code=501, detail=f"PDF generation not available (WeasyPrint failed: {weasy_error}; Playwright failed: {playwright_error}); pdfkit not installed: {e}")
+
+        try:
+            pdfkit.from_string(html, str(pdf_path), options={"quiet": ""})
+            return FileResponse(str(pdf_path), media_type="application/pdf", filename=pdf_path.name)
+        except Exception:
+            pass
+        import os, shutil
+        exe = os.environ.get("WKHTMLTOPDF_PATH") or os.environ.get("WKHTMLTOPDF_BIN") or os.environ.get("WKHTMLTOPDF_BINARY")
+        if not exe:
+            candidates = [
+                r"C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe",
+                r"C:\\Program Files (x86)\\wkhtmltopdf\\bin\\wkhtmltopdf.exe",
+                r"C:\\ProgramData\\chocolatey\\bin\\wkhtmltopdf.exe",
+            ]
+            for cpath in candidates:
+                if os.path.exists(cpath):
+                    exe = cpath
+                    break
+        if not exe:
+            exe = shutil.which("wkhtmltopdf")
+        if exe and os.path.isdir(exe):
+            candidate = os.path.join(exe, "wkhtmltopdf.exe")
+            if os.path.exists(candidate):
+                exe = candidate
+        if not exe:
+            env_path = os.environ.get("PATH", "")
+            short_path = (env_path[:240] + '…') if len(env_path) > 240 else env_path
+            raise HTTPException(status_code=501, detail=f"wkhtmltopdf not found. Install wkhtmltopdf and/or set WKHTMLTOPDF_PATH to the executable. Alternatively install Playwright: pip install playwright and python -m playwright install chromium. PATH={short_path}")
+        try:
+            config = pdfkit.configuration(wkhtmltopdf=exe)
+            pdfkit.from_string(html, str(pdf_path), configuration=config, options={"quiet": ""})
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"cannot render pdf with wkhtmltopdf: {e}")
+        return FileResponse(str(pdf_path), media_type="application/pdf", filename=pdf_path.name)
+    # PDF export is not implemented yet
+    raise HTTPException(status_code=501, detail="unknown export type")
+
+async def _submit_feedback(run_id: str, body: Dict[str, Any], vertical: Optional[str] = None):
+    # Append feedback objects to runs/<run_id>/feedback.json
+    # locate run dir
+    if vertical:
+        run_dir = _get_or_create_vertical_context(vertical)['reader'].layout.run_dir(run_id)
+    else:
+        run_dir = None
+        for c in _iter_all_contexts():
+            cand = c['reader'].layout.run_dir(run_id)
+            if cand.exists():
+                run_dir = cand
+                break
+        if run_dir is None:
+            raise HTTPException(status_code=404, detail="run not found")
+    fb_path = run_dir / "feedback.json"
+    arr: list = []
+    if fb_path.exists():
+        try:
+            import json
+            arr = json.loads(fb_path.read_text(encoding="utf-8"))
+            if not isinstance(arr, list):
+                arr = []
+        except Exception:
+            arr = []
+    arr.append(body)
+    fb_path.write_text(json.dumps(arr, indent=2), encoding="utf-8")
+    return {"ok": True, "count": len(arr)}
+async def _submit_feedback(run_id: str, body: Dict[str, Any], vertical: Optional[str] = None):
     # Append feedback objects to runs/<run_id>/feedback.json
     # locate run dir
     if vertical:

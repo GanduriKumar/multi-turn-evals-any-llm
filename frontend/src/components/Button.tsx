@@ -12,5 +12,6 @@ export default function Button({ variant = 'primary', className = '', ...props }
     danger: 'bg-danger text-white hover:opacity-90 focus-visible:ring-danger/50',
     ghost: 'text-primary hover:bg-primary/10 focus-visible:ring-primary/30'
   }
-  return <button className={`${base} ${styles[variant]} ${className}`} {...props} />
+  const disabledCls = props.disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
+  return <button className={`${base} ${styles[variant]} ${disabledCls} ${className}`} {...props} />
 }

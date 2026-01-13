@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import Badge from '../components/Badge'
@@ -22,6 +22,24 @@ export default function DatasetsPage() {
   const [list, setList] = useState<DatasetItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [chatOpen, setChatOpen] = useState(false)
+  const [chatDataset, setChatDataset] = useState<string | null>(null)
+  const [chatConversation, setChatConversation] = useState<string | null>(null)
+  const [chatConvs, setChatConvs] = useState<any[]>([])
+  const [chatHistory, setChatHistory] = useState<{ role: 'user'|'assistant'; content: string }[]>([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatModel, setChatModel] = useState('openai:gpt-5.1')
+  const [chatBusy, setChatBusy] = useState(false)
+  const chatRef = useRef<HTMLDivElement | null>(null)
+  const chatAbortRef = useRef<AbortController | null>(null)
+
+  // Auto-scroll chat to bottom on new messages
+  useEffect(() => {
+    const el = chatRef.current
+    if (el) {
+      el.scrollTop = el.scrollHeight
+    }
+  }, [chatHistory, chatOpen])
 
   const fetchList = async () => {
     setLoading(true); setError(null)
@@ -34,6 +52,91 @@ export default function DatasetsPage() {
       setError(e.message || 'Failed to load')
     } finally {
       setLoading(false)
+    }
+  }
+  const openChat = async (datasetId: string) => {
+    setChatDataset(datasetId)
+    setChatConversation(null)
+    setChatConvs([])
+    setChatHistory([])
+    setChatInput('')
+    setChatOpen(true)
+    // Load dataset to populate conversation dropdown
+    try {
+      const r = await fetch(`/datasets/${encodeURIComponent(datasetId)}?vertical=${encodeURIComponent(vertical)}`)
+      if (r.ok) {
+        const ds = await r.json()
+        const convs = Array.isArray(ds?.conversations) ? ds.conversations : []
+        setChatConvs(convs)
+        if (convs.length > 0) setChatConversation(convs[0].conversation_id)
+      }
+    } catch {
+      // ignore and keep manual entry
+    }
+    // pick a sensible default model based on backend capabilities
+    try {
+      const v = await fetch('/version')
+      if (v.ok) {
+        const s = await v.json()
+        const models = s?.models || {}
+        if (s?.openai_enabled) setChatModel(`openai:${models.openai || 'gpt-5.1'}`)
+        else if (s?.gemini_enabled) setChatModel(`gemini:${models.gemini || 'gemini-2.5'}`)
+        else setChatModel(`ollama:${models.ollama || 'llama3.2:latest'}`)
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const sendChat = async () => {
+    if (!chatDataset || !chatInput.trim()) return
+    const [provider, model] = chatModel.includes(':') ? chatModel.split(':', 1) && [chatModel.split(':')[0], chatModel.split(':').slice(1).join(':')] : ['openai', chatModel]
+    const body = {
+      dataset_id: chatDataset,
+      // allow empty to chat about the dataset holistically
+      conversation_id: chatConversation || undefined,
+      message: chatInput,
+      model: chatModel,
+      history: chatHistory,
+    }
+    setChatBusy(true)
+    try {
+      const controller = new AbortController()
+      chatAbortRef.current = controller
+      const r = await fetch(`/chat/dataset?vertical=${encodeURIComponent(vertical)}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: controller.signal })
+      const ct = r.headers.get('content-type') || ''
+      let js: any = null
+      let txt: string | null = null
+      try {
+        if (ct.includes('application/json')) js = await r.json()
+        else txt = await r.text()
+      } catch {
+        try { txt = await r.text() } catch { txt = null }
+      }
+      const newHist = [...chatHistory, { role: 'user', content: chatInput }]
+      if (r.ok && js?.content) {
+        newHist.push({ role: 'assistant', content: js.content })
+      } else {
+        const msg = (js?.detail || js?.error || txt || 'failed to chat') as string
+        const tag = `HTTP ${r.status}${r.statusText ? ' ' + r.statusText : ''}`
+        newHist.push({ role: 'assistant', content: `Error (${tag}): ${msg}` })
+      }
+      setChatHistory(newHist)
+      setChatInput('')
+    } catch (e:any) {
+      const aborted = e && (e.name === 'AbortError' || e.message === 'The user aborted a request.')
+      const newHist = [...chatHistory, { role: 'user', content: chatInput }, { role: 'assistant', content: aborted ? 'Cancelled.' : `Error: ${e.message || 'failed to chat'}` }]
+      setChatHistory(newHist)
+      setChatInput('')
+    } finally {
+      setChatBusy(false)
+      if (chatAbortRef.current) chatAbortRef.current = null
+    }
+  }
+
+  const cancelChat = () => {
+    if (chatBusy && chatAbortRef.current) {
+      chatAbortRef.current.abort()
     }
   }
 
@@ -151,6 +254,7 @@ export default function DatasetsPage() {
                 <th className="py-2 pr-4">Golden</th>
                 <th className="py-2 pr-4">Valid</th>
                 <th className="py-2 pr-4">Reports</th>
+                <th className="py-2 pr-4">Chat</th>
               </tr>
             </thead>
             <tbody>
@@ -175,6 +279,9 @@ export default function DatasetsPage() {
                       </Button>
                     </div>
                   </td>
+                  <td className="py-2 pr-4">
+                    <Button onClick={() => openChat(row.dataset_id)}>Chat</Button>
+                  </td>
                 </tr>
               ))}
               {list.length === 0 && !loading && (
@@ -188,6 +295,72 @@ export default function DatasetsPage() {
           </div>
         </div>
       </Card>
+
+      {chatOpen && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setChatOpen(false)}>
+          <div className="bg-base-100 text-base-content w-full max-w-5xl max-h-[90vh] overflow-auto rounded shadow-lg border" onClick={e => e.stopPropagation()}>
+            <div className="p-3 border-b flex items-center justify-between">
+              <div className="text-sm">
+                <div className="font-medium text-white text-2xl">Chat with dataset</div>
+                <div className="text-white">Dataset: <span className="font-mono">{chatDataset}</span></div>
+              </div>
+              <div className="flex items-center gap-2">
+                <select className="select select-bordered select-sm" value={chatModel} onChange={e => setChatModel(e.target.value)}>
+                  <option value="openai:gpt-5.1">openai:gpt-5.1</option>
+                  <option value="gemini:gemini-2.5">gemini:gemini-2.5</option>
+                  <option value="ollama:llama3.2:latest">ollama:llama3.2:latest</option>
+                </select>
+                <Button variant="warning" onClick={() => setChatOpen(false)}>Close</Button>
+              </div>
+            </div>
+            <div className="p-3 space-y-3">
+              <label className="text-xs">Conversation</label>
+              {chatConvs.length > 0 ? (
+                <select className="select select-bordered w-full select-sm" value={chatConversation || ''} onChange={e => setChatConversation(e.target.value)}>
+                  <option value="">All conversations</option>
+                  {chatConvs.map((c:any) => {
+                    const title = c.conversation_title || c.conversation_slug || c.conversation_id
+                    return <option key={c.conversation_id} value={c.conversation_id}>{title} — {c.conversation_id}</option>
+                  })}
+                </select>
+              ) : (
+                <input className="input input-bordered w-full input-sm" placeholder="e.g. conv-001" value={chatConversation || ''} onChange={e => setChatConversation(e.target.value)} />
+              )}
+              <div ref={chatRef} className="border rounded p-2 h-72 overflow-auto bg-base-200 text-base-content">
+                {chatHistory.length === 0 ? (
+                  <div className="text-[12px] text-gray-800">Ask a question about the selected conversation. The assistant will use the conversation metadata and user turns as context.</div>
+                ) : (
+                  <div className="space-y-2">
+                    {chatHistory.map((m,i) => (
+                      <div key={i} className={`p-2 rounded ${m.role === 'user' ? 'bg-base-100' : 'bg-base-300'}`}>
+                        <div className="text-base font-semibold text-white opacity-70">{m.role}</div>
+                        <div className="text-sm whitespace-pre-wrap break-words text-white">{m.content}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <input className="input input-bordered w-full input-sm" placeholder="Type your question" value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat() } }} />
+                {chatBusy ? (
+                  <Button onClick={cancelChat} aria-label="Cancel sending" title="Cancel sending">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                      <rect x="9" y="9" width="6" height="6" fill="currentColor" className="animate-pulse" />
+                    </svg>
+                  </Button>
+                ) : (
+                  <Button onClick={sendChat} aria-label="Send" title="Send">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                      <path d="M12 3c.3 0 .6.12.8.34l7 7a1.14 1.14 0 0 1 .2 1.26A1 1 0 0 1 19 12h-5v8a1 1 0 1 1-2 0v-8H7a1 1 0 0 1-1-.4 1.14 1.14 0 0 1 .2-1.26l7-7c.2-.22.5-.34.8-.34z" />
+                    </svg>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

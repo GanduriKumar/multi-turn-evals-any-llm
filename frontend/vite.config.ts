@@ -45,6 +45,14 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/chat': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/reports': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
     }
   }
 })
