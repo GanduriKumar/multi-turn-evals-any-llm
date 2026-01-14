@@ -4,46 +4,162 @@
   <meta charset="utf-8">
   <title>Run {{ run_id }} — Evaluation Report</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; }
-    .pass { color: #0F9D58; }
-    .fail { color: #DB4437; }
-    .card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
-    .header { background: #f8fafc; padding: .5rem .75rem; border-radius: 6px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: .5rem; border-bottom: 1px solid #e5e7eb; text-align: left; }
-    .muted { color: #64748b; }
-    .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; background: #e5f0ff; color: #1e40af; font-size: .8rem; }
-    .metric-failure { padding: 4px 8px; margin: 2px 0; background: #fef2f2; border-left: 3px solid #dc2626; border-radius: 3px; font-size: .9rem; }
-    .metric-name { font-weight: 600; color: #991b1b; }
-    .reason-text { margin-left: 8px; color: #374151; }
-    .output-text { white-space: pre-wrap; font-family: 'Consolas', 'Monaco', monospace; font-size: .9rem; line-height: 1.5; background: #f9fafb; padding: 8px; border-radius: 4px; max-height: 300px; overflow-y: auto; }
-    .prompt-text { white-space: pre-wrap; font-family: system-ui; font-size: .95rem; line-height: 1.4; }
+    /*
+      Cohesive self-contained theme using Google brand palette
+      No external assets. No JS. Accessible contrast and print-aware.
+    */
+    :root {
+      /* Brand */
+      --g-blue: #4285F4;
+      --g-red: #EA4335;
+      --g-yellow: #FBBC05;
+      --g-green: #34A853;
+      /* Neutrals */
+      --text: #202124;
+      --muted: #5F6368;
+      --border: #E5E7EB;
+      --bg: #FFFFFF;
+      --bg-soft: #F8FAFC;
+      --bg-code: #F9FAFB;
+      /* States */
+      --pass: var(--g-green);
+      --fail: var(--g-red);
+      --info: var(--g-blue);
+      --warn: var(--g-yellow);
+      /* Back-compat helpers for existing inline styles */
+      --pass-color: var(--pass);
+      --fail-color: var(--fail);
+    }
 
-    /* Visual donut charts */
-    :root { --pass-color: #16a34a; --fail-color: #dc2626; }
+    /* Base */
+    html { color-scheme: light; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; color: var(--text); background: var(--bg); margin: 2rem; }
+    a { color: var(--g-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .muted { color: var(--muted); }
+
+    /* Cards and layout */
+    .card { border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; background: var(--bg); box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+    .header { background: var(--bg-soft); padding: .6rem .8rem; border-radius: 8px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: .6rem .55rem; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    thead th { position: sticky; top: 0; background: var(--bg-soft); z-index: 1; box-shadow: inset 0 -1px 0 var(--border); }
+    tbody tr:nth-child(odd) { background: #FAFBFC; }
+
+    /* Badges and status */
+    .badge { display: inline-flex; align-items: center; gap: .35rem; padding: 2px 8px; border-radius: 999px; font-size: .78rem; font-weight: 600; border: 1px solid var(--border); }
+    .badge-pass { background: #E9F7EF; color: var(--pass); border-color: #C6EBD3; }
+    .badge-fail { background: #FDEAEA; color: var(--fail); border-color: #F5C2C0; }
+    .pass { color: var(--pass); font-weight: 600; }
+    .fail { color: var(--fail); font-weight: 600; }
+
+    /* Metrics and helpers */
+    .metric-failure { padding: 4px 8px; margin: 2px 0; background: #FEF2F2; border-left: 3px solid var(--fail); border-radius: 4px; font-size: .9rem; }
+    .metric-name { font-weight: 700; color: #B91C1C; }
+    .reason-text { margin-left: 8px; color: #374151; }
+    .output-text { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: .9rem; line-height: 1.5; background: var(--bg-code); padding: 10px; border-radius: 6px; max-height: 320px; overflow-y: auto; border: 1px solid var(--border); }
+    .prompt-text { white-space: pre-wrap; font-family: inherit; font-size: .95rem; line-height: 1.45; }
+
+    /* Visual donut charts (pure CSS) */
     .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; align-items: center; }
     .chart-card { display: flex; gap: 1rem; align-items: center; }
     .donut { position: relative; width: 180px; height: 180px; border-radius: 50%;
-         background: conic-gradient(var(--pass-color) 0 var(--p), var(--fail-color) var(--p) 100%);
+         background: conic-gradient(var(--pass) 0 var(--p), var(--fail) var(--p) 100%);
          box-shadow: inset 0 0 0 20px #f3f4f6, 0 2px 6px rgba(0,0,0,.08); }
-    .donut::before { content: ""; position: absolute; inset: 40px; border-radius: 50%; background: #ffffff; box-shadow: inset 0 0 0 1px #e5e7eb; }
-    .donut::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 0 1px #e5e7eb; opacity: .8; }
-    .donut-label { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 600; font-size: 16px; color: #111827; }
+    .donut::before { content: ""; position: absolute; inset: 40px; border-radius: 50%; background: var(--bg); box-shadow: inset 0 0 0 1px var(--border); }
+    .donut::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--border); opacity: .8; }
+    .donut-label { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 700; font-size: 16px; color: var(--text); }
     .legend { font-size: .85rem; color: #374151; }
     .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 9999px; margin-right: 6px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* KPI tiles */
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .8rem; margin-top: .6rem; }
+    .kpi-card { border: 1px solid var(--border); border-radius: 10px; padding: .75rem .9rem; background: var(--bg); box-shadow: 0 1px 1px rgba(0,0,0,.02); }
+    .kpi-title { font-size: .8rem; color: var(--muted); margin-bottom: .25rem; }
+    .kpi-value { font-size: 1.25rem; font-weight: 700; color: var(--text); }
+    .kpi-sub { font-size: .85rem; color: var(--muted); }
+
+    /* Failures by metric */
+    .metrics-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: .8rem; margin-top: .6rem; }
+    .metric-card { border: 1px solid var(--border); border-radius: 10px; padding: .75rem .9rem; background: var(--bg); }
+    .metric-card h4 { margin: 0 0 .25rem 0; font-size: 1rem; display: flex; align-items: center; gap: .5rem; }
+    .metric-count { font-weight: 700; color: var(--fail); }
+    .reasons { margin: .25rem 0 0 0; padding-left: 1rem; }
+    .reasons li { margin: .15rem 0; color: var(--muted); }
+
+    /* Back to top link */
+    .back-to-top { text-align: right; margin-top: .4rem; }
+    .back-to-top a { color: var(--muted); font-size: .85rem; }
+
+    /* Turn layout */
+    .turns { display: grid; gap: 0.75rem; }
+    .turn { border: 1px solid var(--border); border-radius: 10px; padding: .75rem .9rem; background: var(--bg); }
+    .turn-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+    .turn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+    @media (max-width: 900px) { .turn-grid { grid-template-columns: 1fr; } }
+    .turn-label { font-size: .8rem; letter-spacing: .02em; text-transform: uppercase; }
+
+    /* Icons */
+    .icon { width: 14px; height: 14px; display: inline-block; vertical-align: -2px; }
+
+    /* Print styles */
+    @media print {
+      /* General color fidelity and compact spacing */
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { margin: 0.5in; }
+      a { text-decoration: none; color: inherit; }
+      .card { box-shadow: none; margin-bottom: .5rem; padding: .75rem; }
+      .header { background: #f1f5f9; }
+
+      /* Hide navigation-only elements */
+      .toc, .back-to-top { display: none !important; }
+
+      /* Avoid sticky in print */
+      thead th { position: static !important; box-shadow: none !important; }
+
+      /* Avoid breaking inside structured blocks */
+      table, tr, td, th, thead, tbody { break-inside: avoid; page-break-inside: avoid; }
+      .turn, .output-text, .prompt-text { break-inside: avoid; page-break-inside: avoid; }
+
+      /* Start each conversation on a new page for clarity */
+      .card[id^="conv-"] { break-before: page; page-break-before: always; }
+    }
   </style>
 </head>
 <body>
-  <div class="card">
+  <!-- SVG symbols for status/icons -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 6L9 17l-5-5"/>
+    </symbol>
+    <symbol id="ic-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6L6 18M6 6l12 12"/>
+    </symbol>
+    <symbol id="ic-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+    </symbol>
+    <symbol id="ic-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </symbol>
+  </svg>
+  <a id="top"></a>
+
+  {# Ensure conversations is a list even if missing #}
+  {% set conversations = conversations if conversations is defined and conversations is not none else [] %}
+
+  {# TOC removed per request #}
+  <div class="card" id="run-summary">
     <div class="header"><h2>Run Summary</h2></div>
-    <p><strong>Run ID:</strong> {{ run_id }}</p>
-    <p><strong>Dataset:</strong> {{ dataset_id }}</p>
-    <p><strong>Model:</strong> {{ model_spec }}</p>
+    <p><strong>Run ID:</strong> {{ run_id | default('') }}</p>
+    <p><strong>Dataset:</strong> {{ dataset_id | default('') }}</p>
+    <p><strong>Model:</strong> {{ model_spec | default('') }}</p>
     <p><strong>Input tokens consumed:</strong> {{ input_tokens_total | default(0) }}</p>
     <p><strong>Output tokens consumed:</strong> {{ output_tokens_total | default(0) }}</p>
-    {% if domain_description %}
+    {% if domain_description is defined and domain_description %}
     <p class="muted">{{ domain_description }}</p>
     {% endif %}
   </div>
@@ -64,7 +180,8 @@
 
   {% set tns = namespace(total=0, passed=0) %}
   {% for c in conversations %}
-    {% for t in c.turns %}
+    {% set cturns = c.turns if c.turns is defined and c.turns else [] %}
+    {% for t in cturns %}
       {% set tns.total = tns.total + 1 %}
       {% if t.turn_pass is not defined or t.turn_pass %}
         {% set tns.passed = tns.passed + 1 %}
@@ -78,8 +195,35 @@
   {% set conv_pass_pct = (100 * conv_pass / conv_total) if conv_total > 0 else 0 %}
   {% set turn_pass_pct = (100 * turn_pass / turn_total) if turn_total > 0 else 0 %}
 
-  <div class="card">
+  <div class="card" id="overview">
     <div class="header"><h2>Overview</h2></div>
+    <div class="kpis">
+      <div class="kpi-card">
+        <div class="kpi-title">Conversations Pass</div>
+        <div class="kpi-value">{{ conv_pass }}/{{ conv_total }}</div>
+        <div class="kpi-sub">{{ '%.1f'|format(conv_pass_pct) }}%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Turns Pass</div>
+        <div class="kpi-value">{{ turn_pass }}/{{ turn_total }}</div>
+        <div class="kpi-sub">{{ '%.1f'|format(turn_pass_pct) }}%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Total Conversations</div>
+        <div class="kpi-value">{{ conv_total }}</div>
+        <div class="kpi-sub">All scenarios</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Total Turns</div>
+        <div class="kpi-value">{{ turn_total }}</div>
+        <div class="kpi-sub">All steps</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Failed Turns</div>
+        <div class="kpi-value" style="color: var(--fail)">{{ turn_fail }}</div>
+        <div class="kpi-sub">Needs attention</div>
+      </div>
+    </div>
     <div class="charts">
       <div class="chart-card">
         <div class="donut" style="--p: {{ '%.2f'|format(conv_pass_pct) }}%">
@@ -104,7 +248,112 @@
     </div>
   </div>
 
-  <div class="card">
+  {#
+    Failures by Metric (Turn-level): compute counts and collect sample reasons.
+    Note: Counts below reflect number of failing turns, not conversations.
+  #}
+  {% set m = namespace(
+      exact_count=0, exact_reasons=[], exact_first_anchor='',
+      semantic_count=0, semantic_reasons=[], semantic_first_anchor='',
+      consistency_count=0, consistency_reasons=[], consistency_first_anchor='',
+      adherence_count=0, adherence_reasons=[], adherence_first_anchor='',
+      hallucination_count=0, hallucination_reasons=[], hallucination_first_anchor=''
+    ) %}
+  {% for c in conversations %}
+    {% set conv_anchor = 'conv-' ~ (c.conversation_id if c.conversation_id is defined and c.conversation_id else (c.conversation_slug if c.conversation_slug is defined and c.conversation_slug else (loop.index|string))) %}
+    {% set cturns = c.turns if c.turns is defined and c.turns else [] %}
+    {% for t in cturns %}
+      {% set ex = t.metrics.exact if t.metrics is defined and t.metrics.exact is defined else none %}
+      {% if ex is not none and ex.pass is defined and not ex.pass %}
+        {% set m.exact_count = m.exact_count + 1 %}
+        {% set r = ex.reason if ex.reason is defined and ex.reason else 'Mismatch with expected' %}
+        {% if r not in m.exact_reasons %}{% set m.exact_reasons = m.exact_reasons + [r] %}{% endif %}
+        {% if not m.exact_first_anchor %}{% set m.exact_first_anchor = '#metric-exact-' ~ conv_anchor %}{% endif %}
+      {% endif %}
+
+      {% set se = t.metrics.semantic if t.metrics is defined and t.metrics.semantic is defined else none %}
+      {% if se is not none and se.pass is defined and not se.pass %}
+        {% set m.semantic_count = m.semantic_count + 1 %}
+        {% if se.reason is defined and se.reason %}
+          {% set r = se.reason %}
+        {% elif se.score_max is defined %}
+          {% set r = 'Score %.2f below threshold' % (se.score_max or 0) %}
+        {% else %}
+          {% set r = 'Below similarity threshold' %}
+        {% endif %}
+        {% if r not in m.semantic_reasons %}{% set m.semantic_reasons = m.semantic_reasons + [r] %}{% endif %}
+        {% if not m.semantic_first_anchor %}{% set m.semantic_first_anchor = '#metric-semantic-' ~ conv_anchor %}{% endif %}
+      {% endif %}
+
+      {% set co = t.metrics.consistency if t.metrics is defined and t.metrics.consistency is defined else none %}
+      {% if co is not none and co.pass is defined and not co.pass %}
+        {% set m.consistency_count = m.consistency_count + 1 %}
+        {% set r = co.reason if co.reason is defined and co.reason else 'Inconsistent with prior context' %}
+        {% if r not in m.consistency_reasons %}{% set m.consistency_reasons = m.consistency_reasons + [r] %}{% endif %}
+        {% if not m.consistency_first_anchor %}{% set m.consistency_first_anchor = '#metric-consistency-' ~ conv_anchor %}{% endif %}
+      {% endif %}
+
+      {% set ad = t.metrics.adherence if t.metrics is defined and t.metrics.adherence is defined else none %}
+      {% if ad is not none and ad.pass is defined and not ad.pass %}
+        {% set m.adherence_count = m.adherence_count + 1 %}
+        {% set r = ad.reason if ad.reason is defined and ad.reason else 'Policy criteria not met' %}
+        {% if r not in m.adherence_reasons %}{% set m.adherence_reasons = m.adherence_reasons + [r] %}{% endif %}
+        {% if not m.adherence_first_anchor %}{% set m.adherence_first_anchor = '#metric-adherence-' ~ conv_anchor %}{% endif %}
+      {% endif %}
+
+      {% set ha = t.metrics.hallucination if t.metrics is defined and t.metrics.hallucination is defined else none %}
+      {% if ha is not none and ha.pass is defined and not ha.pass %}
+        {% set m.hallucination_count = m.hallucination_count + 1 %}
+        {% set r = ha.reason if ha.reason is defined and ha.reason else 'Possible hallucination detected' %}
+        {% if r not in m.hallucination_reasons %}{% set m.hallucination_reasons = m.hallucination_reasons + [r] %}{% endif %}
+        {% if not m.hallucination_first_anchor %}{% set m.hallucination_first_anchor = '#metric-hallucination-' ~ conv_anchor %}{% endif %}
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+
+  <div class="card" id="fail-metrics">
+    <div class="header"><h2>Failures by Metric (Turn-level)</h2></div>
+    <p class="muted">Counts reflect the number of failing <strong>turns</strong> across all conversations.</p>
+    <div class="metrics-group">
+      <div class="metric-card" data-metric="exact" data-failed-count="{{ m.exact_count }}">
+          <h4><a href="{{ m.exact_first_anchor or '#detailed-report' }}">Exact</a> · <span class="metric-count">{{ m.exact_count }}</span></h4>
+        <ul class="reasons">
+          {% for r in m.exact_reasons[:3] %}<li>{{ r }}</li>{% endfor %}
+          {% if m.exact_reasons|length == 0 %}<li class="muted">No specific reasons captured</li>{% endif %}
+        </ul>
+      </div>
+      <div class="metric-card" data-metric="semantic" data-failed-count="{{ m.semantic_count }}">
+          <h4><a href="{{ m.semantic_first_anchor or '#detailed-report' }}">Semantic</a> · <span class="metric-count">{{ m.semantic_count }}</span></h4>
+        <ul class="reasons">
+          {% for r in m.semantic_reasons[:3] %}<li>{{ r }}</li>{% endfor %}
+          {% if m.semantic_reasons|length == 0 %}<li class="muted">No specific reasons captured</li>{% endif %}
+        </ul>
+      </div>
+      <div class="metric-card" data-metric="consistency" data-failed-count="{{ m.consistency_count }}">
+          <h4><a href="{{ m.consistency_first_anchor or '#detailed-report' }}">Consistency</a> · <span class="metric-count">{{ m.consistency_count }}</span></h4>
+        <ul class="reasons">
+          {% for r in m.consistency_reasons[:3] %}<li>{{ r }}</li>{% endfor %}
+          {% if m.consistency_reasons|length == 0 %}<li class="muted">No specific reasons captured</li>{% endif %}
+        </ul>
+      </div>
+      <div class="metric-card" data-metric="adherence" data-failed-count="{{ m.adherence_count }}">
+          <h4><a href="{{ m.adherence_first_anchor or '#detailed-report' }}">Adherence</a> · <span class="metric-count">{{ m.adherence_count }}</span></h4>
+        <ul class="reasons">
+          {% for r in m.adherence_reasons[:3] %}<li>{{ r }}</li>{% endfor %}
+          {% if m.adherence_reasons|length == 0 %}<li class="muted">No specific reasons captured</li>{% endif %}
+        </ul>
+      </div>
+      <div class="metric-card" data-metric="hallucination" data-failed-count="{{ m.hallucination_count }}">
+          <h4><a href="{{ m.hallucination_first_anchor or '#detailed-report' }}">Hallucination</a> · <span class="metric-count">{{ m.hallucination_count }}</span></h4>
+        <ul class="reasons">
+          {% for r in m.hallucination_reasons[:3] %}<li>{{ r }}</li>{% endfor %}
+          {% if m.hallucination_reasons|length == 0 %}<li class="muted">No specific reasons captured</li>{% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="failure-explanations">
     <div class="header"><h2>Failure Explanations</h2></div>
     <div class="grid-2">
       <div>
@@ -129,17 +378,27 @@
               <td>
                 {% set outcome = c.summary.final_outcome if c.summary is defined and c.summary.final_outcome is defined else none %}
                 {% if outcome and outcome.reasons and outcome.reasons|length > 0 %}
-                  <div style="line-height: 1.6;">
-                    {% for reason in outcome.reasons %}
-                      <div style="margin-bottom: 4px;">• {{ reason }}</div>
-                    {% endfor %}
-                  </div>
+                  {% for reason in outcome.reasons %}
+                    <div class="metric-failure">
+                      <span class="metric-name">Reason:</span>
+                      <span class="reason-text">{{ reason }}</span>
+                    </div>
+                  {% endfor %}
                 {% elif c.summary.failed_metrics and (c.summary.failed_metrics|length > 0) %}
-                  <div><strong>Failed metrics:</strong> {{ (c.summary.failed_metrics or []) | join(', ') }}</div>
+                  <div class="metric-failure">
+                    <span class="metric-name">Failed metrics:</span>
+                    <span class="reason-text">{{ (c.summary.failed_metrics or []) | join(', ') }}</span>
+                  </div>
                 {% elif c.summary.failed_turns_count is defined and c.summary.failed_turns_count > 0 %}
-                  <div class="muted">One or more turns failed. See turn-level details below.</div>
+                  <div class="metric-failure">
+                    <span class="metric-name">Turn failures:</span>
+                    <span class="reason-text">One or more turns failed. See turn-level details below.</span>
+                  </div>
                 {% else %}
-                  <div class="muted">See detailed turn failures below</div>
+                  <div class="metric-failure">
+                    <span class="metric-name">Info:</span>
+                    <span class="reason-text">See detailed turn failures below</span>
+                  </div>
                 {% endif %}
               </td>
             </tr>
@@ -210,81 +469,109 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="detailed-report">
     <div class="header"><h2>Detailed Report</h2></div>
   </div>
 
+  {# Anchors to allow metric links to jump to Detailed Report #}
+  <a id="metric-exact"></a>
+  <a id="metric-semantic"></a>
+  <a id="metric-consistency"></a>
+  <a id="metric-adherence"></a>
+  <a id="metric-hallucination"></a>
+
   {% for conv in conversations %}
-  <div class="card">
+  {% set conv_anchor = 'conv-' ~ (conv.conversation_id if conv.conversation_id is defined and conv.conversation_id else (conv.conversation_slug if conv.conversation_slug is defined and conv.conversation_slug else (loop.index|string))) %}
+  <div class="card" id="{{ conv_anchor }}">
     <div class="header">
       <h3>
-        {{ conv.conversation_title or conv.conversation_slug or conv.conversation_id }}
-        — <span class="badge">{{ 'PASS' if conv.summary.conversation_pass else 'FAIL' }}</span>
+        {{ conv.conversation_title or conv.conversation_slug or conv.conversation_id or ('Conversation ' ~ loop.index) }}
+        {% set conv_pass = conv.summary.conversation_pass if conv.summary is defined and conv.summary and conv.summary.conversation_pass is defined else True %}
+        — <span class="badge {{ 'badge-pass' if conv_pass else 'badge-fail' }}">{{ 'PASS' if conv_pass else 'FAIL' }}</span>
       </h3>
       <div class="muted">
-        {% if conv.domain %}{{ conv.domain }}{% endif %}
-        {% if conv.behavior %}{% if conv.domain %} • {% endif %}{{ conv.behavior }}{% endif %}
-        {% if conv.scenario %}{% if conv.domain or conv.behavior %} • {% endif %}{{ conv.scenario }}{% endif %}
-        {% if conv.conversation_slug %}{% if conv.domain or conv.behavior or conv.scenario %} • {% endif %}<span class="muted">{{ conv.conversation_slug }}</span>{% endif %}
+        {% if conv.domain is defined and conv.domain %}{{ conv.domain }}{% endif %}
+        {% if conv.behavior is defined and conv.behavior %}{% if conv.domain %} • {% endif %}{{ conv.behavior }}{% endif %}
+        {% if conv.scenario is defined and conv.scenario %}{% if conv.domain or conv.behavior %} • {% endif %}{{ conv.scenario }}{% endif %}
+        {% if conv.conversation_slug is defined and conv.conversation_slug %}{% if conv.domain or conv.behavior or conv.scenario %} • {% endif %}<span class="muted">{{ conv.conversation_slug }}</span>{% endif %}
       </div>
-      <div class="muted">Weighted pass rate: {{ '%.2f'|format(conv.summary.weighted_pass_rate or 0) }}</div>
-      {% if conv.summary.high_severity_violation is defined and conv.summary.high_severity_violation %}
+      {% set wpr = (conv.summary.weighted_pass_rate if conv.summary is defined and conv.summary.weighted_pass_rate is defined else 0) %}
+      <div class="muted">Weighted pass rate: {{ '%.2f'|format(wpr) }}</div>
+      {% if conv.summary is defined and conv.summary.high_severity_violation is defined and conv.summary.high_severity_violation %}
       <div class="muted"><strong>High-severity violations</strong>: {{ (conv.summary.severity_reasons or [])|join('; ') }}</div>
       {% endif %}
-      {% if conv.conversation_description %}
+      {% if conv.conversation_description is defined and conv.conversation_description %}
       <div class="muted">{{ conv.conversation_description }}</div>
       {% endif %}
       <div class="muted">
         <strong>Failed turns:</strong> 
         {% set has_failures = namespace(value=false) %}
-        {% for t in conv.turns %}{% if t.turn_pass is defined and not t.turn_pass %}{% set has_failures.value = true %}{% endif %}{% endfor %}
+        {% set cturns = conv.turns if conv.turns is defined and conv.turns else [] %}
+        {% for t in cturns %}{% if t.turn_pass is defined and not t.turn_pass %}{% set has_failures.value = true %}{% endif %}{% endfor %}
         {% if has_failures.value %}
-          {% for t in conv.turns %}
+          {% for t in cturns %}
             {% if t.turn_pass is defined and not t.turn_pass %}{{ t.turn_index }}{% if not loop.last %}, {% endif %}{% endif %}
           {% endfor %}
         {% else %}
           <span style="color: #059669;">None</span>
         {% endif %}
-        {% if conv.summary.failed_metrics %}
+        {% if conv.summary is defined and conv.summary.failed_metrics %}
           · Failed metrics: {{ (conv.summary.failed_metrics or [])|join(', ') }}
         {% endif %}
       </div>
     </div>
 
     <h4>Turns</h4>
-    <table>
-      <thead><tr><th>Turn</th><th>User prompt</th><th>Assistant output</th><th>Pass</th></tr></thead>
-      <tbody>
-      {% for t in conv.turns %}
-        <tr>
-          <td>{{ (t.turn_index or 0) + 1 }}</td>
-          <td>
-            <div class="prompt-text">{{ t.user_prompt_full or t.user_prompt_snippet or '' }}</div>
-          </td>
-          <td>
-            {% set a_full = t.assistant_output_full or t.assistant_output_snippet or '' %}
-            {% if a_full %}
-              <div class="output-text">{{ a_full }}</div>
-            {% else %}
-              <div class="muted">
-                No assistant output captured.
-                {% if t.assistant_ok is defined and not t.assistant_ok %}
-                  <div class="metric-failure"><span class="metric-name">Provider error:</span> <span class="reason-text">{{ t.assistant_error or 'Unknown error' }}</span></div>
-                {% endif %}
-              </div>
-            {% endif %}
-          </td>
-          <td class="{{ 'pass' if t.turn_pass is not defined or t.turn_pass else 'fail' }}">{{ 'True' if t.turn_pass is not defined or t.turn_pass else 'False' }}</td>
-        </tr>
+    <div class="turns">
+      {% for t in cturns %}
+        <div class="turn">
+          <div class="turn-head">
+            <div><strong>Turn {{ (t.turn_index or 0) + 1 }}</strong></div>
+            <div class="badge {{ 'badge-pass' if t.turn_pass is not defined or t.turn_pass else 'badge-fail' }}">
+              {% if t.turn_pass is not defined or t.turn_pass %}
+                <svg class="icon" style="color: var(--pass)"><use href="#ic-check"/></svg>
+                PASS
+              {% else %}
+                <svg class="icon" style="color: var(--fail)"><use href="#ic-x"/></svg>
+                FAIL
+              {% endif %}
+            </div>
+          </div>
+          <div class="turn-grid">
+            <div>
+              <div class="muted turn-label">User Prompt</div>
+              <div class="prompt-text">{{ t.user_prompt_full or t.user_prompt_snippet or '' }}</div>
+            </div>
+            <div>
+              <div class="muted turn-label">Assistant Output</div>
+              {% set a_full = t.assistant_output_full or t.assistant_output_snippet or '' %}
+              {% if a_full %}
+                <div class="output-text">{{ a_full }}</div>
+              {% else %}
+                <div class="muted">
+                  No assistant output captured.
+                  {% if t.assistant_ok is defined and not t.assistant_ok %}
+                    <div class="metric-failure"><span class="metric-name">Provider error:</span> <span class="reason-text">{{ t.assistant_error or 'Unknown error' }}</span></div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
       {% endfor %}
-      </tbody>
-    </table>
+    </div>
 
+    {# Per-conversation anchors to land directly on the metrics table for each metric #}
+    <a id="metric-exact-{{ conv_anchor }}"></a>
+    <a id="metric-semantic-{{ conv_anchor }}"></a>
+    <a id="metric-consistency-{{ conv_anchor }}"></a>
+    <a id="metric-adherence-{{ conv_anchor }}"></a>
+    <a id="metric-hallucination-{{ conv_anchor }}"></a>
     <h4>Per-turn Metrics</h4>
     <table>
       <thead><tr><th>Turn</th><th>Exact</th><th>Semantic</th><th>Consistency</th><th>Adherence</th><th>Hallucination (risk↓)</th></tr></thead>
       <tbody>
-      {% for t in conv.turns %}
+      {% for t in cturns %}
         <tr>
           <td>{{ (t.turn_index or 0) + 1 }}</td>
           {% set ex = t.metrics.exact if t.metrics is defined and t.metrics.exact is defined else none %}
@@ -318,10 +605,12 @@
     {% if outcome %}
       <p class="{{ 'pass' if outcome.pass else 'fail' }}">{{ 'PASS' if outcome.pass else 'FAIL' }} — {{ outcome.reasons|join('; ') }}</p>
     {% else %}
-      <p class="{{ 'pass' if conv.summary.conversation_pass else 'fail' }}">{{ 'PASS' if conv.summary.conversation_pass else 'FAIL' }}
-      {% if conv.summary.failed_metrics %} — Failed metrics: {{ (conv.summary.failed_metrics or [])|join(', ') }}{% endif %}
+      {% set conv_pass = conv.summary.conversation_pass if conv.summary is defined and conv.summary.conversation_pass is defined else True %}
+      <p class="{{ 'pass' if conv_pass else 'fail' }}">{{ 'PASS' if conv_pass else 'FAIL' }}
+      {% if conv.summary is defined and conv.summary.failed_metrics %} — Failed metrics: {{ (conv.summary.failed_metrics or [])|join(', ') }}{% endif %}
       </p>
     {% endif %}
+    <div class="back-to-top"><a href="#top">Back to top ↑</a></div>
   </div>
   {% endfor %}
 </body>

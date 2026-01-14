@@ -1,0 +1,15 @@
+{
+  "run_id": "sample",
+  "dataset_id": "demo",
+  "model_spec": "openai:gpt-5",
+  "conversations": [
+    {
+      "conversation_id": "c1",
+      "conversation_title": "Demo",
+      "summary": {"conversation_pass": true, "weighted_pass_rate": 1.0},
+      "turns": [
+        {"turn_index": 0, "turn_pass": true, "user_prompt_snippet": "Hi", "assistant_output_snippet": "Hello", "metrics": {"exact": {"pass": true}}}
+      ]
+    }
+  ]
+}

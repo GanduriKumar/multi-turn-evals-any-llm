@@ -25,6 +25,15 @@ Where files go
 - runs/<vertical>/ — results.json, results.csv, report.html
 - datasets/<vertical>/ — your datasets and goldens
 
+HTML report (single-run)
+- Self-contained HTML/CSS (no external assets)
+- Overview KPIs and CSS donut charts
+- Failures by Metric summary with links/anchors
+- Table of Contents with anchors and back-to-top
+- Side-by-side turns (user vs assistant)
+- Inline SVG icons for PASS/FAIL
+- Print/PDF styles with page-break per conversation
+
 Tip
 - Restart the server after changing .env in development.
 
