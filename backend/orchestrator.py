@@ -669,7 +669,7 @@ class Orchestrator:
                         user_text = ""
                     def _snippet(t: str, n: int = 160) -> str:
                         t = (t or "").strip().replace("\n", " ")
-                        return t if len(t) <= n else (t[: n - 1] + "…")
+                        return t if len(t) <= n else (t[: n - 1] + "...")
                     mets: Dict[str, Any] = {}
                     # exact (if selected and golden exists)
                     exp_variants = []

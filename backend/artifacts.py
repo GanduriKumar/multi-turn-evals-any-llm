@@ -103,6 +103,16 @@ class RunArtifactWriter:
           ]
         }
         """
+        def sanitize_snippet(text: Optional[str]) -> Optional[str]:
+            """Remove special characters and collapse whitespace in snippets for CSV."""
+            if not text:
+                return text
+            # Replace special Unicode characters with ASCII equivalents
+            text = text.replace("…", "...").replace("—", "-").replace("–", "-")
+            # Collapse multiple spaces and replace newlines with single space
+            text = " ".join(text.split())
+            return text
+        
         path = self.layout.results_csv_path(run_id)
         with path.open("w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
@@ -167,8 +177,8 @@ class RunArtifactWriter:
                 for t in conv.get("turns", []) or []:
                     idx = t.get("turn_index")
                     turn_key = f"{slug}#{idx}" if slug is not None else f"{cid}#{idx}"
-                    user_snip = t.get("user_prompt_snippet")
-                    asst_snip = t.get("assistant_output_snippet")
+                    user_snip = sanitize_snippet(t.get("user_prompt_snippet"))
+                    asst_snip = sanitize_snippet(t.get("assistant_output_snippet"))
                     mets = t.get("metrics", {})
                     ex = mets.get("exact") or {}
                     se = mets.get("semantic") or {}
