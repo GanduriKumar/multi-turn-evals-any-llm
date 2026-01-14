@@ -5,6 +5,7 @@ import Badge from '../components/Badge'
 import { Select, Input, Textarea } from '../components/Form'
 import { useVertical } from '../context/VerticalContext'
 import CircularProgress from '../components/CircularProgress'
+import ChatMessage from '../components/ChatMessage'
 
 type RunListItem = {
   run_id: string
@@ -880,10 +881,7 @@ export default function ReportsPage() {
             ) : (
               <div className="space-y-2">
                 {rcHistory.map((m,i) => (
-                  <div key={i} className={`p-2 rounded ${m.role === 'user' ? 'bg-base-100' : 'bg-base-300'}`}>
-                    <div className="text-base font-semibold opacity-70">{m.role}</div>
-                    <div className="text-sm whitespace-pre-wrap break-words">{m.content}</div>
-                  </div>
+                  <ChatMessage key={i} content={m.content} role={m.role} />
                 ))}
               </div>
             )}

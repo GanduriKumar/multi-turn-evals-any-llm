@@ -4,6 +4,7 @@ import Button from '../components/Button'
 import Badge from '../components/Badge'
 import { Input, Select, Checkbox } from '../components/Form'
 import { useVertical } from '../context/VerticalContext'
+import ChatMessage from '../components/ChatMessage'
 
 type DatasetItem = {
   dataset_id: string
@@ -466,10 +467,7 @@ export default function DatasetsPage() {
               ) : (
                 <div className="space-y-2">
                   {chatHistory.map((m,i) => (
-                    <div key={i} className={`p-2 rounded ${m.role === 'user' ? 'bg-base-100' : 'bg-base-300'}`}>
-                      <div className="text-base font-semibold opacity-70">{m.role}</div>
-                      <div className="text-sm whitespace-pre-wrap break-words">{m.content}</div>
-                    </div>
+                    <ChatMessage key={i} content={m.content} role={m.role} />
                   ))}
                 </div>
               )}

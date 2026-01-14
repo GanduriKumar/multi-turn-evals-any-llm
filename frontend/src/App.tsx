@@ -38,10 +38,6 @@ function Layout({ children }: { children: React.ReactNode }) {
           <Link to="/" className="flex items-center gap-2">
             <div className="flex flex-col leading-tight">
               <span className="font-extrabold text-4xl text-orange-600">LLM Evals</span>
-              <span className="flex items-baseline gap-1 tracking-wide">
-                <span className="text-2xl text-orange-600 font-semibold">SatyaPramana</span>
-                <sup className="text-xs text-orange-600 align-top" aria-hidden="true">{'\u2122'}</sup>
-              </span>
             </div>
           </Link>
           <nav className="flex items-center gap-4 text-sm">
