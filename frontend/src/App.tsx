@@ -48,7 +48,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                 { to: '/coverage', label: 'Dataset Generator', color: 'warning' },
                 { to: '/datasets', label: 'Datasets Viewer', color: 'success' },
                 { to: '/metrics', label: 'Metrics', color: 'primary' },
-                { to: '/settings', label: 'LLM Settings', color: 'danger' },
+                { to: '/settings', label: 'Provider Settings', color: 'danger' },
                 { to: '/runs', label: 'Runs', color: 'primary' },
                 { to: '/reports', label: 'Reports', color: 'warning' },
                 // Golden Generator deprecated/hidden per scope

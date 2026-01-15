@@ -438,6 +438,7 @@ export default function RunsPage() {
           <div className="text-sm text-danger">{error}</div>
         ) : (
           <div className="space-y-4 text-sm">
+            {/* Removed provider banner; provider status now shown in separate card */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="col-span-full">
                 <label className="block text-sm font-medium mb-1">Dataset</label>
@@ -481,78 +482,97 @@ export default function RunsPage() {
       </Card>
 
       {startRes && (
-        <Card title="Run Status">
-          <div className="text-sm space-y-2">
-            <div>Job: <span className="font-mono">{startRes.job_id}</span></div>
-            <div>Run: <span className="font-mono">{startRes.run_id}</span></div>
-            <div className="flex items-center gap-2">
-              <span>State:</span>
-              <span className="font-medium">
-                {(() => {
-                  const s = status?.state || startRes.state
-                  if (s === 'succeeded') return <Badge variant="success">succeeded</Badge>
-                  if (s === 'failed' || s === 'cancelled') return <Badge variant="danger">{s}</Badge>
-                  return <Badge variant="warning">{s}</Badge>
-                })()}
-              </span>
-            </div>
-            {status && (
-              <div className="flex items-center gap-8 flex-wrap">
-                {(() => {
-                  const rawPct = typeof status.progress_pct === 'number' && isFinite(status.progress_pct) ? status.progress_pct : 0
-                  const pct = Math.max(0, Math.min(100, Math.round(rawPct)))
-                  return (
-                    <>
-                      <div className="flex flex-col items-center gap-3">
-                        {(() => {
-                          const progressVariant: 'primary' | 'success' | 'warning' | 'danger' =
-                            status.state === 'succeeded'
-                              ? 'success'
-                              : (status.state === 'failed' || status.state === 'cancelled')
-                              ? 'danger'
-                              : 'warning'
-                          return (
-                            <CircularProgress value={pct} size={224} strokeWidth={12} bezel variant={progressVariant} />
-                          )
-                        })()}
-                        {status.state !== 'succeeded' && status.state !== 'failed' && status.state !== 'cancelled' && (
-                          <div className="flex gap-2">
-                            {status.state !== 'paused' ? (
-                              <Button onClick={() => control('pause')}>Pause</Button>
-                            ) : (
-                              <Button variant="success" onClick={() => control('resume')}>Resume</Button>
-                            )}
-                            <Button variant="danger" onClick={async () => { await control('cancel'); await refreshRuns() }}>Abort</Button>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Card title="Run Status">
+            <div className="text-sm space-y-2">
+              <div>Job: <span className="font-mono">{startRes.job_id}</span></div>
+              <div>Run: <span className="font-mono">{startRes.run_id}</span></div>
+              <div className="flex items-center gap-2">
+                <span>State:</span>
+                <span className="font-medium">
+                  {(() => {
+                    const s = status?.state || startRes.state
+                    if (s === 'succeeded') return <Badge variant="success">succeeded</Badge>
+                    if (s === 'failed' || s === 'cancelled') return <Badge variant="danger">{s}</Badge>
+                    return <Badge variant="warning">{s}</Badge>
+                  })()}
+                </span>
+              </div>
+              {status && (
+                <div className="flex items-center gap-8 flex-wrap">
+                  {(() => {
+                    const rawPct = typeof status.progress_pct === 'number' && isFinite(status.progress_pct) ? status.progress_pct : 0
+                    const pct = Math.max(0, Math.min(100, Math.round(rawPct)))
+                    return (
+                      <>
+                        <div className="flex flex-col items-center gap-3">
+                          {(() => {
+                            const progressVariant: 'primary' | 'success' | 'warning' | 'danger' =
+                              status.state === 'succeeded'
+                                ? 'success'
+                                : (status.state === 'failed' || status.state === 'cancelled')
+                                ? 'danger'
+                                : 'warning'
+                            return (
+                              <CircularProgress value={pct} size={224} strokeWidth={12} bezel variant={progressVariant} />
+                            )
+                          })()}
+                          {status.state !== 'succeeded' && status.state !== 'failed' && status.state !== 'cancelled' && (
+                            <div className="flex gap-2">
+                              {status.state !== 'paused' ? (
+                                <Button onClick={() => control('pause')}>Pause</Button>
+                              ) : (
+                                <Button variant="success" onClick={() => control('resume')}>Resume</Button>
+                              )}
+                              <Button variant="danger" onClick={async () => { await control('cancel'); await refreshRuns() }}>Abort</Button>
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-700 min-w-[220px]">
+                          <div>{status.completed_conversations} / {status.total_conversations}</div>
+                          <div className="text-gray-500">{pct}% complete</div>
+                        </div>
+                        {typeof status.current_conv_total_turns === 'number' && status.current_conv_total_turns > 0 && (
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="text-sm font-medium">Turn progress (conversation {status.current_conv_idx})</div>
+                            <div className="w-64 bg-gray-200 rounded-full h-3 overflow-hidden">
+                              {(() => {
+                                const t = Math.max(0, Math.min(status.current_conv_total_turns || 0, status.current_conv_completed_turns || 0))
+                                const pctTurns = Math.max(0, Math.min(100, Math.round(100 * t / Math.max(1, status.current_conv_total_turns || 0))))
+                                const allTurnsDone = typeof status.total_turns === 'number' && typeof status.completed_turns === 'number' && status.total_turns > 0 && status.completed_turns >= status.total_turns
+                                const barClass = allTurnsDone ? 'bg-success' : 'bg-primary'
+                                return <div className={`h-3 ${barClass}`} style={{ width: `${pctTurns}%` }} />
+                              })()}
+                            </div>
+                            <div className="text-xs text-gray-600">{status.current_conv_completed_turns || 0} / {status.current_conv_total_turns}</div>
                           </div>
                         )}
-                      </div>
-                      <div className="text-sm text-gray-700 min-w-[220px]">
-                        <div>{status.completed_conversations} / {status.total_conversations}</div>
-                        <div className="text-gray-500">{pct}% complete</div>
-                        {status.error && <div className="text-danger">{status.error}</div>}
-                      </div>
-                      {typeof status.current_conv_total_turns === 'number' && status.current_conv_total_turns > 0 && (
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="text-sm font-medium">Turn progress (conversation {status.current_conv_idx})</div>
-                          <div className="w-64 bg-gray-200 rounded-full h-3 overflow-hidden">
-                            {(() => {
-                              const t = Math.max(0, Math.min(status.current_conv_total_turns || 0, status.current_conv_completed_turns || 0))
-                              const pctTurns = Math.max(0, Math.min(100, Math.round(100 * t / Math.max(1, status.current_conv_total_turns || 0))))
-                              const allTurnsDone = typeof status.total_turns === 'number' && typeof status.completed_turns === 'number' && status.total_turns > 0 && status.completed_turns >= status.total_turns
-                              const barClass = allTurnsDone ? 'bg-success' : 'bg-primary'
-                              return <div className={`h-3 ${barClass}`} style={{ width: `${pctTurns}%` }} />
-                            })()}
-                          </div>
-                          <div className="text-xs text-gray-600">{status.current_conv_completed_turns || 0} / {status.current_conv_total_turns}</div>
-                        </div>
-                      )}
-                    </>
-                  )
-                })()}
-              </div>
-            )}
-          </div>
-        </Card>
+                      </>
+                    )
+                  })()}
+                </div>
+              )}
+            </div>
+          </Card>
+          <Card title="Provider Status">
+            <div className="text-sm">
+              {status ? (
+                status.error ? (
+                  <div>
+                    <div className="text-danger font-medium">Provider error</div>
+                    <div className="font-mono text-xs mt-1">
+                      {String(status.error).length > 200 ? String(status.error).slice(0, 200) + '…' : String(status.error)}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-success">Calls to the provider successful</div>
+                )
+              ) : (
+                <div className="text-gray-500">Waiting for status…</div>
+              )}
+            </div>
+          </Card>
+        </div>
       )}
 
       {/* Recent runs (lets user reselect or view status when returning) */}

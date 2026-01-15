@@ -78,7 +78,7 @@ export default function SettingsPage() {
       const r = await fetch('/settings', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ollama_host: ollama, google_api_key: apiKeyGemini || undefined, openai_api_key: apiKeyOpenAI || undefined, semantic_threshold: semThr, hallucination_threshold: hallThr, ollama_model: modelOllama, gemini_model: modelGemini, openai_model: modelOpenAI, embed_model: embedModel }) })
       const js = await r.json()
       if (!r.ok) throw new Error(js?.detail || 'Save failed')
-      // Keep metrics-config thresholds in sync with LLM Settings values
+      // Keep metrics-config thresholds in sync with Provider Settings values
       try {
         const mr = await fetch('/metrics-config')
         if (mr.ok) {
@@ -95,7 +95,7 @@ export default function SettingsPage() {
           }
         }
       } catch {}
-      setMsg('Saved. Restart backend to apply to providers.')
+      setMsg('Saved.')
       await load()
     } catch (e:any) {
       setErr(e.message || 'Save failed')

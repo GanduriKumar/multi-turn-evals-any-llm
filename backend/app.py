@@ -1140,6 +1140,21 @@ async def update_settings_api(body: SettingsBody):
         os.environ['INDUSTRY_VERTICAL'] = env['INDUSTRY_VERTICAL']
         # Pre-create vertical context so subsequent calls use the updated selection
         _get_or_create_vertical_context(env['INDUSTRY_VERTICAL'])
+    # Hot‑reload provider registry so new keys/hosts/models take effect without restart
+    try:
+        reg = ProviderRegistry()
+        app.state.providers = reg
+        # Also update TurnRunner providers for all existing orchestrators
+        for ctx in app.state.vctx.values():
+            try:
+                ctx_orch = ctx.get('orch')
+                if ctx_orch is not None and hasattr(ctx_orch, "_runner"):
+                    ctx_orch._runner.providers = reg
+            except Exception:
+                pass
+    except Exception:
+        # non-fatal; settings file/env still updated
+        pass
     return {"ok": True}
 
 

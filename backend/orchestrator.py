@@ -452,7 +452,7 @@ class Orchestrator:
                             params_override = (jr.config.get("context") or {}).get("params")
                         except Exception:
                             params_override = None
-                        await self._runner.run_turn(
+                        rec = await self._runner.run_turn(
                             run_id=jr.run_id,
                             provider=provider,
                             model=model,
@@ -463,6 +463,20 @@ class Orchestrator:
                             conv_meta=conv_meta,
                             params_override=params_override,
                         )
+                        # Surface provider errors as a job-level warning for frontend display
+                        try:
+                            resp_ok = bool(((rec.get("response", {}) or {}).get("ok")))
+                            if not resp_ok:
+                                err_txt = (rec.get("response", {}) or {}).get("error")
+                                if err_txt:
+                                    # Truncate to a reasonable summary length
+                                    jr.error = f"{provider}:{model} — {str(err_txt)[:280]}"
+                            else:
+                                # Clear transient provider error on success
+                                if getattr(jr, "error", None):
+                                    jr.error = None
+                        except Exception:
+                            pass
                         # update turn-level progress
                         try:
                             jr.completed_turns += 1
@@ -483,7 +497,7 @@ class Orchestrator:
                                 "current_conv_idx": jr.current_conv_idx,
                                 "current_conv_total_turns": jr.current_conv_total_turns,
                                 "current_conv_completed_turns": jr.current_conv_completed_turns,
-                                "error": None,
+                                "error": jr.error,
                                 "boot_id": self.boot_id,
                             })
                         except Exception:
@@ -671,6 +685,9 @@ class Orchestrator:
                         t = (t or "").strip().replace("\n", " ")
                         return t if len(t) <= n else (t[: n - 1] + "...")
                     mets: Dict[str, Any] = {}
+                    # If provider failed, record a provider metric that forces failure
+                    if not resp_ok:
+                        mets["provider"] = {"metric": "provider", "pass": False, "error": resp_err or "provider error"}
                     # exact (if selected and golden exists)
                     exp_variants = []
                     if golden_entry:
@@ -717,6 +734,9 @@ class Orchestrator:
                         pass_vals = [bool(v.get("pass")) for v in considered]
                         turn_pass = all(pass_vals) if pass_vals else True
                     except Exception:
+                        turn_pass = False
+                    # Provider error always forces turn failure
+                    if not resp_ok:
                         turn_pass = False
                     per_turn.append({
                         "turn_index": uidx,
