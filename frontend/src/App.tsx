@@ -15,7 +15,7 @@ import Button from './components/Button'
 function VerticalSelector() {
   const { vertical, supported, setVertical, loading } = useVertical()
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <span className="rounded-md px-2 py-1 font-medium bg-primary text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 text-sm">Vertical</span>
       <select
         className="border rounded px-2 py-1 text-sm"
@@ -34,13 +34,13 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-full">
       <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-gray-200">
-        <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
+        <div className="mx-auto max-w-6xl px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2">
           <Link to="/" className="flex items-center gap-2">
             <div className="flex flex-col leading-tight">
-              <span className="font-extrabold text-4xl text-orange-600">LLM Evals</span>
+              <span className="font-extrabold text-2xl sm:text-3xl md:text-4xl text-orange-600">LLM Evals</span>
             </div>
           </Link>
-          <nav className="flex items-center gap-4 text-sm">
+          <nav className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
             {(() => {
               type Color = 'primary' | 'success' | 'warning' | 'danger'
               const links: Array<{to: string, label: string, color: Color}> = [
@@ -76,7 +76,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           <VerticalSelector />
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6">
         {children}
       </main>
     </div>
@@ -131,7 +131,7 @@ function HomeCards() {
   }, [vertical])
 
   return (
-    <div className="grid grid-cols-2 gap-4 items-start">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
       <div className="w-full">
         <Card title="Quick Start" className="h-full" borderless>
           <div className="text-base text-gray-800 space-y-3">

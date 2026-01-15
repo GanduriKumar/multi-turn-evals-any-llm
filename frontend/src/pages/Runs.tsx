@@ -79,6 +79,8 @@ export default function RunsPage() {
   const [recentRuns, setRecentRuns] = useState<RunListItem[]>([])
   const [regenLoading, setRegenLoading] = useState(false)
   const [regenMsg, setRegenMsg] = useState<string | null>(null)
+  // Avoid persisting defaults before initial prefs/data load completes
+  const [prefsHydrated, setPrefsHydrated] = useState(false)
 
   // Local persistence helpers (per-vertical)
   type Prefs = {
@@ -243,6 +245,8 @@ export default function RunsPage() {
         setError(e.message || 'Failed to load')
       } finally {
         setLoading(false)
+        // Mark that initial load has completed so subsequent changes can be persisted safely
+        setPrefsHydrated(true)
       }
     }
     load()
@@ -251,13 +255,14 @@ export default function RunsPage() {
 
   // Persist preferences whenever they change
   useEffect(() => {
+    if (!prefsHydrated) return
     savePrefs({
       modelSpec,
       semanticThreshold,
       hallucinationThreshold,
       datasetId,
     })
-  }, [modelSpec, semanticThreshold, hallucinationThreshold, datasetId])
+  }, [prefsHydrated, modelSpec, semanticThreshold, hallucinationThreshold, datasetId])
 
   const availableModels = useMemo(() => {
     const arr: { id: string; label: string }[] = []
@@ -439,7 +444,7 @@ export default function RunsPage() {
         ) : (
           <div className="space-y-4 text-sm">
             {/* Removed provider banner; provider status now shown in separate card */}
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="col-span-full">
                 <label className="block text-sm font-medium mb-1">Dataset</label>
                 <Select className="w-full" value={datasetId} onChange={e => setDatasetId(e.target.value)}>
@@ -466,7 +471,7 @@ export default function RunsPage() {
 
             {/* Regenerate (optimized) action removed per scope */}
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3 sm:gap-4">
               <label className="inline-flex items-center gap-2"><Checkbox checked={metricExact} onChange={e => setMetricExact((e.target as HTMLInputElement).checked)} /> exact</label>
               <label className="inline-flex items-center gap-2"><Checkbox checked={metricSemantic} onChange={e => setMetricSemantic((e.target as HTMLInputElement).checked)} /> semantic</label>
               <label className="inline-flex items-center gap-2"><Checkbox checked={metricConsistency} onChange={e => setMetricConsistency((e.target as HTMLInputElement).checked)} /> consistency</label>

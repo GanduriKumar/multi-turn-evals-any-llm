@@ -857,7 +857,7 @@ export default function ReportsPage() {
       {rcOpen && (
         <Card title="Chat with report">
           <div className="text-xs mb-2">Run: <span className="font-mono">{runId}</span></div>
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
             <select className="select select-bordered select-sm" value={rcModel} onChange={e => setRcModel(e.target.value)}>
               {rcModels.map(m => <option key={m} value={m}>{m}</option>)}
             </select>

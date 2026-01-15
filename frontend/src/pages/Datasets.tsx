@@ -442,7 +442,7 @@ export default function DatasetsPage() {
       {chatOpen && (
         <Card title="Chat with dataset">
           <div className="text-xs mb-2">Dataset: <span className="font-mono">{chatDataset}</span></div>
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
             <select className="select select-bordered select-sm" value={chatModel} onChange={e => setChatModel(e.target.value)}>
               {chatModels.map(m => <option key={m} value={m}>{m}</option>)}
             </select>

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const baseField = 'border rounded px-2 py-1 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/40 focus:border-primary'
+const baseField = 'border rounded px-2 py-1 text-sm w-full sm:w-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/40 focus:border-primary'
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   const { className = '', ...rest } = props

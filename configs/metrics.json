@@ -9,7 +9,7 @@
       "name": "semantic_similarity",
       "enabled": true,
       "weight": 0.8,
-      "threshold": 0.8
+      "threshold": 0.9
     },
     {
       "name": "consistency",
