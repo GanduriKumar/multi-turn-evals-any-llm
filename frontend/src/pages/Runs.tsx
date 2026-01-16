@@ -495,72 +495,65 @@ export default function RunsPage() {
               <div className="flex items-center gap-2">
                 <span>State:</span>
                 <span className="font-medium">
-                  {(() => {
-                    const s = status?.state || startRes.state
-                    if (s === 'succeeded') return <Badge variant="success">succeeded</Badge>
-                    if (s === 'failed' || s === 'cancelled') return <Badge variant="danger">{s}</Badge>
-                    return <Badge variant="warning">{s}</Badge>
-                  })()}
+                  {status?.state === 'succeeded' ? (
+                    <Badge variant="success">succeeded</Badge>
+                  ) : (status?.state === 'failed' || status?.state === 'cancelled') ? (
+                    <Badge variant="danger">{status.state}</Badge>
+                  ) : (
+                    <Badge variant="warning">{status?.state || startRes.state}</Badge>
+                  )}
                 </span>
               </div>
-              {status && (
-                <div className="flex items-center gap-8 flex-wrap">
-                  {(() => {
-                    const rawPct = typeof status.progress_pct === 'number' && isFinite(status.progress_pct) ? status.progress_pct : 0
-                    const pct = Math.max(0, Math.min(100, Math.round(rawPct)))
-                    return (
-                      <>
-                        <div className="flex flex-col items-center gap-3">
-                          {(() => {
-                            const progressVariant: 'primary' | 'success' | 'warning' | 'danger' =
-                              status.state === 'succeeded'
-                                ? 'success'
-                                : (status.state === 'failed' || status.state === 'cancelled')
-                                ? 'danger'
-                                : 'warning'
-                            return (
-                              <CircularProgress value={pct} size={224} strokeWidth={12} bezel variant={progressVariant} />
-                            )
-                          })()}
-                          {status.state !== 'succeeded' && status.state !== 'failed' && status.state !== 'cancelled' && (
-                            <div className="flex gap-2">
-                              {status.state !== 'paused' ? (
-                                <Button onClick={() => control('pause')}>Pause</Button>
-                              ) : (
-                                <Button variant="success" onClick={() => control('resume')}>Resume</Button>
-                              )}
-                              <Button variant="danger" onClick={async () => { await control('cancel'); await refreshRuns() }}>Abort</Button>
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-700 min-w-[220px]">
-                          <div>{status.completed_conversations} / {status.total_conversations}</div>
-                          <div className="text-gray-500">{pct}% complete</div>
-                        </div>
-                        {typeof status.current_conv_total_turns === 'number' && status.current_conv_total_turns > 0 && (
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="text-sm font-medium">Turn progress (conversation {status.current_conv_idx})</div>
-                            <div className="w-64 bg-gray-200 rounded-full h-3 overflow-hidden">
-                              {(() => {
-                                const t = Math.max(0, Math.min(status.current_conv_total_turns || 0, status.current_conv_completed_turns || 0))
-                                const pctTurns = Math.max(0, Math.min(100, Math.round(100 * t / Math.max(1, status.current_conv_total_turns || 0))))
-                                const allTurnsDone = typeof status.total_turns === 'number' && typeof status.completed_turns === 'number' && status.total_turns > 0 && status.completed_turns >= status.total_turns
-                                const barClass = allTurnsDone ? 'bg-success' : 'bg-primary'
-                                return <div className={`h-3 ${barClass}`} style={{ width: `${pctTurns}%` }} />
-                              })()}
-                            </div>
-                            <div className="text-xs text-gray-600">{status.current_conv_completed_turns || 0} / {status.current_conv_total_turns}</div>
-                          </div>
-                        )}
-                      </>
-                    )
-                  })()}
+              <div className="flex items-center gap-8 flex-wrap">
+                <div className="flex flex-col items-center gap-3">
+                  <CircularProgress 
+                    value={Math.max(0, Math.min(100, Math.round(typeof status?.progress_pct === 'number' && isFinite(status.progress_pct) ? status.progress_pct : 0)))} 
+                    size={224} 
+                    strokeWidth={12} 
+                    bezel 
+                    variant={
+                      status?.state === 'succeeded'
+                        ? 'success'
+                        : (status?.state === 'failed' || status?.state === 'cancelled')
+                        ? 'danger'
+                        : 'warning'
+                    } 
+                  />
+                  {status && status.state !== 'succeeded' && status.state !== 'failed' && status.state !== 'cancelled' && (
+                    <div className="flex gap-2">
+                      {status.state !== 'paused' ? (
+                        <Button onClick={() => control('pause')}>Pause</Button>
+                      ) : (
+                        <Button variant="success" onClick={() => control('resume')}>Resume</Button>
+                      )}
+                      <Button variant="danger" onClick={async () => { await control('cancel'); await refreshRuns() }}>Abort</Button>
+                    </div>
+                  )}
                 </div>
-              )}
+                <div className="text-sm text-gray-700 min-w-[220px]">
+                  <div>{status?.completed_conversations || 0} / {status?.total_conversations || 0}</div>
+                  <div className="text-gray-500">{Math.max(0, Math.min(100, Math.round(typeof status?.progress_pct === 'number' && isFinite(status.progress_pct) ? status.progress_pct : 0)))}% complete</div>
+                </div>
+                {status && typeof status.current_conv_total_turns === 'number' && status.current_conv_total_turns > 0 && (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="text-sm font-medium">Turn progress (conversation {status.current_conv_idx})</div>
+                    <div className="w-64 bg-gray-200 rounded-full h-3 overflow-hidden">
+                      <div 
+                        className={`h-3 ${typeof status.total_turns === 'number' && typeof status.completed_turns === 'number' && status.total_turns > 0 && status.completed_turns >= status.total_turns ? 'bg-success' : 'bg-primary'}`} 
+                        style={{ 
+                          width: `${Math.max(0, Math.min(100, Math.round(100 * Math.max(0, Math.min(status.current_conv_total_turns || 0, status.current_conv_completed_turns || 0)) / Math.max(1, status.current_conv_total_turns || 0))))}%`,
+                          transition: 'width 0.3s ease'
+                        }} 
+                      />
+                    </div>
+                    <div className="text-xs text-gray-600">{status.current_conv_completed_turns || 0} / {status.current_conv_total_turns}</div>
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
           <Card title="Provider Status">
-            <div className="text-sm">
+            <div className="text-sm space-y-3">
               {status ? (
                 status.error ? (
                   <div>
@@ -570,7 +563,19 @@ export default function RunsPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-success">Calls to the provider successful</div>
+                  <>
+                    <div className="text-success font-medium">Calls to the provider successful</div>
+                    <div className="border-t pt-2 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Input tokens consumed:</span>
+                        <span className="font-mono font-medium">{(status.input_tokens_total || 0).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Output tokens consumed:</span>
+                        <span className="font-mono font-medium">{(status.output_tokens_total || 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </>
                 )
               ) : (
                 <div className="text-gray-500">Waiting for status…</div>

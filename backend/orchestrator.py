@@ -112,6 +112,8 @@ class Orchestrator:
                 "completed_conversations": jr.completed_conversations,
                 "total_turns": jr.total_turns,
                 "completed_turns": jr.completed_turns,
+                "input_tokens_total": jr.input_tokens_total,
+                "output_tokens_total": jr.output_tokens_total,
                 "error": None,
                 "boot_id": self.boot_id,
             })
@@ -209,6 +211,8 @@ class Orchestrator:
                     "completed_conversations": jr.completed_conversations,
                     "total_turns": jr.total_turns,
                     "completed_turns": jr.completed_turns,
+                    "input_tokens_total": jr.input_tokens_total,
+                    "output_tokens_total": jr.output_tokens_total,
                     "error": None,
                     "boot_id": self.boot_id,
                 })
@@ -362,6 +366,8 @@ class Orchestrator:
                         "current_conv_idx": jr.current_conv_idx,
                         "current_conv_total_turns": jr.current_conv_total_turns,
                         "current_conv_completed_turns": jr.current_conv_completed_turns,
+                        "input_tokens_total": jr.input_tokens_total,
+                        "output_tokens_total": jr.output_tokens_total,
                         "error": None,
                         "boot_id": self.boot_id,
                     })
@@ -463,6 +469,16 @@ class Orchestrator:
                             conv_meta=conv_meta,
                             params_override=params_override,
                         )
+                        # Extract and accumulate token usage from this turn
+                        try:
+                            usage = (rec.get("response", {}) or {}).get("usage")
+                            if usage:
+                                in_tok = usage.get("prompt_tokens") or usage.get("input_tokens") or 0
+                                out_tok = usage.get("completion_tokens") or usage.get("output_tokens") or 0
+                                jr.input_tokens_total += int(in_tok)
+                                jr.output_tokens_total += int(out_tok)
+                        except Exception:
+                            pass
                         # Surface provider errors as a job-level warning for frontend display
                         try:
                             resp_ok = bool(((rec.get("response", {}) or {}).get("ok")))
@@ -810,6 +826,8 @@ class Orchestrator:
                     "completed_conversations": jr.completed_conversations,
                     "total_turns": jr.total_turns,
                     "completed_turns": jr.completed_turns,
+                    "input_tokens_total": jr.input_tokens_total,
+                    "output_tokens_total": jr.output_tokens_total,
                     "error": None,
                     "boot_id": self.boot_id,
                 })
@@ -830,6 +848,8 @@ class Orchestrator:
                     "completed_conversations": jr.completed_conversations,
                     "total_turns": jr.total_turns,
                     "completed_turns": jr.completed_turns,
+                    "input_tokens_total": jr.input_tokens_total,
+                    "output_tokens_total": jr.output_tokens_total,
                     "error": "cancelled by user",
                     "boot_id": self.boot_id,
                 })
@@ -850,6 +870,8 @@ class Orchestrator:
                     "completed_conversations": jr.completed_conversations,
                     "total_turns": jr.total_turns,
                     "completed_turns": jr.completed_turns,
+                    "input_tokens_total": jr.input_tokens_total,
+                    "output_tokens_total": jr.output_tokens_total,
                     "error": jr.error,
                     "boot_id": self.boot_id,
                 })
