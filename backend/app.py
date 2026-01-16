@@ -1811,6 +1811,8 @@ async def run_status(job_id: str):
                 "current_conv_idx": getattr(jr, 'current_conv_idx', 0),
                 "current_conv_total_turns": getattr(jr, 'current_conv_total_turns', 0),
                 "current_conv_completed_turns": getattr(jr, 'current_conv_completed_turns', 0),
+                "input_tokens_total": getattr(jr, 'input_tokens_total', 0),
+                "output_tokens_total": getattr(jr, 'output_tokens_total', 0),
                 "error": jr.error,
             }
     # Try to recover from persisted job status if the process lost in-memory job across verticals
@@ -1833,6 +1835,8 @@ async def run_status(job_id: str):
                 obj.setdefault("current_conv_idx", 0)
                 obj.setdefault("current_conv_total_turns", 0)
                 obj.setdefault("current_conv_completed_turns", 0)
+                obj.setdefault("input_tokens_total", 0)
+                obj.setdefault("output_tokens_total", 0)
                 return obj
     raise HTTPException(status_code=404, detail="job not found")
     return {

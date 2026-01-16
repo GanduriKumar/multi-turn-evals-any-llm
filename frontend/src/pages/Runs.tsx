@@ -52,6 +52,8 @@ type JobStatus = {
   current_conv_idx?: number
   current_conv_total_turns?: number
   current_conv_completed_turns?: number
+  input_tokens_total?: number
+  output_tokens_total?: number
   error?: string | null
 }
 

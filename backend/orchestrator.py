@@ -60,6 +60,8 @@ class JobRecord:
     current_conv_idx: int = 0
     current_conv_total_turns: int = 0
     current_conv_completed_turns: int = 0
+    input_tokens_total: int = 0
+    output_tokens_total: int = 0
     error: Optional[str] = None
     _task: Optional[asyncio.Task] = None
     _cancel: bool = False
