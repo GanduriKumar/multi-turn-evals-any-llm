@@ -473,7 +473,8 @@ class Orchestrator:
                         )
                         # Extract and accumulate token usage from this turn
                         try:
-                            usage = (rec.get("response", {}) or {}).get("usage")
+                            provider_meta = (rec.get("response", {}) or {}).get("provider_meta", {})
+                            usage = provider_meta.get("usage") if isinstance(provider_meta, dict) else None
                             if usage:
                                 in_tok = usage.get("prompt_tokens") or usage.get("input_tokens") or 0
                                 out_tok = usage.get("completion_tokens") or usage.get("output_tokens") or 0

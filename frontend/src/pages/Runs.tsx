@@ -84,6 +84,21 @@ export default function RunsPage() {
   // Avoid persisting defaults before initial prefs/data load completes
   const [prefsHydrated, setPrefsHydrated] = useState(false)
 
+  const formatUsd = (value: number) => {
+    const v = typeof value === 'number' && isFinite(value) ? value : 0
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 4,
+      }).format(v)
+    } catch {
+      // Fallback (should be rare): still satisfies "$" prefix requirement
+      return `$${v.toFixed(4)}`
+    }
+  }
+
   // Local persistence helpers (per-vertical)
   type Prefs = {
     modelSpec?: string
@@ -570,11 +585,17 @@ export default function RunsPage() {
                     <div className="border-t pt-2 space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Input tokens consumed:</span>
-                        <span className="font-mono font-medium">{(status.input_tokens_total || 0).toLocaleString()}</span>
+                        <span className="font-mono font-medium">
+                          {(Number(status.input_tokens_total) || 0).toLocaleString()}{' '}
+                          <span className="text-gray-500">({formatUsd(((Number(status.input_tokens_total) || 0) / 1_000_000) * 1.75)})</span>
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Output tokens consumed:</span>
-                        <span className="font-mono font-medium">{(status.output_tokens_total || 0).toLocaleString()}</span>
+                        <span className="font-mono font-medium">
+                          {(Number(status.output_tokens_total) || 0).toLocaleString()}{' '}
+                          <span className="text-gray-500">({formatUsd(((Number(status.output_tokens_total) || 0) / 1_000_000) * 14)})</span>
+                        </span>
                       </div>
                     </div>
                   </>
