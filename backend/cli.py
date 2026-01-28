@@ -14,6 +14,7 @@ try:
         build_domain_combined_datasets_v2,
         build_global_combined_dataset_v2,
     )
+    from .export_prompts import export_prompts_to_csv
 except ImportError:
     from backend.orchestrator import Orchestrator
     from backend.schemas import SchemaValidator
@@ -23,6 +24,7 @@ except ImportError:
         build_domain_combined_datasets_v2,
         build_global_combined_dataset_v2,
     )
+    from backend.export_prompts import export_prompts_to_csv
 
 
 DEMO_DATASET = {
@@ -152,9 +154,33 @@ def cmd_run(root: Path, file: Path, no_semantic: bool = False) -> int:
     return 0
 
 
+def cmd_export_prompts_csv(root: Path, vertical: str, dataset_id: Optional[str] = None, output: Optional[str] = None) -> int:
+    """Export prompts and golden data to CSV."""
+    try:
+        csv_content = export_prompts_to_csv(vertical, dataset_id)
+        
+        # Determine output file path
+        if output:
+            out_path = Path(output)
+        else:
+            filename = f"prompts-export-{vertical}"
+            if dataset_id:
+                filename += f"-{dataset_id}"
+            filename += ".csv"
+            out_path = root / filename
+        
+        # Write to file
+        out_path.write_text(csv_content, encoding="utf-8")
+        print(f"Export successful: {out_path}")
+        return 0
+    except Exception as e:
+        print(f"Export failed: {e}", file=sys.stderr)
+        return 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="llm-eval-cli", description="LLM Eval CLI")
-    p.add_argument("command", choices=["init", "run", "coverage"], help="CLI command")
+    p.add_argument("command", choices=["init", "run", "coverage", "export-prompts-csv"], help="CLI command")
     p.add_argument("--root", dest="root", default=str(Path.cwd()), help="Workspace root (default: CWD)")
     # run
     p.add_argument("--file", dest="file", default=None, help="Run config file (for run)")
@@ -171,6 +197,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", dest="out", default=None, help="Output directory (default: <root>/datasets)")
     p.add_argument("--shards", dest="shards", type=int, default=1, help="Total shards for generation")
     p.add_argument("--shard-index", dest="shard_index", type=int, default=0, help="This shard index [0..shards-1]")
+    # export-prompts-csv options
+    p.add_argument("--vertical", dest="vertical", default=None, help="Vertical subfolder (required for export-prompts-csv)")
+    p.add_argument("--dataset-id", dest="dataset_id", default=None, help="Specific dataset to export (optional for export-prompts-csv)")
+    p.add_argument("--output", dest="output", default=None, help="Output CSV file path (optional for export-prompts-csv)")
     return p
 
 
@@ -201,6 +231,11 @@ def main(argv: List[str] | None = None) -> int:
             shard_index=args.shard_index,
             v2=True,
         )
+    if args.command == "export-prompts-csv":
+        if not args.vertical:
+            print("--vertical is required for export-prompts-csv", file=sys.stderr)
+            return 2
+        return cmd_export_prompts_csv(root, args.vertical, args.dataset_id, args.output)
     parser.print_help()
     return 2
 

@@ -42,6 +42,7 @@ else:
     from .array_builder_v2 import build_combined_array
     from .coverage_config import CoverageConfig
     from .commerce_taxonomy import load_commerce_config
+    from .export_prompts import export_prompts_to_csv
 
 APP_VERSION = "0.1.0-mvp"
 
@@ -1325,6 +1326,37 @@ async def save_dataset(body: SaveDatasetBody, vertical: Optional[str] = None):
         gt_path.write_text(json.dumps(gt, indent=2), encoding='utf-8')
         golden_saved = True
     return {"ok": True, "dataset_id": dataset_id, "version": ds.get("version"), "dataset_saved": True, "golden_saved": golden_saved}
+
+
+@app.get("/datasets/export-prompts-csv")
+async def export_prompts_csv(vertical: str, dataset_id: Optional[str] = None):
+    """
+    Export prompts and golden data from dataset files to CSV format.
+    
+    Query parameters:
+    - vertical (required): The vertical subfolder (e.g., "commerce")
+    - dataset_id (optional): Export only a specific dataset
+    
+    Returns CSV with columns:
+    dataset_id, conversation_id, conversation_title, domain, behavior,
+    turn_index, role, prompt_text, expected_variants, final_decision, final_next_action
+    """
+    from fastapi.responses import Response
+    try:
+        csv_content = export_prompts_to_csv(vertical, dataset_id)
+        filename = f"prompts-export-{vertical}"
+        if dataset_id:
+            filename += f"-{dataset_id}"
+        filename += ".csv"
+        return Response(
+            content=csv_content,
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"'
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
 
 # --- Coverage Generation API (Prompt 7) ---
