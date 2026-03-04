@@ -1,5 +1,9 @@
 Generate the html format of the slide deck considering the following.Use colors and styling and font that is compelling 
 use langauage and narrative that is user friendly and easier to understand
+If the content for any of the below section is missing or not available, leave the slide blank with the corresponding title and placeholder with text "Update content manually" with suggested example(s). 
+Use white background and dark text for readability. Use a consistent layout for each slide, with the title at the top and content below. Include relevant icons or images to enhance visual appeal where appropriate.
+
+
 
 1. What real delivery challenge in current engagements does this solution address?
 •	What operational pain do delivery teams face today?
