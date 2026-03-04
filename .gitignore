@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 .Python
+*.pptx
+*.pdf
+*.xml
+*.html
 
 # Distribution / packaging
 runs/
