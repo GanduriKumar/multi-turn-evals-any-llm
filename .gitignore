@@ -7,6 +7,12 @@ __pycache__/
 *.pdf
 *.xml
 *.html
+*.png
+*.dat
+Local State
+Variations
+metadata
+*.dmp
 
 # Distribution / packaging
 runs/
