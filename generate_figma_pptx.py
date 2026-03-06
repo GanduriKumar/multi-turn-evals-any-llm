@@ -254,19 +254,64 @@ def parse_bullet_items(ul_el):
     return items
 
 
-def _estimate_box_height(el, base=0.4):
-    """Estimate height of a box element based on content."""
-    text = el.get_text(strip=True)
-    lines = max(1, len(text) // 120 + 1)
-    lis = el.find_all("li")
-    lines += len(lis)
-    h4s = el.find_all("h4")
-    lines += len(h4s)
-    nested = el.find_all("ul")
-    for n in nested:
-        lines += len(n.find_all("li"))
-    height = Inches(base + 0.16 * min(lines, 22))
-    return min(height, Inches(3.8))
+# ────────────────────── Height estimation helpers ──────────────────────
+
+def _estimate_lines(text, width_inches, font_pt):
+    """Estimate number of rendered lines for text given width and font size.
+    Uses conservative Segoe UI character width estimates."""
+    # Segoe UI average chars per inch:  ~13 at 9pt, ~12 at 10pt, ~14.5 at 8pt
+    chars_per_inch = 115.0 / font_pt
+    chars_per_line = max(10, int(width_inches * chars_per_inch))
+    text_len = len(text)
+    return max(1, -(-text_len // chars_per_line))  # ceiling division
+
+
+def _line_height(font_pt):
+    """Line height in inches including spacing for a given font pt size."""
+    return font_pt * 1.55 / 72.0
+
+
+def _bullet_list_height(items, width_inches, font_pt=9):
+    """Compute total height of a parsed bullet item list."""
+    lh = _line_height(font_pt)
+    nested_lh = _line_height(font_pt - 1)
+    total = 0.0
+    for bold_part, rest_text in items:
+        if bold_part in ("__nested__", "__nested_bold__"):
+            if bold_part == "__nested_bold__":
+                nb, nrest = rest_text
+                text = f"    -> {nb}{nrest}"
+            else:
+                text = f"    -> {rest_text}"
+            lines = _estimate_lines(text, width_inches, font_pt - 1)
+            total += lines * nested_lh + 0.02
+        else:
+            full = f"x {bold_part or ''}{rest_text}"  # "▸ " prefix
+            lines = _estimate_lines(full, width_inches, font_pt)
+            total += lines * lh + 0.02
+    return total
+
+
+def _estimate_box_height(el, width_inches=None, base=0.30):
+    """Estimate height of a box element based on actual text content."""
+    if width_inches is None:
+        width_inches = 11.0  # CONTENT_WIDTH - margins, approx
+    total = base  # padding top+bottom
+    # h4 heading
+    for h4 in el.find_all("h4"):
+        total += 0.24
+    # paragraphs
+    for p in el.find_all("p"):
+        text = p.get_text(strip=True)
+        if text:
+            lines = _estimate_lines(text, width_inches, 9)
+            total += lines * _line_height(9) + 0.02
+    # bullet items
+    uls = el.find_all("ul", class_="bullet-list")
+    for ul in uls:
+        items = parse_bullet_items(ul)
+        total += _bullet_list_height(items, width_inches, 9)
+    return Inches(min(total, 3.5))
 
 
 def _render_box_content(slide, box_el, left, y_pos, width, text_color):
@@ -275,7 +320,7 @@ def _render_box_content(slide, box_el, left, y_pos, width, text_color):
     if ul:
         items = parse_bullet_items(ul)
         _render_bullet_items_at(
-            slide, items, left, y_pos, width, font_size=10, text_color=text_color
+            slide, items, left, y_pos, width, font_size=9, text_color=text_color
         )
         return
 
@@ -283,7 +328,7 @@ def _render_box_content(slide, box_el, left, y_pos, width, text_color):
     ps = box_el.find_all("p")
     if ps:
         tf = add_textbox(
-            slide, left, y_pos, width, Inches(0.3), "", font_size=10, font_color=text_color
+            slide, left, y_pos, width, Inches(0.3), "", font_size=9, font_color=text_color
         )
         tf.paragraphs[0].text = ""
         first = True
@@ -298,19 +343,19 @@ def _render_box_content(slide, box_el, left, y_pos, width, text_color):
                         rest = text[len(bold_text) :]
                         run1 = tf.paragraphs[0].add_run()
                         run1.text = bold_text
-                        run1.font.size = Pt(10)
+                        run1.font.size = Pt(9)
                         run1.font.color.rgb = text_color
                         run1.font.bold = True
                         run1.font.name = FONT_NAME
                         if rest:
                             run2 = tf.paragraphs[0].add_run()
                             run2.text = rest
-                            run2.font.size = Pt(10)
+                            run2.font.size = Pt(9)
                             run2.font.color.rgb = text_color
                             run2.font.name = FONT_NAME
                     else:
                         tf.paragraphs[0].text = text
-                        tf.paragraphs[0].font.size = Pt(10)
+                        tf.paragraphs[0].font.size = Pt(9)
                         tf.paragraphs[0].font.color.rgb = text_color
                         tf.paragraphs[0].font.name = FONT_NAME
                 else:
@@ -318,26 +363,26 @@ def _render_box_content(slide, box_el, left, y_pos, width, text_color):
                         bold_text = strong.get_text(strip=True)
                         rest = text[len(bold_text) :]
                         p = tf.add_paragraph()
-                        p.space_before = Pt(3)
+                        p.space_before = Pt(2)
                         run1 = p.add_run()
                         run1.text = bold_text
-                        run1.font.size = Pt(10)
+                        run1.font.size = Pt(9)
                         run1.font.color.rgb = text_color
                         run1.font.bold = True
                         run1.font.name = FONT_NAME
                         if rest:
                             run2 = p.add_run()
                             run2.text = rest
-                            run2.font.size = Pt(10)
+                            run2.font.size = Pt(9)
                             run2.font.color.rgb = text_color
                             run2.font.name = FONT_NAME
                     else:
                         add_paragraph(
                             tf,
                             text,
-                            font_size=10,
+                            font_size=9,
                             font_color=text_color,
-                            space_before=Pt(3),
+                            space_before=Pt(2),
                         )
 
 
@@ -345,8 +390,10 @@ def _render_bullet_items_at(
     slide, items, left, y_pos, width, font_size=10, text_color=DARK_TEXT
 ):
     """Render parsed bullet items at a given position."""
+    width_in = width / 914400  # EMU to inches
+    box_h = _bullet_list_height(items, width_in, font_size)
     tf = add_textbox(
-        slide, left, y_pos, width, Inches(0.3), "", font_size=font_size, font_color=text_color
+        slide, left, y_pos, width, Inches(max(0.3, box_h)), "", font_size=font_size, font_color=text_color
     )
     tf.paragraphs[0].text = ""
     first = True
@@ -443,7 +490,7 @@ def _render_table(slide, table_el, left, top, width):
     if num_cols == 0 or num_rows == 0:
         return
 
-    row_height = Inches(0.30)
+    row_height = Inches(0.27)
     table_height = row_height * num_rows
     col_width = width // num_cols
 
@@ -471,17 +518,17 @@ def _render_table(slide, table_el, left, top, width):
                 run1 = p.add_run()
                 run1.text = bold_text
                 run1.font.bold = True
-                run1.font.size = Pt(9)
+                run1.font.size = Pt(8)
                 run1.font.name = FONT_NAME
                 if rest:
                     run2 = p.add_run()
                     run2.text = rest
-                    run2.font.size = Pt(9)
+                    run2.font.size = Pt(8)
                     run2.font.name = FONT_NAME
             else:
                 run = p.add_run()
                 run.text = cell_text
-                run.font.size = Pt(9)
+                run.font.size = Pt(8)
                 run.font.name = FONT_NAME
 
             if row_idx == 0:
@@ -559,8 +606,22 @@ def build_title_slide(slide_html, prs):
     return slide
 
 
+def _add_slide_header(slide, slide_num, slide_title):
+    """Add the standard header (circle, title, underline) to a slide."""
+    add_colored_rect(slide, LEFT_MARGIN, Inches(1.05), CONTENT_WIDTH, Pt(3), BLUE_PRIMARY)
+    circle_size = Inches(0.55)
+    add_circle(
+        slide, LEFT_MARGIN, Inches(0.3), circle_size, BLUE_PRIMARY,
+        text=slide_num, font_size=18, font_color=WHITE,
+    )
+    add_textbox(
+        slide, Inches(1.55), Inches(0.25), CONTENT_WIDTH - Inches(0.75), Inches(0.75),
+        slide_title, font_size=20, font_color=BLUE_PRIMARY, bold=True,
+    )
+
+
 def build_content_slide(slide_html, prs):
-    """Build a content slide with header bar, number circle, and content blocks."""
+    """Build content slide(s) with auto-continuation if content overflows."""
     slide = prs.slides.add_slide(blank_layout)
     add_bg_picture(slide, white_bg_path)
 
@@ -569,42 +630,26 @@ def build_content_slide(slide_html, prs):
     slide_num = number_el.get_text(strip=True) if number_el else ""
     slide_title = title_el.get_text(strip=True) if title_el else ""
 
-    # Blue header underline
-    add_colored_rect(slide, LEFT_MARGIN, Inches(1.05), CONTENT_WIDTH, Pt(3), BLUE_PRIMARY)
-
-    # Slide number circle
-    circle_size = Inches(0.55)
-    add_circle(
-        slide,
-        LEFT_MARGIN,
-        Inches(0.3),
-        circle_size,
-        BLUE_PRIMARY,
-        text=slide_num,
-        font_size=18,
-        font_color=WHITE,
-    )
-
-    # Title
-    add_textbox(
-        slide,
-        Inches(1.55),
-        Inches(0.25),
-        CONTENT_WIDTH - Inches(0.75),
-        Inches(0.75),
-        slide_title,
-        font_size=20,
-        font_color=BLUE_PRIMARY,
-        bold=True,
-    )
+    _add_slide_header(slide, slide_num, slide_title)
 
     # Process content blocks
     content_div = slide_html.select_one(".content")
     if not content_div:
         return slide
 
-    y_pos = Inches(1.25)
-    MAX_Y = Inches(7.1)  # Don't place content below this
+    y_pos = Inches(1.20)
+    MAX_Y = Inches(7.05)  # Don't place content below this
+    CONT_START_Y = Inches(1.20)  # y_pos for continuation slides
+
+    def _need_continuation(needed_inches):
+        """Check if we need a continuation slide for the next element."""
+        nonlocal slide, y_pos
+        if y_pos + Inches(needed_inches) > MAX_Y:
+            # Create continuation slide
+            slide = prs.slides.add_slide(blank_layout)
+            add_bg_picture(slide, white_bg_path)
+            _add_slide_header(slide, slide_num, slide_title + " (cont.)")
+            y_pos = CONT_START_Y
 
     children = list(content_div.children)
     i = 0
@@ -616,36 +661,37 @@ def build_content_slide(slide_html, prs):
 
         classes = el.get("class", [])
 
-        if y_pos >= MAX_Y:
-            break
-
         # Section Heading
         if "section-heading" in classes:
+            _need_continuation(0.27)
             heading_text = el.get_text(strip=True)
             tf = add_textbox(
                 slide,
                 LEFT_MARGIN,
                 y_pos,
                 CONTENT_WIDTH,
-                Inches(0.30),
+                Inches(0.26),
                 heading_text,
-                font_size=13,
+                font_size=12,
                 font_color=BLUE_PRIMARY,
                 bold=True,
             )
-            y_pos += Inches(0.32)
+            y_pos += Inches(0.27)
 
         # Bullet list (standalone)
         elif el.name == "ul" and "bullet-list" in classes:
             items = parse_bullet_items(el)
+            avail_w_in = (CONTENT_WIDTH - Inches(0.3)) / 914400
+            bullet_h = _bullet_list_height(items, avail_w_in, 9)
+            _need_continuation(bullet_h)
             tf = add_textbox(
                 slide,
                 Inches(1.1),
                 y_pos,
                 CONTENT_WIDTH - Inches(0.3),
-                Inches(0.3),
+                Inches(max(0.3, bullet_h)),
                 "",
-                font_size=10,
+                font_size=9,
                 font_color=DARK_TEXT,
             )
             tf.paragraphs[0].text = ""
@@ -653,33 +699,33 @@ def build_content_slide(slide_html, prs):
             for bold_part, rest_text in items:
                 if bold_part == "__nested__":
                     p = tf.add_paragraph()
-                    p.space_before = Pt(1)
-                    p.space_after = Pt(1)
+                    p.space_before = Pt(0)
+                    p.space_after = Pt(0)
                     run = p.add_run()
                     run.text = f"    → {rest_text}"
-                    run.font.size = Pt(9)
+                    run.font.size = Pt(8)
                     run.font.color.rgb = DARK_TEXT
                     run.font.name = FONT_NAME
                 elif bold_part == "__nested_bold__":
                     nb, nrest = rest_text
                     p = tf.add_paragraph()
-                    p.space_before = Pt(1)
-                    p.space_after = Pt(1)
+                    p.space_before = Pt(0)
+                    p.space_after = Pt(0)
                     run0 = p.add_run()
                     run0.text = "    → "
-                    run0.font.size = Pt(9)
+                    run0.font.size = Pt(8)
                     run0.font.color.rgb = DARK_TEXT
                     run0.font.name = FONT_NAME
                     run1 = p.add_run()
                     run1.text = nb
-                    run1.font.size = Pt(9)
+                    run1.font.size = Pt(8)
                     run1.font.color.rgb = DARK_TEXT
                     run1.font.bold = True
                     run1.font.name = FONT_NAME
                     if nrest:
                         run2 = p.add_run()
                         run2.text = nrest
-                        run2.font.size = Pt(9)
+                        run2.font.size = Pt(8)
                         run2.font.color.rgb = DARK_TEXT
                         run2.font.name = FONT_NAME
                 elif bold_part:
@@ -688,24 +734,24 @@ def build_content_slide(slide_html, prs):
                         first = False
                     else:
                         p = tf.add_paragraph()
-                    p.space_before = Pt(2)
-                    p.space_after = Pt(1)
+                    p.space_before = Pt(1)
+                    p.space_after = Pt(0)
                     run1 = p.add_run()
                     run1.text = "▸ "
-                    run1.font.size = Pt(10)
+                    run1.font.size = Pt(9)
                     run1.font.color.rgb = BLUE_PRIMARY
                     run1.font.bold = True
                     run1.font.name = FONT_NAME
                     run2 = p.add_run()
                     run2.text = bold_part
-                    run2.font.size = Pt(10)
+                    run2.font.size = Pt(9)
                     run2.font.color.rgb = DARK_TEXT
                     run2.font.bold = True
                     run2.font.name = FONT_NAME
                     if rest_text:
                         run3 = p.add_run()
                         run3.text = rest_text
-                        run3.font.size = Pt(10)
+                        run3.font.size = Pt(9)
                         run3.font.color.rgb = DARK_TEXT
                         run3.font.bold = False
                         run3.font.name = FONT_NAME
@@ -715,34 +761,41 @@ def build_content_slide(slide_html, prs):
                         first = False
                     else:
                         p = tf.add_paragraph()
-                    p.space_before = Pt(2)
-                    p.space_after = Pt(1)
+                    p.space_before = Pt(1)
+                    p.space_after = Pt(0)
                     run1 = p.add_run()
                     run1.text = "▸ "
-                    run1.font.size = Pt(10)
+                    run1.font.size = Pt(9)
                     run1.font.color.rgb = BLUE_PRIMARY
                     run1.font.bold = True
                     run1.font.name = FONT_NAME
                     run2 = p.add_run()
                     run2.text = rest_text
-                    run2.font.size = Pt(10)
+                    run2.font.size = Pt(9)
                     run2.font.color.rgb = DARK_TEXT
                     run2.font.name = FONT_NAME
 
-            item_count = len(items)
-            y_pos += Inches(0.20 * max(item_count, 1))
+            # Compute actual height based on text wrapping
+            avail_w = (CONTENT_WIDTH - Inches(0.3)) / 914400  # to inches
+            y_pos += Inches(_bullet_list_height(items, avail_w, 9))
 
         # Ordered list
         elif el.name == "ol":
             lis = el.find_all("li", recursive=False)
+            ol_avail_w = (CONTENT_WIDTH - Inches(0.3)) / 914400
+            ol_h_est = 0.0
+            for li in lis:
+                t = li.get_text(strip=True)
+                ol_h_est += _estimate_lines(f"1. {t}", ol_avail_w, 9) * _line_height(9) + 0.02
+            _need_continuation(ol_h_est)
             tf = add_textbox(
                 slide,
                 Inches(1.1),
                 y_pos,
                 CONTENT_WIDTH - Inches(0.3),
-                Inches(0.3),
+                Inches(max(0.3, ol_h_est)),
                 "",
-                font_size=10,
+                font_size=9,
                 font_color=DARK_TEXT,
             )
             tf.paragraphs[0].text = ""
@@ -761,12 +814,12 @@ def build_content_slide(slide_html, prs):
                 if strong:
                     run0 = p.add_run()
                     run0.text = f"{num}. "
-                    run0.font.size = Pt(10)
+                    run0.font.size = Pt(9)
                     run0.font.color.rgb = DARK_TEXT
                     run0.font.name = FONT_NAME
                     run1 = p.add_run()
                     run1.text = strong.get_text(strip=True)
-                    run1.font.size = Pt(10)
+                    run1.font.size = Pt(9)
                     run1.font.color.rgb = DARK_TEXT
                     run1.font.bold = True
                     run1.font.name = FONT_NAME
@@ -774,36 +827,50 @@ def build_content_slide(slide_html, prs):
                     if rest:
                         run2 = p.add_run()
                         run2.text = rest
-                        run2.font.size = Pt(10)
+                        run2.font.size = Pt(9)
                         run2.font.color.rgb = DARK_TEXT
                         run2.font.name = FONT_NAME
                 else:
                     run = p.add_run()
                     run.text = f"{num}. {li.get_text(strip=True)}"
-                    run.font.size = Pt(10)
+                    run.font.size = Pt(9)
                     run.font.color.rgb = DARK_TEXT
                     run.font.name = FONT_NAME
-            y_pos += Inches(0.20 * max(len(lis), 1))
+            # Compute actual height based on text
+            avail_w = (CONTENT_WIDTH - Inches(0.3)) / 914400
+            total_ol_h = 0.0
+            ol_lh = _line_height(9)
+            for li in lis:
+                t = li.get_text(strip=True)
+                lines = _estimate_lines(f"1. {t}", avail_w, 9)
+                total_ol_h += lines * ol_lh + 0.02
+            y_pos += Inches(total_ol_h)
 
         # Paragraph text (standalone <p>)
         elif el.name == "p":
             text = el.get_text(strip=True)
             if text:
+                p_w = CONTENT_WIDTH / 914400
+                p_lines = _estimate_lines(text, p_w, 9)
+                p_h = max(0.25, p_lines * _line_height(9) + 0.04)
+                _need_continuation(p_h)
                 tf = add_textbox(
                     slide,
                     LEFT_MARGIN,
                     y_pos,
                     CONTENT_WIDTH,
-                    Inches(0.35),
+                    Inches(p_h),
                     text,
-                    font_size=10,
+                    font_size=9,
                     font_color=DARK_TEXT,
                 )
-                y_pos += Inches(0.30)
+                y_pos += Inches(p_h)
 
         # Highlight box
         elif "highlight-box" in classes:
-            box_height = _estimate_box_height(el)
+            box_w = (CONTENT_WIDTH - Inches(0.4)) / 914400
+            box_height = _estimate_box_height(el, width_inches=box_w)
+            _need_continuation(box_height / 914400 + 0.06)
             add_colored_rect(
                 slide, LEFT_MARGIN, y_pos, CONTENT_WIDTH, box_height, LIGHT_BLUE_BG
             )
@@ -811,7 +878,7 @@ def build_content_slide(slide_html, prs):
                 slide, LEFT_MARGIN, y_pos, Pt(5), box_height, BLUE_PRIMARY
             )
 
-            inner_y = y_pos + Inches(0.08)
+            inner_y = y_pos + Inches(0.06)
             h4 = el.find("h4")
             if h4:
                 add_textbox(
@@ -819,13 +886,13 @@ def build_content_slide(slide_html, prs):
                     Inches(1.0),
                     inner_y,
                     CONTENT_WIDTH - Inches(0.4),
-                    Inches(0.25),
+                    Inches(0.22),
                     h4.get_text(strip=True),
-                    font_size=12,
+                    font_size=11,
                     font_color=BLUE_PRIMARY,
                     bold=True,
                 )
-                inner_y += Inches(0.25)
+                inner_y += Inches(0.22)
 
             _render_box_content(
                 slide,
@@ -835,11 +902,13 @@ def build_content_slide(slide_html, prs):
                 CONTENT_WIDTH - Inches(0.4),
                 DARK_TEXT,
             )
-            y_pos += box_height + Inches(0.08)
+            y_pos += box_height + Inches(0.06)
 
         # Warning box
         elif "warning-box" in classes:
-            box_height = _estimate_box_height(el)
+            box_w = (CONTENT_WIDTH - Inches(0.4)) / 914400
+            box_height = _estimate_box_height(el, width_inches=box_w)
+            _need_continuation(box_height / 914400 + 0.06)
             add_colored_rect(
                 slide, LEFT_MARGIN, y_pos, CONTENT_WIDTH, box_height, YELLOW_BG
             )
@@ -847,7 +916,7 @@ def build_content_slide(slide_html, prs):
                 slide, LEFT_MARGIN, y_pos, Pt(5), box_height, YELLOW_BORDER
             )
 
-            inner_y = y_pos + Inches(0.08)
+            inner_y = y_pos + Inches(0.06)
             strong = el.find("strong", recursive=False)
             if strong:
                 add_textbox(
@@ -855,13 +924,13 @@ def build_content_slide(slide_html, prs):
                     Inches(1.0),
                     inner_y,
                     CONTENT_WIDTH - Inches(0.4),
-                    Inches(0.25),
+                    Inches(0.22),
                     strong.get_text(strip=True),
-                    font_size=12,
+                    font_size=11,
                     font_color=BROWN_TEXT,
                     bold=True,
                 )
-                inner_y += Inches(0.25)
+                inner_y += Inches(0.22)
 
             _render_box_content(
                 slide,
@@ -871,11 +940,13 @@ def build_content_slide(slide_html, prs):
                 CONTENT_WIDTH - Inches(0.4),
                 BROWN_TEXT,
             )
-            y_pos += box_height + Inches(0.08)
+            y_pos += box_height + Inches(0.06)
 
         # Success box
         elif "success-box" in classes:
-            box_height = _estimate_box_height(el)
+            box_w = (CONTENT_WIDTH - Inches(0.4)) / 914400
+            box_height = _estimate_box_height(el, width_inches=box_w)
+            _need_continuation(box_height / 914400 + 0.06)
             add_colored_rect(
                 slide, LEFT_MARGIN, y_pos, CONTENT_WIDTH, box_height, GREEN_BG
             )
@@ -883,7 +954,7 @@ def build_content_slide(slide_html, prs):
                 slide, LEFT_MARGIN, y_pos, Pt(5), box_height, GREEN_BORDER
             )
 
-            inner_y = y_pos + Inches(0.08)
+            inner_y = y_pos + Inches(0.06)
             h4 = el.find("h4")
             if h4:
                 add_textbox(
@@ -891,13 +962,13 @@ def build_content_slide(slide_html, prs):
                     Inches(1.0),
                     inner_y,
                     CONTENT_WIDTH - Inches(0.4),
-                    Inches(0.25),
+                    Inches(0.22),
                     h4.get_text(strip=True),
-                    font_size=12,
+                    font_size=11,
                     font_color=GREEN_DARK,
                     bold=True,
                 )
-                inner_y += Inches(0.25)
+                inner_y += Inches(0.22)
 
             _render_box_content(
                 slide,
@@ -907,11 +978,13 @@ def build_content_slide(slide_html, prs):
                 CONTENT_WIDTH - Inches(0.4),
                 DARK_TEXT,
             )
-            y_pos += box_height + Inches(0.08)
+            y_pos += box_height + Inches(0.06)
 
         # Placeholder box
         elif "placeholder" in classes:
-            box_height = _estimate_box_height(el, base=0.5)
+            box_w = CONTENT_WIDTH / 914400
+            box_height = _estimate_box_height(el, width_inches=box_w, base=0.4)
+            _need_continuation(box_height / 914400 + 0.06)
             add_colored_rect(
                 slide,
                 LEFT_MARGIN,
@@ -923,7 +996,7 @@ def build_content_slide(slide_html, prs):
                 2,
             )
 
-            inner_y = y_pos + Inches(0.10)
+            inner_y = y_pos + Inches(0.06)
             strong = el.find("strong")
             if strong:
                 add_textbox(
@@ -931,14 +1004,14 @@ def build_content_slide(slide_html, prs):
                     LEFT_MARGIN,
                     inner_y,
                     CONTENT_WIDTH,
-                    Inches(0.25),
+                    Inches(0.22),
                     strong.get_text(strip=True),
-                    font_size=12,
+                    font_size=11,
                     font_color=PLACEHOLDER_TEXT,
                     bold=True,
                     alignment=PP_ALIGN.CENTER,
                 )
-                inner_y += Inches(0.25)
+                inner_y += Inches(0.22)
 
             ems = el.find_all("em")
             if ems:
@@ -949,7 +1022,7 @@ def build_content_slide(slide_html, prs):
                     CONTENT_WIDTH - Inches(0.8),
                     Inches(0.3),
                     "",
-                    font_size=10,
+                    font_size=9,
                     font_color=PLACEHOLDER_EM,
                     italic=True,
                     alignment=PP_ALIGN.CENTER,
@@ -961,7 +1034,7 @@ def build_content_slide(slide_html, prs):
                     if text:
                         if first:
                             tf.paragraphs[0].text = text
-                            tf.paragraphs[0].font.size = Pt(10)
+                            tf.paragraphs[0].font.size = Pt(9)
                             tf.paragraphs[0].font.color.rgb = PLACEHOLDER_EM
                             tf.paragraphs[0].font.italic = True
                             tf.paragraphs[0].font.name = FONT_NAME
@@ -971,25 +1044,34 @@ def build_content_slide(slide_html, prs):
                             add_paragraph(
                                 tf,
                                 text,
-                                font_size=10,
+                                font_size=9,
                                 font_color=PLACEHOLDER_EM,
                                 italic=True,
                                 alignment=PP_ALIGN.CENTER,
-                                space_before=Pt(2),
-                                space_after=Pt(1),
+                                space_before=Pt(1),
+                                space_after=Pt(0),
                             )
 
-            y_pos += box_height + Inches(0.08)
+            y_pos += box_height + Inches(0.06)
 
         # Two-column layout
         elif "two-column" in classes:
             columns = el.select(".column-box")
             col_width = (CONTENT_WIDTH - Inches(0.3)) / 2
+            # Pre-compute max column height for continuation check
+            pre_max_h = Inches(0)
+            for col in columns:
+                col_inner_w_pre = (col_width - Inches(0.24)) / 914400
+                ch = _estimate_box_height(col, width_inches=col_inner_w_pre, base=0.25)
+                if ch > pre_max_h:
+                    pre_max_h = ch
+            _need_continuation(pre_max_h / 914400 + 0.08)
 
             max_col_h = Inches(0)
             for ci, col in enumerate(columns):
                 col_left = LEFT_MARGIN + (col_width + Inches(0.3)) * ci
-                col_h = _estimate_box_height(col, base=0.3)
+                col_inner_w = (col_width - Inches(0.24)) / 914400
+                col_h = _estimate_box_height(col, width_inches=col_inner_w, base=0.25)
                 if col_h > max_col_h:
                     max_col_h = col_h
 
@@ -997,7 +1079,7 @@ def build_content_slide(slide_html, prs):
                     slide, col_left, y_pos, col_width, col_h, GRAY_BG, GRAY_BORDER, 1
                 )
 
-                inner_y = y_pos + Inches(0.06)
+                inner_y = y_pos + Inches(0.05)
                 h4 = col.find("h4")
                 if h4:
                     add_textbox(
@@ -1005,13 +1087,13 @@ def build_content_slide(slide_html, prs):
                         col_left + Inches(0.12),
                         inner_y,
                         col_width - Inches(0.24),
-                        Inches(0.25),
+                        Inches(0.22),
                         h4.get_text(strip=True),
-                        font_size=11,
+                        font_size=10,
                         font_color=BLUE_PRIMARY,
                         bold=True,
                     )
-                    inner_y += Inches(0.24)
+                    inner_y += Inches(0.21)
 
                 # Paragraph text in column
                 p_el = col.find("p")
@@ -1021,9 +1103,9 @@ def build_content_slide(slide_html, prs):
                         col_left + Inches(0.12),
                         inner_y,
                         col_width - Inches(0.24),
-                        Inches(0.5),
+                        Inches(0.45),
                         p_el.get_text(strip=True),
-                        font_size=9,
+                        font_size=8,
                         font_color=DARK_TEXT,
                     )
 
@@ -1037,7 +1119,7 @@ def build_content_slide(slide_html, prs):
                         col_left + Inches(0.12),
                         inner_y,
                         col_width - Inches(0.24),
-                        font_size=9,
+                        font_size=8,
                     )
 
                 # Ordered list in column
@@ -1051,7 +1133,7 @@ def build_content_slide(slide_html, prs):
                         col_width - Inches(0.24),
                         Inches(0.3),
                         "",
-                        font_size=9,
+                        font_size=8,
                         font_color=DARK_TEXT,
                     )
                     tf.paragraphs[0].text = ""
@@ -1064,18 +1146,18 @@ def build_content_slide(slide_html, prs):
                             first = False
                         else:
                             p = tf.add_paragraph()
-                        p.space_before = Pt(2)
-                        p.space_after = Pt(1)
+                        p.space_before = Pt(1)
+                        p.space_after = Pt(0)
                         strong_li = li.find("strong")
                         if strong_li:
                             run0 = p.add_run()
                             run0.text = f"{num}. "
-                            run0.font.size = Pt(9)
+                            run0.font.size = Pt(8)
                             run0.font.color.rgb = DARK_TEXT
                             run0.font.name = FONT_NAME
                             run1 = p.add_run()
                             run1.text = strong_li.get_text(strip=True)
-                            run1.font.size = Pt(9)
+                            run1.font.size = Pt(8)
                             run1.font.color.rgb = DARK_TEXT
                             run1.font.bold = True
                             run1.font.name = FONT_NAME
@@ -1083,23 +1165,34 @@ def build_content_slide(slide_html, prs):
                             if rest:
                                 run2 = p.add_run()
                                 run2.text = rest
-                                run2.font.size = Pt(9)
+                                run2.font.size = Pt(8)
                                 run2.font.color.rgb = DARK_TEXT
                                 run2.font.name = FONT_NAME
                         else:
                             run = p.add_run()
                             run.text = f"{num}. {li.get_text(strip=True)}"
-                            run.font.size = Pt(9)
+                            run.font.size = Pt(8)
                             run.font.color.rgb = DARK_TEXT
                             run.font.name = FONT_NAME
 
-            y_pos += max_col_h + Inches(0.10)
+            y_pos += max_col_h + Inches(0.08)
 
         # Comparison table
         elif el.name == "table" and "comparison-table" in classes:
+            rows_list = el.find_all("tr")
+            num_cols_est = max(1, len(rows_list[0].find_all(["th", "td"]))) if rows_list else 1
+            col_w_in = (CONTENT_WIDTH / 914400) / num_cols_est
+            tbl_h = 0.0
+            for tr in rows_list:
+                max_cell_lines = 1
+                for cell in tr.find_all(["th", "td"]):
+                    cl = _estimate_lines(cell.get_text(strip=True), col_w_in, 8)
+                    if cl > max_cell_lines:
+                        max_cell_lines = cl
+                tbl_h += max_cell_lines * _line_height(8) + 0.06
+            _need_continuation(tbl_h + 0.06)
             _render_table(slide, el, LEFT_MARGIN, y_pos, CONTENT_WIDTH)
-            rows = el.find_all("tr")
-            y_pos += Inches(0.28 * len(rows)) + Inches(0.08)
+            y_pos += Inches(tbl_h) + Inches(0.06)
 
         i += 1
 
