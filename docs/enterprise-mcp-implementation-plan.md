@@ -7,6 +7,14 @@ sequence for converting the current multi-turn LLM evaluation application into
 an enterprise toolkit exposed through MCP. The existing frontend remains as a
 test console for the MCP server; it is not the owner of evaluation logic.
 
+- docs/engineering-harness-and-loop-plan.md
+- docs/runtime-harness-implementation-plan.md
+- docs/enterprise-mcp-granular-delivery-plan-part1.md
+- docs/enterprise-mcp-granular-delivery-plan-part2.md
+- docs/reference-pack-builder-plan.md
+
+Authoritative execution documents are the engineering-harness plan, runtime-harness plan, granular delivery plans, and reference-pack builder plan. The high-level phase document is a map only.
+
 ## 1. Target outcome
 
 The toolkit ships with a versioned built-in reference pack based on LLM Wiki and Google OKF files. A user selects a business use case, persona, risk area, and
@@ -90,6 +98,9 @@ The first release uses only the versioned LLM Wiki and Google OKF files shipped 
 ## 6. Target package layout
 
 Create focused packages with one public responsibility per module:
+
+  backend/engineering_harness/
+  backend/runtime_harness/
 
   backend/toolkit/
     domain_pack.py
@@ -177,5 +188,5 @@ HTML, and PDF as derived artifacts. Record framework, target, schema versions,
 timestamps, and configuration hashes. Reports must be regenerable from stored
 normalized results, and run comparisons must not rerun agents.
 
-Continue with the detailed phases in
-docs/enterprise-mcp-implementation-phases.md.
+The engineering harness H0.1-H0.8 and runtime harness R0-R7 are prerequisites for the granular delivery gates.
+Use the granular delivery plans and harness plans listed at the start of this document.

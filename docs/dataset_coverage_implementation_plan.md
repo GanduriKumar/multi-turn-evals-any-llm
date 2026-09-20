@@ -1,3 +1,6 @@
+# Status: Historical and superseded for the MCP migration.
+# Use the enterprise MCP plans instead.
+
 # Dataset 100% Coverage Generation – Implementation Plan
 
 This plan defines how to generate datasets with 100% coverage based on Domains × Behavioral Classes × Variation axes, with approved thresholds and exclusion rules.

@@ -1,3 +1,6 @@
+# Status: Historical and superseded for the MCP migration.
+# Use the enterprise MCP plans instead.
+
 # MVP Implementation Plan — Multi‑Turn LLM Evaluation System
 
 This plan follows the Interview‑First approach: clear, atomic prompts you can execute sequentially. Each prompt is self‑contained, test‑driven, and production‑oriented.

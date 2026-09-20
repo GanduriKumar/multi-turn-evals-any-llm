@@ -1,7 +1,14 @@
 # Enterprise MCP Toolkit: Implementation Phases
 
-This document is the stepwise execution companion to
-docs/enterprise-mcp-implementation-plan.md.
+This document is a high-level phase map. The detailed execution order and gates
+are defined by the following documents:
+
+- docs/enterprise-mcp-granular-delivery-plan-part1.md
+- docs/enterprise-mcp-granular-delivery-plan-part2.md
+- docs/engineering-harness-and-loop-plan.md
+- docs/runtime-harness-implementation-plan.md
+- docs/reference-pack-builder-plan.md
+
 
 ## Phase 0: Baseline and compatibility
 

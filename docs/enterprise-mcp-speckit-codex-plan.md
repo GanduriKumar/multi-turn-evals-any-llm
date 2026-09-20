@@ -20,6 +20,8 @@ References:
 - Spec Kit core commands: https://github.github.com/spec-kit/reference/core.html
 - Codex repository instructions: https://developers.openai.com/codex/guides/agents-md
 
+Before Feature 001, implement and gate H0.1-H0.8 from the engineering harness plan and register R0-R7 from the runtime harness plan. No feature is eligible until these prerequisite gates pass.
+
 ## 1. Prepare the repository safely
 
 Before initialization:

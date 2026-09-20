@@ -1,3 +1,6 @@
+# Status: Historical and superseded for the MCP migration.
+# Use the enterprise MCP plans instead.
+
 # Multi-Turn Commerce Evals — Implementation Plan (v2)
 
 This plan encodes the clarified requirements for a Commerce merchant app. Each prompt is atomic, self-contained, and test-driven. Do not overwrite existing files; add new modules/files where reasonable.
