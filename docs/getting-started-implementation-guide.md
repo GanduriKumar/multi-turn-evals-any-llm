@@ -22,6 +22,31 @@ later features early, skip tests, or silently change the architecture.
 The older MVP and commerce plans are historical. They are useful for
 understanding existing behavior, but they are not the new implementation plan.
 
+## Use the skills in real work
+The `skills/` directories are the canonical, version-controlled copies. A skill
+is an instruction set for the coding agent; it is not the runtime harness and
+cannot enforce gates until the engineering-harness code is implemented.
+Install the skills in the directory recognized by the coding client:
+
+- Codex: `.agents/skills`
+- Claude Code: `.claude/skills`
+- GitHub Copilot: `.github/skills`
+For the selected directory, run the equivalent commands below:
+    mkdir -p .agents/skills
+    cp -R skills/plan-locked-implementation .agents/skills/
+    cp -R skills/runtime-harness-builder .agents/skills/
+Replace `.agents/skills` with `.claude/skills` or `.github/skills` as needed.
+Invoke them explicitly at the start of an implementation session:
+- Codex: `$plan-locked-implementation $runtime-harness-builder`
+- Claude Code or Copilot: `/plan-locked-implementation` and
+  `/runtime-harness-builder`
+- If a client has no slash command, name both skill files in the prompt and
+  tell the agent to follow them before editing.
+
+Use `plan-locked-implementation` for the coding-agent control loop and
+`runtime-harness-builder` when implementing the final toolkit runtime. Keep
+host-specific copies synchronized with the canonical files under `skills/`.
+
 ## The two harnesses
 
 ### Runtime harness
